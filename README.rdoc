@@ -1,0 +1,43 @@
+= OpenIDConnect
+
+JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON Web Key) in Ruby
+
+== Installation
+
+  gem install json-jwt
+
+== Resources
+
+* View Source on GitHub (https://github.com/nov/json-jwt)
+* Report Issues on GitHub (https://github.com/nov/json-jwt/issues)
+
+== Examples
+
+  claim = {
+    iss: 'nov',
+    exp: 1.week.from_now,
+    nbf: Time.now
+  }
+
+  # No signature, no encryption
+  JSON::JWT.new(claim).to_s
+
+  # With signiture, no encryption
+  JSON::JWT.new(claim).sign(key, algorithm).to_s
+
+  # With signature & encryption
+  JSON::JWT.new(claim).sign(key, algorithm).encrypt(key, algorithm).to_s
+
+== Note on Patches/Pull Requests
+ 
+* Fork the project.
+* Make your feature addition or bug fix.
+* Add tests for it. This is important so I don't break it in a
+  future version unintentionally.
+* Commit, do not mess with rakefile, version, or history.
+  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+* Send me a pull request. Bonus points for topic branches.
+
+== Copyright
+
+Copyright (c) 2011 nov matake. See LICENSE for details.
