@@ -1,11 +1,11 @@
 module JSON
   class JWS < JWT
     def initialize(jwt)
-      header = jwt.header
-      replace jwt
+      @header = jwt.header
+      @claim  = jwt.claim
     end
 
-    def sign!(private_key_or_secret, algorithm)
+    def sign(private_key_or_secret, algorithm)
       header[:alg] = algorithm
       digest = OpenSSL::Digest::Digest.new "SHA#{algorithm.to_s[2, 3]}"
       self.signature = case algorithm
@@ -28,10 +28,10 @@ module JSON
 
     private
 
-    def signature_base_string(header)
+    def signature_base_string
       [
-        header,
-        to_json
+        header.to_json,
+        claim.to_json
       ].collect do |segment|
         UrlSafeBase64.encode64 segment
       end.join('.')

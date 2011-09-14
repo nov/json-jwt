@@ -1,5 +1,5 @@
 module JSON
-  class JWS < JWT
+  class JWE < JWT
     # TODO
   end
 end
