@@ -4,7 +4,7 @@ require 'json'
 
 module JSON
   class JWT < Hash
-    attr_accessor :header, :claim, :signature
+    attr_accessor :header, :signature
 
     def initialize(claim)
       @header = {
