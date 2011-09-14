@@ -22,6 +22,8 @@ module JSON
           digest,
           signature_base_string
         )
+      when :ES256, :ES384, :ES512
+        # TODO
       end
       self
     end
