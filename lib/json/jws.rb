@@ -2,7 +2,7 @@ module JSON
   class JWS < JWT
     def initialize(jwt)
       @header = jwt.header
-      @claim  = jwt.claim
+      replace jwt
     end
 
     def sign(private_key_or_secret, algorithm)
@@ -33,7 +33,7 @@ module JSON
     def signature_base_string
       [
         header.to_json,
-        claim.to_json
+        self.to_json
       ].collect do |segment|
         UrlSafeBase64.encode64 segment
       end.join('.')

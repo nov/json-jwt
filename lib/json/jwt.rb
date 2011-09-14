@@ -3,7 +3,7 @@ require 'url_safe_base64'
 require 'json'
 
 module JSON
-  class JWT
+  class JWT < Hash
     attr_accessor :header, :claim, :signature
 
     def initialize(claim)
@@ -16,7 +16,7 @@ module JSON
           claim[key] = claim[key].to_i
         end
       end
-      @claim = claim
+      replace claim
     end
 
     def sign(private_key_or_secret, algorithm = :RS256)
@@ -26,7 +26,7 @@ module JSON
     def to_s
       [
         header.to_json,
-        claim.to_json,
+        self.to_json,
         signature
       ].collect do |segment|
         UrlSafeBase64.encode64 segment.to_s
