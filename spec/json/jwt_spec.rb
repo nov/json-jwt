@@ -2,10 +2,10 @@ require 'spec_helper'
 
 describe JSON::JWT do
   let(:jwt) { JSON::JWT.new claim }
-  let :claim do
+  let(:claim) do
     {
-      iss: 'joe',
-      exp: 1300819380,
+      :iss => 'joe',
+      :exp => 1300819380,
       'http://example.com/is_root' => true
     }
   end
