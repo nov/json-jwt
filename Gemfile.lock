@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    json-jwt (0.0.0)
+    json-jwt (0.0.1)
       json (>= 1.4.3)
       url_safe_base64
 

@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe JSON::JWS do
-  let(:jwt) { JSON::JWT.new claim }
+  let(:jwt) { JSON::JWT.new claims }
   let(:jws) { JSON::JWS.new jwt }
-  let(:claim) do
+  let(:claims) do
     {
       :iss => 'joe',
       :exp => 1300819380,

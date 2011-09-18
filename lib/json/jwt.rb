@@ -6,17 +6,17 @@ module JSON
   class JWT < Hash
     attr_accessor :header, :signature
 
-    def initialize(claim)
+    def initialize(claims)
       @header = {
         :typ => :JWT,
         :alg => :none
       }
       [:exp, :nbf, :iat].each do |key|
-        if claim[key]
-          claim[key] = claim[key].to_i
+        if claims[key]
+          claims[key] = claims[key].to_i
         end
       end
-      replace claim
+      replace claims
     end
 
     def sign(private_key_or_secret, algorithm = :RS256)
