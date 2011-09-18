@@ -9,18 +9,17 @@ describe JSON::JWT do
       'http://example.com/is_root' => true
     }
   end
+  let(:no_signed) do
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
+  end
 
-  context 'when no sign no encryption' do
-    let :result do
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
-    end
-
+  context 'when not signed nor encrypted' do
     it do
-      jwt.to_s.should == result
+      jwt.to_s.should == no_signed
     end
   end
 
-  describe '.sign' do
+  describe '#sign' do
     [:HS256, :HS384, :HS512].each do |algorithm|
       context algorithm do
         it do
@@ -34,6 +33,34 @@ describe JSON::JWT do
         it do
           jwt.sign(private_key, algorithm).should be_a JSON::JWS
         end
+      end
+    end
+  end
+
+  describe '#verify' do
+    context 'when not signed nor encrypted' do
+      context 'no signature given' do
+        it do
+          jwt.verify(no_signed.chop).should be_true
+        end
+      end
+
+      context 'otherwise' do
+        it do
+          expect do
+            jwt.verify(no_signed.chop, 'signature')
+          end.should raise_error JSON::JWT::VerificationFailed
+        end
+      end
+    end
+
+    context 'when signed' do
+      before { jwt.header[:alg] = :HS256 }
+      it 'should delegate verification to JWS' do
+        jws = JSON::JWS.new jwt
+        jws.should_receive(:verify)
+        JSON::JWS.should_receive(:new).and_return(jws)
+        jwt.verify 'signature_base_string', 'signature', 'shared_secret'
       end
     end
   end

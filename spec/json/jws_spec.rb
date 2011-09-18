@@ -1,7 +1,12 @@
 require 'spec_helper'
 
 describe JSON::JWS do
-  let(:jwt) { JSON::JWT.new claims }
+  let(:alg) { :none }
+  let(:jwt) do
+    _jwt_ = JSON::JWT.new claims
+    _jwt_.header[:alg] = alg
+    _jwt_
+  end
   let(:jws) { JSON::JWS.new jwt }
   let(:claims) do
     {
@@ -22,7 +27,7 @@ describe JSON::JWS do
     its(:signature) { should be_nil }
   end
 
-  describe '#sign' do
+  describe '#sign!' do
     shared_examples_for :jwt_with_expected_signature do
       it 'should generate expected signature' do
         UrlSafeBase64.encode64(signed.signature).should == expected_signature[alg]
@@ -42,10 +47,10 @@ describe JSON::JWS do
       }
     }
     let(:signed) do
-      jws.sign key, alg
+      jws.sign! key
     end
     subject { signed }
-    
+
     [:HS256, :HS384, :HS512].each do |algorithm|
       describe algorithm do
         let(:key) { shared_secret }
