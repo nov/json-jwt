@@ -26,12 +26,12 @@ module JSON
       JWS.new(self).sign!(private_key_or_secret)
     end
 
-    def verify(signature_base_string, signature = '', private_key_or_secret = nil)
+    def verify(signature_base_string, signature = '', prublic_key_or_secret = nil)
       case header[:alg]
       when :none
         signature == '' or raise VerificationFailed
       else
-        JWS.new(self).verify(signature_base_string, signature, private_key_or_secret)
+        JWS.new(self).verify(signature_base_string, signature, prublic_key_or_secret)
       end
     end
 

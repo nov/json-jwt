@@ -13,8 +13,8 @@ module JSON
       self
     end
 
-    def verify(signature_base_string, signature, private_key_or_secret)
-      sign(signature_base_string, private_key_or_secret) == signature or
+    def verify(signature_base_string, signature, public_key_or_secret)
+      sign(signature_base_string, public_key_or_secret) == signature or
       raise VerificationFailed
     end
 
