@@ -21,7 +21,7 @@ module JSON
     private
 
     def algorithm
-      @header[:alg]
+      @header[:alg].to_s
     end
 
     def signature_base_string
@@ -36,13 +36,13 @@ module JSON
     def sign(signature_base_string, private_key_or_secret)
       digest = OpenSSL::Digest::Digest.new "SHA#{algorithm.to_s[2, 3]}"
       case algorithm
-      when :HS256, :HS384, :HS512
+      when 'HS256', 'HS384', 'HS512'
         secret = private_key_or_secret
         OpenSSL::HMAC.digest digest, secret, signature_base_string
-      when :RS256, :RS384, :RS512
+      when 'RS256', 'RS384', 'RS512'
         private_key = private_key_or_secret
         private_key.sign digest, signature_base_string
-      when :ES256, :ES384, :ES512
+      when 'ES256', 'ES384', 'ES512'
         # TODO
         raise NotImplementedError.new
       else
