@@ -21,7 +21,7 @@ module JSON
     private
 
     def algorithm
-      header[:alg] || header['alg']
+      header[:alg]
     end
 
     def digest
