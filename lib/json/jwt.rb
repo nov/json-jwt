@@ -1,6 +1,7 @@
 require 'openssl'
 require 'url_safe_base64'
 require 'json'
+require 'active_support/core_ext'
 
 module JSON
   class JWT < Hash
@@ -45,6 +46,11 @@ module JSON
       end.join('.')
     end
 
+    def [](key)
+      super key.to_sym or
+      super key.to_s
+    end
+
     class << self
       def decode(jwt_string, public_key_or_secret = nil)
         raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 dots.') unless jwt_string.count('.') == 2
@@ -53,7 +59,7 @@ module JSON
         end
         signature_base_string = jwt_string.split('.')[0,2].join('.')
         jwt = new JSON.parse(claims)
-        jwt.header = JSON.parse header
+        jwt.header = JSON.parse(header).with_indifferent_access
         jwt.verify signature_base_string, signature, public_key_or_secret
         jwt
       rescue JSON::ParserError
