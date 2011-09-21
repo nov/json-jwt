@@ -12,8 +12,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.add_runtime_dependency "json", ">= 1.4.3"
   s.add_runtime_dependency "url_safe_base64"
-  s.add_runtime_dependency "activesupport", ">= 2.3"
-  s.add_runtime_dependency "i18n"
   s.add_development_dependency "rake", ">= 0.8"
   s.add_development_dependency "rcov", ">= 0.9"
   s.add_development_dependency "rspec", ">= 2"

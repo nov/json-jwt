@@ -26,12 +26,12 @@ module JSON
       JWS.new(self).sign!(private_key_or_secret)
     end
 
-    def verify(signature_base_string, signature = '', prublic_key_or_secret = nil)
+    def verify(signature_base_string, signature = '', public_key_or_secret = nil)
       case header[:alg]
       when :none
         signature == '' or raise VerificationFailed
       else
-        JWS.new(self).verify(signature_base_string, signature, prublic_key_or_secret)
+        JWS.new(self).verify(signature_base_string, signature, public_key_or_secret)
       end
     end
 
@@ -51,9 +51,10 @@ module JSON
         header, claims, signature = jwt_string.split('.').collect do |segment|
           UrlSafeBase64.decode64 segment.to_s
         end
-        jwt = new JSON.parse(claims).with_indifferent_access
-        jwt.header = JSON.parse(header).with_indifferent_access
-        jwt.verify [header, claims].join('.'), signature, public_key_or_secret
+        signature_base_string = jwt_string.split('.')[0,2].join('.')
+        jwt = new JSON.parse(claims)
+        jwt.header = JSON.parse header
+        jwt.verify signature_base_string, signature, public_key_or_secret
         jwt
       rescue JSON::ParserError
         raise InvalidFormat.new("Invalid JSON Format")
