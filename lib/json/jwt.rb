@@ -47,8 +47,12 @@ module JSON
     end
 
     def [](key)
-      super key.to_sym or
-      super key.to_s
+      if key.respond_to? :to_sym
+        super key.to_sym or
+        super key.to_s
+      else
+        super
+      end
     end
 
     class << self
