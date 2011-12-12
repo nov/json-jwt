@@ -41,14 +41,14 @@ describe JSON::JWT do
     context 'when not signed nor encrypted' do
       context 'no signature given' do
         it do
-          jwt.verify(no_signed.chop).should be_true
+          jwt.verify(no_signed).should be_true
         end
       end
 
       context 'otherwise' do
         it do
           expect do
-            jwt.verify(no_signed.chop, 'signature')
+            jwt.verify(no_signed, 'signature')
           end.should raise_error JSON::JWT::VerificationFailed
         end
       end
@@ -69,7 +69,7 @@ describe JSON::JWT do
     context 'when not signed nor encrypted' do
       context 'no signature given' do
         it do
-          JSON::JWT.decode(jwt.to_s).should == jwt.stringify_keys
+          JSON::JWT.decode(no_signed).should == jwt.with_indifferent_access
         end
       end
     end

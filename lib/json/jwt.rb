@@ -28,8 +28,7 @@ module JSON
     end
 
     def verify(signature_base_string, signature = '', public_key_or_secret = nil)
-      case header[:alg]
-      when :none, "none"
+      if header[:alg].to_s == 'none'
         signature == '' or raise VerificationFailed
       else
         JWS.new(self).verify(signature_base_string, signature, public_key_or_secret)
@@ -61,7 +60,7 @@ module JSON
         header, claims, signature = jwt_string.split('.', 3).collect do |segment|
           UrlSafeBase64.decode64 segment.to_s
         end
-        signature_base_string = jwt_string.split('.')[0,2].join('.')
+        signature_base_string = jwt_string.split('.')[0, 2].join('.')
         jwt = new JSON.parse(claims)
         jwt.header = JSON.parse(header).with_indifferent_access
         jwt.verify signature_base_string, signature, public_key_or_secret
