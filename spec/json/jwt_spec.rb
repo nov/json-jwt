@@ -64,4 +64,14 @@ describe JSON::JWT do
       end
     end
   end
+
+  describe '.decode' do
+    context 'when not signed nor encrypted' do
+      context 'no signature given' do
+        it do
+          JSON::JWT.decode(jwt.to_s).should == jwt.stringify_keys
+        end
+      end
+    end
+  end
 end
