@@ -29,7 +29,7 @@ module JSON
 
     def verify(signature_base_string, signature = '', public_key_or_secret = nil)
       case header[:alg]
-      when :none
+      when :none, "none"
         signature == '' or raise VerificationFailed
       else
         JWS.new(self).verify(signature_base_string, signature, public_key_or_secret)
@@ -58,7 +58,7 @@ module JSON
     class << self
       def decode(jwt_string, public_key_or_secret = nil)
         raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 dots.') unless jwt_string.count('.') == 2
-        header, claims, signature = jwt_string.split('.').collect do |segment|
+        header, claims, signature = jwt_string.split('.', 3).collect do |segment|
           UrlSafeBase64.decode64 segment.to_s
         end
         signature_base_string = jwt_string.split('.')[0,2].join('.')
