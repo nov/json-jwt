@@ -15,6 +15,8 @@ JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON 
 
 === Encoding
 
+  require 'json/jwt'
+
   claim = {
     iss: 'nov',
     exp: 1.week.from_now,
@@ -30,11 +32,13 @@ JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON 
   # With signature & encryption
   JSON::JWT.new(claim).sign(key, algorithm).encrypt(key, algorithm).to_s
 
+For details about *key* and *algorithm*, see spec/json/jws_spec.rb and spec/helpers/sign_key_fixture_helper.rb
+
 === Decoding
 
   jwt_string = "jwt_header.jwt_claims.jwt_signature"
 
-  JSON::JWT.decode(jwt_string, public_key)
+  JSON::JWT.decode(jwt_string, key)
 
 == Note on Patches/Pull Requests
  
