@@ -32,7 +32,7 @@ JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON 
   # With signature & encryption
   JSON::JWT.new(claim).sign(key, algorithm).encrypt(key, algorithm).to_s
 
-For details about *key* and *algorithm*, see spec/json/jws_spec.rb and spec/helpers/sign_key_fixture_helper.rb
+For details about <code>key</code> and <code>algorithm</code>, see <code>spec/json/jws_spec.rb</code> and <code>spec/helpers/sign_key_fixture_helper.rb</code>.
 
 === Decoding
 
