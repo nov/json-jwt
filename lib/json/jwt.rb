@@ -35,6 +35,10 @@ module JSON
       end
     end
 
+    def [](key)
+      super || with_indifferent_access[key]
+    end
+
     def to_s
       [
         header.to_json,
@@ -43,15 +47,6 @@ module JSON
       ].collect do |segment|
         UrlSafeBase64.encode64 segment.to_s
       end.join('.')
-    end
-
-    def [](key)
-      if key.respond_to? :to_sym
-        super key.to_sym or
-        super key.to_s
-      else
-        super
-      end
     end
 
     class << self
