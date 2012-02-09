@@ -10,6 +10,7 @@ module JSON
     class Exception < StandardError; end
     class InvalidFormat < Exception; end
     class VerificationFailed < Exception; end
+    class UnexpectedAlgorighm < VerificationFailed; end
 
     def initialize(claims)
       @header = {
@@ -29,12 +30,7 @@ module JSON
 
     def verify(signature_base_string, signature = '', public_key_or_secret = nil)
       if header[:alg].to_s == 'none'
-        if public_key_or_secret
-          warn [
-            'A public key or secret is given for this "non-signed" JWT.',
-            'Non-signed JWTs can be valid regardless public key or secret, but something unexpected seems occuring.'
-          ].join('\n')
-        end
+        raise UnexpectedAlgorighm if public_key_or_secret
         signature == '' or raise VerificationFailed
       else
         JWS.new(self).verify(signature_base_string, signature, public_key_or_secret)

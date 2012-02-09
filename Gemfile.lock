@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    json-jwt (0.0.5)
+    json-jwt (0.0.6)
       activesupport (>= 2.3)
       i18n
       json (>= 1.4.3)

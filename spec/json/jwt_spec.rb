@@ -46,9 +46,10 @@ describe JSON::JWT do
       end
 
       context 'when public_key_or_secret given' do
-        it 'should be true but warn' do
-          jwt.should_receive(:warn).once
-          jwt.verify(no_signed, '', 'public_key_or_secret').should be_true
+        it do
+          expect do
+            jwt.verify(no_signed, '', 'secret')
+          end.should raise_error JSON::JWT::UnexpectedAlgorighm
         end
       end
 
