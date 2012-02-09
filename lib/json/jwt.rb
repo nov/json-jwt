@@ -31,8 +31,8 @@ module JSON
       if header[:alg].to_s == 'none'
         if public_key_or_secret
           warn [
-            'A public key or secret is given for non-signed JWT.',
-            'The JWT can be valid regardless public key or secret, but something unexpected seems occuring.'
+            'A public key or secret is given for this "non-signed" JWT.',
+            'Non-signed JWTs can be valid regardless public key or secret, but something unexpected seems occuring.'
           ].join('\n')
         end
         signature == '' or raise VerificationFailed
