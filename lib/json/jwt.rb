@@ -29,6 +29,12 @@ module JSON
 
     def verify(signature_base_string, signature = '', public_key_or_secret = nil)
       if header[:alg].to_s == 'none'
+        if public_key_or_secret
+          warn [
+            'A public key or secret is given for non-signed JWT.',
+            'The JWT can be valid regardless public key or secret, but something unexpected seems occuring.'
+          ].join('\n')
+        end
         signature == '' or raise VerificationFailed
       else
         JWS.new(self).verify(signature_base_string, signature, public_key_or_secret)

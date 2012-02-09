@@ -39,13 +39,20 @@ describe JSON::JWT do
 
   describe '#verify' do
     context 'when not signed nor encrypted' do
-      context 'no signature given' do
+      context 'when no signature nor public_key_or_secret given' do
         it do
           jwt.verify(no_signed).should be_true
         end
       end
 
-      context 'otherwise' do
+      context 'when public_key_or_secret given' do
+        it 'should be true but warn' do
+          jwt.should_receive(:warn).once
+          jwt.verify(no_signed, '', 'public_key_or_secret').should be_true
+        end
+      end
+
+      context 'when signature given' do
         it do
           expect do
             jwt.verify(no_signed, 'signature')
