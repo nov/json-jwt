@@ -24,7 +24,7 @@ module JSON
     end
 
     def sign(private_key_or_secret, algorithm = :HS256)
-      header[:alg] = algorithm
+      self.header[:alg] = algorithm
       JWS.new(self).sign!(private_key_or_secret)
     end
 
