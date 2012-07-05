@@ -6,7 +6,7 @@ describe JSON::JWT do
     {
       :iss => 'joe',
       :exp => 1300819380,
-      'http://example.com/is_root' => true
+      :'http://example.com/is_root' => true
     }
   end
   let(:no_signed) do
@@ -77,7 +77,7 @@ describe JSON::JWT do
     context 'when not signed nor encrypted' do
       context 'no signature given' do
         it do
-          JSON::JWT.decode(no_signed).should == jwt.with_indifferent_access
+          JSON::JWT.decode(no_signed).should == jwt
         end
       end
     end

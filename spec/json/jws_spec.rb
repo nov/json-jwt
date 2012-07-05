@@ -14,7 +14,7 @@ describe JSON::JWS do
     {
       :iss => 'joe',
       :exp => 1300819380,
-      'http://example.com/is_root' => true
+      :'http://example.com/is_root' => true
     }
   end
   let(:expected_signature) {
@@ -86,20 +86,15 @@ describe JSON::JWS do
       describe 'header' do
         let(:header) { decoded.header }
         it 'should be parsed successfully' do
-          header['typ'].should == 'JWT'
           header[:typ].should == 'JWT'
-          header['alg'].should == alg.to_s
           header[:alg].should == alg.to_s
         end
       end
 
       describe 'claims' do
         it 'should be parsed successfully' do
-          decoded['iss'].should == 'joe'
           decoded[:iss].should == 'joe'
-          decoded['exp'].should == 1300819380
           decoded[:exp].should == 1300819380
-          decoded['http://example.com/is_root'] == true
           decoded[:'http://example.com/is_root'] == true
         end
       end

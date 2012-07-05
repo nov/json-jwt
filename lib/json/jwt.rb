@@ -38,7 +38,7 @@ module JSON
     end
 
     def [](key)
-      super || with_indifferent_access[key]
+      super
     end
 
     def to_s
@@ -58,8 +58,8 @@ module JSON
           UrlSafeBase64.decode64 segment.to_s
         end
         signature_base_string = jwt_string.split('.')[0, 2].join('.')
-        jwt = new JSON.parse(claims)
-        jwt.header = JSON.parse(header).with_indifferent_access
+        jwt = new JSON.parse(claims, :symbolize_names => true)
+        jwt.header = JSON.parse(header, :symbolize_names => true)
         jwt.verify signature_base_string, signature, public_key_or_secret
         jwt
       rescue JSON::ParserError
