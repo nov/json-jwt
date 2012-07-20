@@ -4,7 +4,7 @@ module JSON
       replace Array(jwks).flatten
     end
 
-    def as_json
+    def as_json(options = {})
       {:keys => self}
     end
   end
