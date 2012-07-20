@@ -79,7 +79,7 @@ describe JSON::JWS do
   describe '#verify' do
     shared_examples_for :succes_signature_verification do
       it do
-        expect { decoded }.should_not raise_error
+        expect { decoded }.not_to raise_error
         decoded.should be_a JSON::JWT
       end
 

@@ -49,7 +49,7 @@ describe JSON::JWT do
         it do
           expect do
             jwt.verify(no_signed, '', 'secret')
-          end.should raise_error JSON::JWT::UnexpectedAlgorighm
+          end.to raise_error JSON::JWT::UnexpectedAlgorighm
         end
       end
 
@@ -57,7 +57,7 @@ describe JSON::JWT do
         it do
           expect do
             jwt.verify(no_signed, 'signature')
-          end.should raise_error JSON::JWT::VerificationFailed
+          end.to raise_error JSON::JWT::VerificationFailed
         end
       end
     end
