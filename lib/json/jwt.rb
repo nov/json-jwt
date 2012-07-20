@@ -37,10 +37,6 @@ module JSON
       end
     end
 
-    def [](key)
-      super
-    end
-
     def to_s
       [
         header.to_json,
@@ -65,17 +61,6 @@ module JSON
       rescue JSON::ParserError
         raise InvalidFormat.new("Invalid JSON Format")
       end
-    end
-
-    private
-
-    def replace(hash_or_jwt)
-      super hash_or_jwt
-      if hash_or_jwt.is_a? JSON::JWT
-        self.header = hash_or_jwt.header
-        self.signature = hash_or_jwt.signature
-      end
-      self
     end
   end
 end
