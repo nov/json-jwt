@@ -82,4 +82,4 @@ end
 
 require 'json/jws'
 require 'json/jwe'
-require 'json/jwt'
+require 'json/jwk'
