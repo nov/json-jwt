@@ -5,7 +5,8 @@ module JSON
     end
 
     def as_json(options = {})
-      {:keys => self}
+      # NOTE: Array.new wrapper is requied to avoid CircularReferenceError
+      {:keys => Array.new(self)}
     end
   end
 end
