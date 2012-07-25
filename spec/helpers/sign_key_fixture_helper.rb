@@ -20,8 +20,8 @@ module SignKeyFixtureHelper
         'pass-phrase'
       )
     when :ecdsa
-      OpenSSL::PKey::RSA.new(
-        pem_file("#{algorithm}/#{options[:degree]}/private_key")
+      OpenSSL::PKey::EC.new(
+        pem_file("#{algorithm}/#{options[:digest_length]}/private_key")
       )
     end
   end
@@ -33,8 +33,8 @@ module SignKeyFixtureHelper
         pem_file("#{algorithm}/public_key")
       )
     when :ecdsa
-      OpenSSL::PKey::RSA.new(
-        pem_file("#{algorithm}/#{options[:degree]}/public_key")
+      OpenSSL::PKey::EC.new(
+        pem_file("#{algorithm}/#{options[:digest_length]}/public_key")
       )
     end
   end

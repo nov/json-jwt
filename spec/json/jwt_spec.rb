@@ -81,5 +81,13 @@ describe JSON::JWT do
         end
       end
     end
+
+    context 'when JSON parse failed' do
+      it do
+        expect do
+          JSON::JWT.decode('header.payload.signature')
+        end.to raise_error JSON::JWT::InvalidFormat
+      end
+    end
   end
 end
