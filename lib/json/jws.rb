@@ -92,7 +92,7 @@ module JSON
       when 512
         'secp521r1'
       end
-      key.group = PKey::EC::Group.new group_name
+      key.group = OpenSSL::PKey::EC::Group.new group_name
       key.check_key
     end
 
