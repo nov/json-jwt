@@ -50,7 +50,7 @@ module JSON
     class << self
       def decode(jwt_string, key_or_secret = nil)
         case jwt_string.count('.')
-        when 2
+        when 2 # JWT / JWS
           header, claims, signature = jwt_string.split('.', 3).collect do |segment|
             UrlSafeBase64.decode64 segment.to_s
           end
@@ -59,8 +59,10 @@ module JSON
           jwt.header = JSON.parse(header, :symbolize_names => true)
           jwt.verify signature_base_string, signature, key_or_secret
           jwt
-        when 3
-          # TODO: JWE decrypt & decode
+        when 3 # JWE
+          # TODO: Concept code first.
+          #  jwt = JWE.decrypt ...
+          #  jwt.verify ...
         else
           raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 or 3 dots.')
         end
