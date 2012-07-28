@@ -48,16 +48,22 @@ module JSON
     end
 
     class << self
-      def decode(jwt_string, public_key_or_secret = nil)
-        raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 dots.') unless jwt_string.count('.') == 2
-        header, claims, signature = jwt_string.split('.', 3).collect do |segment|
-          UrlSafeBase64.decode64 segment.to_s
+      def decode(jwt_string, key_or_secret = nil)
+        case jwt_string.count('.')
+        when 2
+          header, claims, signature = jwt_string.split('.', 3).collect do |segment|
+            UrlSafeBase64.decode64 segment.to_s
+          end
+          signature_base_string = jwt_string.split('.')[0, 2].join('.')
+          jwt = new JSON.parse(claims, :symbolize_names => true)
+          jwt.header = JSON.parse(header, :symbolize_names => true)
+          jwt.verify signature_base_string, signature, key_or_secret
+          jwt
+        when 3
+          # TODO: JWE decrypt & decode
+        else
+          raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 or 3 dots.')
         end
-        signature_base_string = jwt_string.split('.')[0, 2].join('.')
-        jwt = new JSON.parse(claims, :symbolize_names => true)
-        jwt.header = JSON.parse(header, :symbolize_names => true)
-        jwt.verify signature_base_string, signature, public_key_or_secret
-        jwt
       rescue JSON::ParserError
         raise InvalidFormat.new("Invalid JSON Format")
       end
