@@ -1,6 +1,6 @@
 module JSON
   class JWK < Hash
-    class UnknownAlgorighm < JWT::Exception; end
+    class UnknownAlgorithm < JWT::Exception; end
 
     def initialize(public_key, options = {})
       replace encode(public_key, options)
@@ -17,7 +17,7 @@ module JSON
       when 'secp521r1'
         :'P-521'
       else
-        raise UnknownAlgorighm.new('Unknown ECDSA Curve')
+        raise UnknownAlgorithm.new('Unknown ECDSA Curve')
       end
     end
 
@@ -52,7 +52,7 @@ module JSON
           :y => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s)
         }
       else
-        raise UnknownAlgorighm.new('Unknown Algorithm')
+        raise UnknownAlgorithm.new('Unknown Algorithm')
       end
       hash.merge(options)
     end
