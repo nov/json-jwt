@@ -10,7 +10,7 @@ module JSON
     class Exception < StandardError; end
     class InvalidFormat < Exception; end
     class VerificationFailed < Exception; end
-    class UnexpectedAlgorighm < VerificationFailed; end
+    class UnexpectedAlgorithm < VerificationFailed; end
 
     def initialize(claims)
       @header = {
@@ -30,7 +30,7 @@ module JSON
 
     def verify(signature_base_string, signature = '', public_key_or_secret = nil)
       if header[:alg].to_s == 'none'
-        raise UnexpectedAlgorighm if public_key_or_secret
+        raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
       else
         JWS.new(self).verify(signature_base_string, signature, public_key_or_secret)
