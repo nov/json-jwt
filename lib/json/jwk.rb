@@ -40,16 +40,16 @@ module JSON
       hash = case public_key
       when OpenSSL::PKey::RSA
         {
-          alg: :RSA,
-          exp: UrlSafeBase64.encode64(public_key.e.to_s(2)),
-          mod: UrlSafeBase64.encode64(public_key.n.to_s(2))
+          :alg => :RSA,
+          :exp => UrlSafeBase64.encode64(public_key.e.to_s(2)),
+          :mod => UrlSafeBase64.encode64(public_key.n.to_s(2))
         }
       when OpenSSL::PKey::EC
         {
-          alg: :EC,
-          crv: ecdsa_curve_name(public_key),
-          x: UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:x].to_s),
-          y: UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s)
+          :alg => :EC,
+          :crv => ecdsa_curve_name(public_key),
+          :x => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:x].to_s),
+          :y => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s)
         }
       else
         raise UnknownAlgorighm.new('Unknown Algorithm')
