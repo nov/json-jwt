@@ -55,8 +55,8 @@ module JSON
             UrlSafeBase64.decode64 segment.to_s
           end
           signature_base_string = jwt_string.split('.')[0, 2].join('.')
-          jwt = new JSON.parse(claims, :symbolize_names => true)
-          jwt.header = JSON.parse(header, :symbolize_names => true)
+          jwt = new JSON.parse(claims, :symbolize_names => true, :symbolize_keys => true)
+          jwt.header = JSON.parse(header, :symbolize_names => true, :symbolize_keys => true)
           jwt.verify signature_base_string, signature, key_or_secret
           jwt
         when 3 # JWE
