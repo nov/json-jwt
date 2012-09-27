@@ -12,12 +12,12 @@ describe JSON::JWS do
   let(:decoded) { JSON::JWT.decode signed.to_s, public_key_or_secret }
   let(:claims) do
     {
-      :iss => 'joe',
-      :exp => 1300819380,
+      iss: 'joe',
+      exp: 1300819380,
       :'http://example.com/is_root' => true
     }
   end
-  let(:expected_signature) {
+  let(:expected_signature) do
     {
       :HS256 => 'DyuTgO2Ggb5nrhkkhI-RjVYIBe3o8oL4ijkAn94YPxQ',
       :HS384 => 'a5-7rr61TG8Snv9xxJ7l064ky-SCq1Mswe9t8HEorvoc_nnfIeUy9WQCLMIli34R',
@@ -26,7 +26,7 @@ describe JSON::JWS do
       :RS384 => 'lT5JbytGKgG9QrwkJuxgw7UjmN9tjkEQW9pVGR2XnKEdC0_wLNIzAmT-jTwyMDGBLUkWO7opDOP6Xy6_DOTg58k9PwVkyQzrLnmxJMEng2Q-aMqcitRSIvUk3DPy8kemp8yUPls9NzWmByM2GoUVHbDsR0r-tZN-g_9QYev32mvMhjMr30JI5S2xiRjc9m2GAaXMOQmNTovJgV4bgCp4UjruCrA0BD1JJwDqKYoR_YYr_ALcVjD_LUgy80udJvbi8MAYJVUf0QYtQDrX2wnT_-eiiWjD5XafLuXEQVDRh-v2MKAwdvtXMq5cZ08Zjl2SyHxJ3OqhEeWPvYGltxZh_A',
       :RS512 => 'EHeGM2Mo3ghhUfSB99AlREehrbC6OPE-nYL_rwf88ysTnJ8L1QQ0UuCrXq4SpRutGLK_bYTK3ZALvFRPoOgK_g0QWmqv6qjQRU_QTxoq8y8APP-IgKKDuIiGH6daBV2rAPLDReqYNKsKjmTvZJo2c0a0e_WZkkj_ZwpgjTG3v0gW9lbDAzLJDz18eqtR4ZO7JTu_fyNrUrNk-w2_wpxSsn9sygIMp0lKE0_pt0b01fz3gjTDjlltU0cKSalUp4geaBDH7QRcexrolIctdQFbNKTXQxoigxD3NLNkKGH7f6A8KZdcOm8AnEjullcZs8_OWGnW43p1qrxoBRSivb9pqQ'
     }
-  }
+  end
 
   shared_examples_for :jwt_with_alg do
     it { should == jwt }
@@ -120,8 +120,8 @@ describe JSON::JWS do
 
     [:ES256, :ES384, :ES512].each do |algorithm|
       describe algorithm do
-        let(:private_key_or_secret) { private_key(:ecdsa, :digest_length => algorithm.to_s[2,3].to_i) }
-        let(:public_key_or_secret) { public_key(:ecdsa, :digest_length => algorithm.to_s[2,3].to_i) }
+        let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+        let(:public_key_or_secret)  { public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
         let(:alg) { algorithm }
         it_behaves_like :success_signature_verification
       end

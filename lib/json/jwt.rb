@@ -14,8 +14,8 @@ module JSON
 
     def initialize(claims)
       @header = {
-        :typ => :JWT,
-        :alg => :none
+        typ: :JWT,
+        alg: :none
       }
       [:exp, :nbf, :iat].each do |key|
         claims[key] = claims[key].to_i if claims[key]
@@ -55,7 +55,7 @@ module JSON
             UrlSafeBase64.decode64 segment.to_s
           end
           header, claims = [header, claims].collect do |json|
-            JSON.parse(json, :symbolize_names => true, :symbolize_keys => true)
+            JSON.parse json, symbolize_names: true, symbolize_keys: true
           end
           signature_base_string = jwt_string.split('.')[0, 2].join('.')
           jwt = new claims

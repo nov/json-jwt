@@ -9,7 +9,7 @@ describe JSON::JWK do
     its(:mod) { jwk[:mod].should == UrlSafeBase64.encode64(public_key.n.to_s(2)) }
 
     context 'when kid/use options given' do
-      let(:jwk) { JSON::JWK.new public_key, :kid => '12345', :use => :sig }
+      let(:jwk) { JSON::JWK.new public_key, kid: '12345', use: :sig }
       it { jwk.should include :kid, :use }
       its(:kid) { jwk[:kid].should == '12345' }
       its(:use) { jwk[:use].should == :sig }
@@ -20,22 +20,22 @@ describe JSON::JWK do
     let(:expected_coodinates) do
       {
         256 => {
-          :x => 'OTUyMUU1NjJFOEQ3NDA0MTRDOEEyQjk5RDQ2NkZERDVFNUYwQzUzMUFGNENBNkMxMTY2Q0NFQzUzQjVGRDMwRg',
-          :y => 'MDIwQTRENTQwN0ExQkJFNzQwNkJDNjIyMUI5NjUxQTY1NjY5Mjg4QUU1OEE1NjRDNjcwN0Q1RkQ5REM3MDlCNw'
+          x: 'OTUyMUU1NjJFOEQ3NDA0MTRDOEEyQjk5RDQ2NkZERDVFNUYwQzUzMUFGNENBNkMxMTY2Q0NFQzUzQjVGRDMwRg',
+          y: 'MDIwQTRENTQwN0ExQkJFNzQwNkJDNjIyMUI5NjUxQTY1NjY5Mjg4QUU1OEE1NjRDNjcwN0Q1RkQ5REM3MDlCNw'
         },
         384 => {
-          :x => 'QTY1Q0MwQTcyMTY3MkJCQUIzODYwRTU3OUM4NjVCMTYzREExNjY4MUY2NTVEOTc4RjkxMTY2RUMzOUVDMzRDMUJEQjcyQUFCQTVGQUI2NDcyOERGMjgwMDVCNzA1NDZE',
-          :y => 'OEIxMDczN0RGODY0RERGNzFCOTlFOEE5MThCOTJGNDAxMzQyQ0RFMzY2RTkwMkY3ODRFNTEzMUZBMjA1MDczMzhCRDE4RUM3QjA2NEU4QTRENEQzQjI5MkUzOTYyQkRC'
+          x: 'QTY1Q0MwQTcyMTY3MkJCQUIzODYwRTU3OUM4NjVCMTYzREExNjY4MUY2NTVEOTc4RjkxMTY2RUMzOUVDMzRDMUJEQjcyQUFCQTVGQUI2NDcyOERGMjgwMDVCNzA1NDZE',
+          y: 'OEIxMDczN0RGODY0RERGNzFCOTlFOEE5MThCOTJGNDAxMzQyQ0RFMzY2RTkwMkY3ODRFNTEzMUZBMjA1MDczMzhCRDE4RUM3QjA2NEU4QTRENEQzQjI5MkUzOTYyQkRC'
         },
         512 => {
-          :x => 'MDFDMzAyMEZFNkI0NkJBQUU3MTNENEVGMEI0OThFQTg1RkMzMTk3NDYwRTU4REUyNERCRTFFMUNEQzEzOUI2OTAzRUEyQkEzQzdEMzNGN0ZDNzdGMTQ2MUVCRDBFODY5QUIzMTI3RTJCNjBGNjE5QTJFMUFDNkM4M0M0ODBCRDJBRkZG',
-          :y => 'MDE0MkQ4MTFERjI1RjlCNTdGMDQ4REJDRjVBN0IzODUyMkQ5RDUxMEM1REE1QjYwMENGMTMyRjU4RUQ4QjZBNjFBRTFDMjVDQTYyQ0IzNTQzMzI5NUQ2QzAxQTdBNzIzODNBNEQ3MjBEOTI4NTZCNTU3NjYxMzc4RDM4OEExQkI4MjM2'
+          x: 'MDFDMzAyMEZFNkI0NkJBQUU3MTNENEVGMEI0OThFQTg1RkMzMTk3NDYwRTU4REUyNERCRTFFMUNEQzEzOUI2OTAzRUEyQkEzQzdEMzNGN0ZDNzdGMTQ2MUVCRDBFODY5QUIzMTI3RTJCNjBGNjE5QTJFMUFDNkM4M0M0ODBCRDJBRkZG',
+          y: 'MDE0MkQ4MTFERjI1RjlCNTdGMDQ4REJDRjVBN0IzODUyMkQ5RDUxMEM1REE1QjYwMENGMTMyRjU4RUQ4QjZBNjFBRTFDMjVDQTYyQ0IzNTQzMzI5NUQ2QzAxQTdBNzIzODNBNEQ3MjBEOTI4NTZCNTU3NjYxMzc4RDM4OEExQkI4MjM2'
         }
       }
     end
     [256, 384, 512].each do |digest_length|
       describe "EC#{digest_length}" do
-        let(:jwk) { JSON::JWK.new public_key(:ecdsa, :digest_length => digest_length) }
+        let(:jwk) { JSON::JWK.new public_key(:ecdsa, digest_length: digest_length) }
         it { jwk.should include :alg, :crv, :x, :y }
         its(:alg) { jwk[:alg].should == :EC }
         its(:x) { jwk[:x].should == expected_coodinates[digest_length][:x] }
@@ -66,9 +66,9 @@ describe JSON::JWK do
     context 'when RSA' do
       subject do
         JSON::JWK.decode(
-          :alg => :RSA,
-          :mod => mod,
-          :exp => exp
+          alg: :RSA,
+          mod: mod,
+          exp: exp
         )
       end
       let(:exp) { 'AQAB' }

@@ -10,8 +10,8 @@ describe JSON::JWT do
   end
   let(:claims) do
     {
-      :iss => 'joe',
-      :exp => 1300819380,
+      iss: 'joe',
+      exp: 1300819380,
       :'http://example.com/is_root' => true
     }
   end
@@ -50,7 +50,7 @@ describe JSON::JWT do
           UrlSafeBase64.decode64 segment.to_s
         end
         header, claims = [header, claims].collect do |json|
-          JSON.parse json, :symbolize_names => true, :symbolize_keys => true
+          JSON.parse json, symbolize_names: true, symbolize_keys: true
         end
         jwt = JSON::JWT.new claims
         jwt.header = header

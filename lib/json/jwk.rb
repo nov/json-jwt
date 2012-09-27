@@ -29,8 +29,8 @@ module JSON
         hex_x =  hex[2, data_len/2]
         hex_y = hex[2+data_len/2, data_len/2]
         @ecdsa_coodinates = {
-          :x => hex_x,
-          :y => hex_y
+          x: hex_x,
+          y: hex_y
         }
       end
       @ecdsa_coodinates
@@ -40,16 +40,16 @@ module JSON
       hash = case public_key
       when OpenSSL::PKey::RSA
         {
-          :alg => :RSA,
-          :exp => UrlSafeBase64.encode64(public_key.e.to_s(2)),
-          :mod => UrlSafeBase64.encode64(public_key.n.to_s(2))
+          alg: :RSA,
+          exp: UrlSafeBase64.encode64(public_key.e.to_s(2)),
+          mod: UrlSafeBase64.encode64(public_key.n.to_s(2))
         }
       when OpenSSL::PKey::EC
         {
-          :alg => :EC,
-          :crv => ecdsa_curve_name(public_key),
-          :x => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:x].to_s),
-          :y => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s)
+          alg: :EC,
+          crv: ecdsa_curve_name(public_key),
+          x: UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:x].to_s),
+          y: UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s)
         }
       else
         raise UnknownAlgorithm.new('Unknown Algorithm')
@@ -61,7 +61,6 @@ module JSON
       def decode(jwk)
         case jwk[:alg]
         when :RSA
-          # NOTE: needs ruby 1.9.3+
           exp = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:exp]), 2
           mod = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:mod]), 2
           key = OpenSSL::PKey::RSA.new
