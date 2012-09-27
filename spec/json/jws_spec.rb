@@ -131,7 +131,7 @@ describe JSON::JWS do
       let(:alg) { :unknown }
       it do
         expect do
-          jws.verify 'signature_base_string', 'signature', 'key'
+          jws.verify 'key'
         end.to raise_error JSON::JWS::InvalidFormat
       end
     end

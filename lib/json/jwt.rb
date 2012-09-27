@@ -28,12 +28,12 @@ module JSON
       JWS.new(self).sign!(private_key_or_secret)
     end
 
-    def verify(signature_base_string, signature = '', public_key_or_secret = nil)
+    def verify(public_key_or_secret = nil)
       if header[:alg].to_s == 'none'
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
       else
-        JWS.new(self).verify(signature_base_string, signature, public_key_or_secret)
+        JWS.new(self).verify(public_key_or_secret)
       end
     end
 
@@ -54,10 +54,14 @@ module JSON
           header, claims, signature = jwt_string.split('.', 3).collect do |segment|
             UrlSafeBase64.decode64 segment.to_s
           end
+          header, claims = [header, claims].collect do |json|
+            JSON.parse(json, :symbolize_names => true, :symbolize_keys => true)
+          end
           signature_base_string = jwt_string.split('.')[0, 2].join('.')
-          jwt = new JSON.parse(claims, :symbolize_names => true, :symbolize_keys => true)
-          jwt.header = JSON.parse(header, :symbolize_names => true, :symbolize_keys => true)
-          jwt.verify signature_base_string, signature, key_or_secret
+          jwt = new claims
+          jwt.header = header
+          jwt.signature = signature
+          jwt.verify key_or_secret unless key_or_secret == :skip_verification
           jwt
         when 3 # JWE
           # TODO: Concept code first.
