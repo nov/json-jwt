@@ -59,15 +59,15 @@ module JSON
 
     class << self
       def decode(jwk)
-        case jwk[:alg]
-        when :RSA
+        case jwk[:alg].to_s
+        when 'RSA'
           exp = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:exp]), 2
           mod = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:mod]), 2
           key = OpenSSL::PKey::RSA.new
           key.e = exp
           key.n = mod
           key
-        when :EC
+        when 'EC'
           raise NotImplementedError.new('Not Implemented Yet')
         else
           raise UnknownAlgorithm.new('Unknown Algorithm')
