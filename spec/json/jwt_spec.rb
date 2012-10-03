@@ -134,5 +134,23 @@ describe JSON::JWT do
         end.to raise_error JSON::JWT::InvalidFormat
       end
     end
+
+    context 'when unexpected format' do
+      context 'when too few dots' do
+        it do
+          expect do
+            JSON::JWT.decode 'header'
+          end.to raise_error JSON::JWT::InvalidFormat
+        end
+      end
+
+      context 'when too many dots' do
+        it do
+          expect do
+            JSON::JWT.decode 'header.payload.signature.something.wrong'
+          end.to raise_error JSON::JWT::InvalidFormat
+        end
+      end
+    end
   end
 end

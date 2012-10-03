@@ -103,5 +103,38 @@ NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
       it { should be_instance_of OpenSSL::PKey::RSA }
       its(:to_pem) { should == pem }
     end
+
+    context 'when ECDSA' do
+      it do
+        expect do
+          JSON::JWK.decode(
+            alg: :EC,
+            crv: 'crv',
+            x: 'x',
+            y: 'y'
+          )
+        end.to raise_error NotImplementedError
+      end
+    end
+
+    context 'when invalid algorithm' do
+      it do
+        expect do
+          JSON::JWK.decode(
+            alg: :XXX
+          )
+        end.to raise_error JSON::JWK::UnknownAlgorithm
+      end
+    end
+
+    context 'when no algorithm' do
+      it do
+        expect do
+          JSON::JWK.decode(
+            x: :x
+          )
+        end.to raise_error JSON::JWK::UnknownAlgorithm
+      end
+    end
   end
 end
