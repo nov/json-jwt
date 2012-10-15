@@ -41,7 +41,7 @@ module JSON
       when OpenSSL::PKey::RSA
         {
           alg: :RSA,
-          exp: UrlSafeBase64.encode64(public_key.e.to_s(2)),
+          xpo: UrlSafeBase64.encode64(public_key.e.to_s(2)),
           mod: UrlSafeBase64.encode64(public_key.n.to_s(2))
         }
       when OpenSSL::PKey::EC
@@ -61,7 +61,7 @@ module JSON
       def decode(jwk)
         case jwk[:alg].to_s
         when 'RSA'
-          exp = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:exp]), 2
+          exp = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:xpo]), 2
           mod = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:mod]), 2
           key = OpenSSL::PKey::RSA.new
           key.e = exp
