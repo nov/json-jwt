@@ -61,7 +61,7 @@ module JSON
       def decode(jwk)
         case jwk[:alg].to_s
         when 'RSA'
-          exp = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:xpo]), 2
+          exp = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:xpo] || jwk[:exp]), 2
           mod = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:mod]), 2
           key = OpenSSL::PKey::RSA.new
           key.e = exp
