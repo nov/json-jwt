@@ -3,9 +3,10 @@ require 'spec_helper'
 describe JSON::JWK do
   context 'when RSA public key given' do
     let(:jwk) { JSON::JWK.new public_key }
-    it { jwk.should include :alg, :xpo, :mod }
+    it { jwk.should include :alg, :xpo, :exp, :mod }
     its(:alg) { jwk[:alg].should == :RSA }
     its(:xpo) { jwk[:xpo].should == UrlSafeBase64.encode64(public_key.e.to_s(2)) }
+    its(:exp) { jwk[:exp].should == UrlSafeBase64.encode64(public_key.e.to_s(2)) }
     its(:mod) { jwk[:mod].should == UrlSafeBase64.encode64(public_key.n.to_s(2)) }
 
     context 'when kid/use options given' do

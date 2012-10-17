@@ -42,6 +42,7 @@ module JSON
         {
           alg: :RSA,
           xpo: UrlSafeBase64.encode64(public_key.e.to_s(2)),
+          exp: UrlSafeBase64.encode64(public_key.e.to_s(2)),
           mod: UrlSafeBase64.encode64(public_key.n.to_s(2))
         }
       when OpenSSL::PKey::EC
