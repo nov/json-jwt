@@ -46,10 +46,10 @@ describe JSON::JWT do
   describe '#verify' do
     context 'when not signed nor encrypted' do
       let(:jwt) do
-        header, claims, signature = no_signed.split('.', 3).collect do |segment|
+        header_base64, claims_base64, signature = no_signed.split('.', 3).collect do |segment|
           UrlSafeBase64.decode64 segment.to_s
         end
-        header, claims = [header, claims].collect do |json|
+        header, claims = [header_base64, claims_base64].collect do |json|
           JSON.parse json, symbolize_names: true, symbolize_keys: true
         end
         jwt = JSON::JWT.new claims
@@ -57,17 +57,18 @@ describe JSON::JWT do
         jwt.signature = signature
         jwt
       end
+      let(:signature_base_string) { no_signed.split('.', 3)[0,2].join('.') }
 
       context 'when no signature nor public_key_or_secret given' do
         it do
-          jwt.verify.should be_true
+          jwt.verify(signature_base_string).should be_true
         end
       end
 
       context 'when public_key_or_secret given' do
         it do
           expect do
-            jwt.verify 'secret'
+            jwt.verify signature_base_string, 'secret'
           end.to raise_error JSON::JWT::UnexpectedAlgorithm
         end
       end
@@ -77,7 +78,7 @@ describe JSON::JWT do
 
         it do
           expect do
-            jwt.verify
+            jwt.verify signature_base_string
           end.to raise_error JSON::JWT::VerificationFailed
         end
       end

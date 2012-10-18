@@ -28,12 +28,12 @@ module JSON
       JWS.new(self).sign!(private_key_or_secret)
     end
 
-    def verify(public_key_or_secret = nil)
+    def verify(signature_base_string, public_key_or_secret = nil)
       if header[:alg].to_s == 'none'
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
       else
-        JWS.new(self).verify(public_key_or_secret)
+        JWS.new(self).verify(signature_base_string, public_key_or_secret)
       end
     end
 
@@ -61,7 +61,11 @@ module JSON
           jwt = new claims
           jwt.header = header
           jwt.signature = signature
-          jwt.verify key_or_secret unless key_or_secret == :skip_verification
+
+          # NOTE:
+          #  Some JSON libraries generates wrong format of JSON (spaces between keys and values etc.)
+          #  So we need to use raw base64 strings for signature verification.
+          jwt.verify signature_base_string, key_or_secret unless key_or_secret == :skip_verification
           jwt
         when 3 # JWE
           # TODO: Concept code first.

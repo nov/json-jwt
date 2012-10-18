@@ -13,8 +13,8 @@ module JSON
       self
     end
 
-    def verify(public_key_or_secret)
-      public_key_or_secret && valid?(public_key_or_secret) or
+    def verify(signature_base_string, public_key_or_secret)
+      public_key_or_secret && valid?(signature_base_string, public_key_or_secret) or
       raise VerificationFailed
     end
 
@@ -66,7 +66,7 @@ module JSON
       end
     end
 
-    def valid?(public_key_or_secret)
+    def valid?(signature_base_string, public_key_or_secret)
       case
       when hmac?
         secret = public_key_or_secret
