@@ -3,11 +3,10 @@ require 'spec_helper'
 describe JSON::JWK do
   context 'when RSA public key given' do
     let(:jwk) { JSON::JWK.new public_key }
-    it { jwk.should include :alg, :xpo, :exp, :mod }
+    it { jwk.should include :alg, :e, :n }
     its(:alg) { jwk[:alg].should == :RSA }
-    its(:xpo) { jwk[:xpo].should == UrlSafeBase64.encode64(public_key.e.to_s(2)) }
-    its(:exp) { jwk[:exp].should == UrlSafeBase64.encode64(public_key.e.to_s(2)) }
-    its(:mod) { jwk[:mod].should == UrlSafeBase64.encode64(public_key.n.to_s(2)) }
+    its(:e) { jwk[:e].should == UrlSafeBase64.encode64(public_key.e.to_s(2)) }
+    its(:n) { jwk[:n].should == UrlSafeBase64.encode64(public_key.n.to_s(2)) }
 
     context 'when kid/use options given' do
       let(:jwk) { JSON::JWK.new public_key, kid: '12345', use: :sig }
@@ -68,12 +67,12 @@ describe JSON::JWK do
       subject do
         JSON::JWK.decode(
           alg: :RSA,
-          mod: mod,
-          xpo: xpo
+          n: n,
+          e: e
         )
       end
-      let(:xpo) { 'AQAB' }
-      let(:mod) { 'AK8ppaAGn6N3jDic2DhDN5mI5mWzvhfL1AFZOS9q2EBM8L5sjZbYiaHeNoKillZGmEF9a9g6Z20bDnoHTuHPsx93HYkZqPumFZ8K9lLCbqKAMWw2Qgk10RgrZ-kblJotTBCeer9-tZSWO-OWFzP4gp8MpSuQOQbwTJwDgEkFIQLUK2YgzWbn1PoW8xcfbVyWhZD880ELGRW6GhRgYAl0DN_EQS8kyUa0CusYCzOOg2W3-7qjYeojyP6jiOEr-eyjC7hcUvTVoTfz84BiZv72KS3i5JS8ZNNuRp5Ce51wjoDDUoNxDLWv6Da6qMaGpKz6NTSNbvhE_KFhpp4wf5yRQD8=' }
+      let(:e) { 'AQAB' }
+      let(:n) { 'AK8ppaAGn6N3jDic2DhDN5mI5mWzvhfL1AFZOS9q2EBM8L5sjZbYiaHeNoKillZGmEF9a9g6Z20bDnoHTuHPsx93HYkZqPumFZ8K9lLCbqKAMWw2Qgk10RgrZ-kblJotTBCeer9-tZSWO-OWFzP4gp8MpSuQOQbwTJwDgEkFIQLUK2YgzWbn1PoW8xcfbVyWhZD880ELGRW6GhRgYAl0DN_EQS8kyUa0CusYCzOOg2W3-7qjYeojyP6jiOEr-eyjC7hcUvTVoTfz84BiZv72KS3i5JS8ZNNuRp5Ce51wjoDDUoNxDLWv6Da6qMaGpKz6NTSNbvhE_KFhpp4wf5yRQD8=' }
       let(:pem) do
         if RUBY_VERSION >= '1.9.3'
           <<-PEM

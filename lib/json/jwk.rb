@@ -41,9 +41,8 @@ module JSON
       when OpenSSL::PKey::RSA
         {
           alg: :RSA,
-          xpo: UrlSafeBase64.encode64(public_key.e.to_s(2)),
-          exp: UrlSafeBase64.encode64(public_key.e.to_s(2)),
-          mod: UrlSafeBase64.encode64(public_key.n.to_s(2))
+          e: UrlSafeBase64.encode64(public_key.e.to_s(2)),
+          n: UrlSafeBase64.encode64(public_key.n.to_s(2))
         }
       when OpenSSL::PKey::EC
         {
@@ -62,11 +61,11 @@ module JSON
       def decode(jwk)
         case jwk[:alg].to_s
         when 'RSA'
-          exp = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:xpo] || jwk[:exp]), 2
-          mod = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:mod]), 2
+          e = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:e]), 2
+          n = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:n]), 2
           key = OpenSSL::PKey::RSA.new
-          key.e = exp
-          key.n = mod
+          key.e = e
+          key.n = n
           key
         when 'EC'
           raise NotImplementedError.new('Not Implemented Yet')
