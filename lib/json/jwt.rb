@@ -55,7 +55,7 @@ module JSON
             UrlSafeBase64.decode64 segment.to_s
           end
           header, claims = [header, claims].collect do |json|
-            JSON.parse(json).with_indifferent_access
+            MultiJson.load(json).with_indifferent_access
           end
           signature_base_string = jwt_string.split('.')[0, 2].join('.')
           jwt = new claims
@@ -74,7 +74,7 @@ module JSON
         else
           raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 or 3 dots.')
         end
-      rescue JSON::ParserError
+      rescue MultiJson::DecodeError
         raise InvalidFormat.new("Invalid JSON Format")
       end
     end

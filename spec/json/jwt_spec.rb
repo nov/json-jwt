@@ -50,7 +50,7 @@ describe JSON::JWT do
           UrlSafeBase64.decode64 segment.to_s
         end
         header, claims = [header_base64, claims_base64].collect do |json|
-          JSON.parse(json).with_indifferent_access
+          MultiJson.load(json).with_indifferent_access
         end
         jwt = JSON::JWT.new claims
         jwt.header = header
