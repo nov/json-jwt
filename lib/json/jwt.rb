@@ -4,7 +4,7 @@ require 'json'
 require 'active_support/core_ext'
 
 module JSON
-  class JWT < Hash
+  class JWT < ActiveSupport::HashWithIndifferentAccess
     attr_accessor :header, :signature
 
     class Exception < StandardError; end
@@ -55,7 +55,7 @@ module JSON
             UrlSafeBase64.decode64 segment.to_s
           end
           header, claims = [header, claims].collect do |json|
-            JSON.parse json, :symbolize_names => true, :symbolize_keys => true
+            JSON.parse(json).with_indifferent_access
           end
           signature_base_string = jwt_string.split('.')[0, 2].join('.')
           jwt = new claims

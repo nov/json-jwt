@@ -1,5 +1,5 @@
 module JSON
-  class JWK < Hash
+  class JWK < ActiveSupport::HashWithIndifferentAccess
     class UnknownAlgorithm < JWT::Exception; end
 
     def initialize(public_key, options = {})

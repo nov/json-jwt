@@ -12,8 +12,8 @@ describe JSON::JWT do
     {
       iss: 'joe',
       exp: 1300819380,
-      :'http://example.com/is_root' => true
-    }
+      'http://example.com/is_root' => true
+    }.with_indifferent_access
   end
   let(:no_signed) do
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
@@ -50,7 +50,7 @@ describe JSON::JWT do
           UrlSafeBase64.decode64 segment.to_s
         end
         header, claims = [header_base64, claims_base64].collect do |json|
-          JSON.parse json, symbolize_names: true, symbolize_keys: true
+          JSON.parse(json).with_indifferent_access
         end
         jwt = JSON::JWT.new claims
         jwt.header = header
