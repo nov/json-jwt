@@ -1,6 +1,6 @@
 require 'openssl'
 require 'url_safe_base64'
-require 'json'
+require 'multi_json'
 require 'active_support/core_ext'
 
 module JSON
