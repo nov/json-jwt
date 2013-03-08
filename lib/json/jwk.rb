@@ -40,13 +40,13 @@ module JSON
       hash = case public_key
       when OpenSSL::PKey::RSA
         {
-          :alg => :RSA,
+          :kty => :RSA,
           :e   => UrlSafeBase64.encode64(public_key.e.to_s(2)),
           :n   => UrlSafeBase64.encode64(public_key.n.to_s(2)),
         }
       when OpenSSL::PKey::EC
         {
-          :alg => :EC,
+          :kty => :EC,
           :crv => ecdsa_curve_name(public_key),
           :x   => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:x].to_s),
           :y   => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s),
@@ -59,7 +59,7 @@ module JSON
 
     class << self
       def decode(jwk)
-        case jwk[:alg].to_s
+        case jwk[:kty].to_s
         when 'RSA'
           e = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:e]), 2
           n = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:n]), 2

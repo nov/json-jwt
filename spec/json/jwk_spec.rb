@@ -3,8 +3,8 @@ require 'spec_helper'
 describe JSON::JWK do
   context 'when RSA public key given' do
     let(:jwk) { JSON::JWK.new public_key }
-    it { jwk.keys.should include :alg, :e, :n }
-    its(:alg) { jwk[:alg].should == :RSA }
+    it { jwk.keys.should include :kty, :e, :n }
+    its(:kty) { jwk[:kty].should == :RSA }
     its(:e) { jwk[:e].should == UrlSafeBase64.encode64(public_key.e.to_s(2)) }
     its(:n) { jwk[:n].should == UrlSafeBase64.encode64(public_key.n.to_s(2)) }
 
@@ -36,8 +36,8 @@ describe JSON::JWK do
     [256, 384, 512].each do |digest_length|
       describe "EC#{digest_length}" do
         let(:jwk) { JSON::JWK.new public_key(:ecdsa, digest_length: digest_length) }
-        it { jwk.keys.should include :alg, :crv, :x, :y }
-        its(:alg) { jwk[:alg].should == :EC }
+        it { jwk.keys.should include :kty, :crv, :x, :y }
+        its(:kty) { jwk[:kty].should == :EC }
         its(:x) { jwk[:x].should == expected_coodinates[digest_length][:x] }
         its(:y) { jwk[:y].should == expected_coodinates[digest_length][:y] }
       end
@@ -66,7 +66,7 @@ describe JSON::JWK do
     context 'when RSA' do
       subject do
         JSON::JWK.decode(
-          alg: :RSA,
+          kty: :RSA,
           n: n,
           e: e
         )
@@ -108,7 +108,7 @@ NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
       it do
         expect do
           JSON::JWK.decode(
-            alg: :EC,
+            kty: :EC,
             crv: 'crv',
             x: 'x',
             y: 'y'
@@ -121,7 +121,7 @@ NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
       it do
         expect do
           JSON::JWK.decode(
-            alg: :XXX
+            kty: :XXX
           )
         end.to raise_error JSON::JWK::UnknownAlgorithm
       end
