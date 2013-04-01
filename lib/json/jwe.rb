@@ -72,7 +72,7 @@ module JSON
         raw_key = cipher.random_key
         self.iv = cipher.random_iv
         self.key = public_key.public_encrypt raw_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-        cipher.auth_data = [header, key, iv].collect do |segment|
+        cipher.auth_data = [header.to_json, key, iv].collect do |segment|
           UrlSafeBase64.encode64 segment.to_s
         end.join('.')
         self.cipher_text = cipher.update(plain_text) + cipher.final
