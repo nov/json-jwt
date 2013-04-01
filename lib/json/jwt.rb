@@ -12,11 +12,28 @@ module JSON
     class VerificationFailed < Exception; end
     class UnexpectedAlgorithm < VerificationFailed; end
 
+    def header
+      @header ||= {}
+    end
+
+    class << self
+      def register_header_keys(*keys)
+        keys.each do |header_key|
+          define_method header_key do
+            self.header[header_key]
+          end
+          define_method "#{header_key}=" do |value|
+            self.header[header_key] = value
+          end
+        end
+      end
+    end
+    register_header_keys :typ, :alg
+    alias_method :algorithm, :alg
+
     def initialize(claims)
-      @header = {
-        :typ => :JWT,
-        :alg => :none
-      }
+      self.typ = :JWT
+      self.alg = :none
       [:exp, :nbf, :iat].each do |key|
         claims[key] = claims[key].to_i if claims[key]
       end
@@ -24,12 +41,20 @@ module JSON
     end
 
     def sign(private_key_or_secret, algorithm = :HS256)
-      header[:alg] = algorithm
-      JWS.new(self).sign!(private_key_or_secret)
+      jws = JWS.new(self)
+      jws.alg = algorithm
+      jws.sign! private_key_or_secret
+    end
+
+    def encrypt(public_key_or_secret, algorithm = :'RSA-OAEP', encryption_method = :A256GCM)
+      jwe = JWE.new(self)
+      jwe.alg = algorithm
+      jwe.enc = encryption_method
+      jwe.encrypt! public_key_or_secret
     end
 
     def verify(signature_base_string, public_key_or_secret = nil)
-      if header[:alg].to_s == 'none'
+      if alg.to_s == 'none'
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
       else

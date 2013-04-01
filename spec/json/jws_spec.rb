@@ -4,7 +4,7 @@ describe JSON::JWS do
   let(:alg) { :none }
   let(:jwt) do
     _jwt_ = JSON::JWT.new claims
-    _jwt_.header[:alg] = alg
+    _jwt_.alg = alg
     _jwt_
   end
   let(:jws) { JSON::JWS.new jwt }

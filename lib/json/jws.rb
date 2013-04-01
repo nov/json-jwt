@@ -21,10 +21,6 @@ module JSON
 
     private
 
-    def algorithm
-      header[:alg]
-    end
-
     def digest
       OpenSSL::Digest::Digest.new "SHA#{algorithm.to_s[2, 3]}"
     end

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe JSON::JWT do
   let(:jwt) { JSON::JWT.new claims }
   let(:jws) do
-    jwt.header[:alg] = :HS256
+    jwt.alg = :HS256
     jws = JSON::JWS.new jwt
     jws.signature = 'signature'
     jws
