@@ -79,9 +79,9 @@ module JSON
         else
           raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
         end
-        @cipher = OpenSSL::Cipher.new cipher_name.to_s
+        @cipher  = OpenSSL::Cipher.new cipher_name.to_s
         self.key = @cipher.random_key
-        self.iv = @cipher.random_iv
+        self.iv  = @cipher.random_iv
       end
       @cipher
     end
@@ -97,6 +97,7 @@ module JSON
       when :A256KW.to_s
         raise NotImplementedError.new('A256KW not implemented yet')
       when :dir.to_s
+        self.key = public_key_or_secret
         ''
       when :'ECDH-ES'.to_s
         raise NotImplementedError.new('ECDH-ES not implemented yet')

@@ -4,58 +4,88 @@ describe JSON::JWE do
   let(:plain_text) { 'Hello World' }
   let(:jwe) { JSON::JWE.new plain_text }
 
-  context 'when alg=RSA-OAEP' do
-    before do
-      jwe.alg = :'RSA1_5'
-    end
-
-    context 'when enc=A128GCM' do
+  describe 'encrypt!' do
+    context 'when alg=RSA-OAEP' do
       before do
-        jwe.enc = :A128GCM
+        jwe.alg = :'RSA1_5'
       end
 
-      it do
-        jwe.encrypt! public_key
-        p jwe.to_s
+      context 'when enc=A128GCM' do
+        before do
+          jwe.enc = :A128GCM
+        end
+
+        it do
+          jwe.encrypt! public_key
+          p jwe.to_s
+        end
+      end
+
+      context 'when enc=A256GCM' do
+        before do
+          jwe.enc = :A256GCM
+        end
+
+        it do
+          jwe.encrypt! public_key
+          p jwe.to_s
+        end
       end
     end
 
-    context 'when enc=A256GCM' do
+    context 'when alg=RSA-OAEP' do
       before do
-        jwe.enc = :A256GCM
+        jwe.alg = :'RSA-OAEP'
       end
 
-      it do
-        jwe.encrypt! public_key
-        p jwe.to_s
+      context 'when enc=A128GCM' do
+        before do
+          jwe.enc = :A128GCM
+        end
+
+        it do
+          jwe.encrypt! public_key
+          p jwe.to_s
+        end
+      end
+
+      context 'when enc=A256GCM' do
+        before do
+          jwe.enc = :A256GCM
+        end
+
+        it do
+          jwe.encrypt! public_key
+          p jwe.to_s
+        end
       end
     end
-  end
 
-  context 'when alg=RSA-OAEP' do
-    before do
-      jwe.alg = :'RSA-OAEP'
-    end
-
-    context 'when enc=A128GCM' do
+    context 'when alg=dir' do
       before do
-        jwe.enc = :A128GCM
+        jwe.alg = :dir
       end
 
-      it do
-        jwe.encrypt! public_key
-        p jwe.to_s
-      end
-    end
+      context 'when enc=A128GCM' do
+        before do
+          jwe.enc = :A128GCM
+        end
 
-    context 'when enc=A256GCM' do
-      before do
-        jwe.enc = :A256GCM
+        it do
+          jwe.encrypt! shared_secret
+          p jwe.to_s
+        end
       end
 
-      it do
-        jwe.encrypt! public_key
-        p jwe.to_s
+      context 'when enc=A256GCM' do
+        before do
+          jwe.enc = :A256GCM
+        end
+
+        it do
+          jwe.encrypt! shared_secret
+          p jwe.to_s
+        end
       end
     end
   end
