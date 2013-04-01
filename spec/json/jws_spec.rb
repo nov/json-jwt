@@ -70,7 +70,7 @@ describe JSON::JWS do
       it do
         expect do
           jws.sign! 'key'
-        end.to raise_error JSON::JWS::InvalidFormat
+        end.to raise_error JSON::JWS::UnexpectedAlgorithm
       end
     end
   end
@@ -132,7 +132,7 @@ describe JSON::JWS do
       it do
         expect do
           jws.verify jws.send(:signature_base_string), 'key'
-        end.to raise_error JSON::JWS::InvalidFormat
+        end.to raise_error JSON::JWS::UnexpectedAlgorithm
       end
     end
   end

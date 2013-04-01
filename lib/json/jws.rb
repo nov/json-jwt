@@ -2,6 +2,7 @@ module JSON
   class JWS < JWT
     class InvalidFormat < JWT::InvalidFormat; end
     class VerificationFailed < JWT::VerificationFailed; end
+    class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end
 
     def initialize(jwt)
       replace jwt
@@ -62,7 +63,7 @@ module JSON
         verify_ecdsa_group! private_key
         private_key.dsa_sign_asn1 digest.digest(signature_base_string)
       else
-        raise InvalidFormat.new('Unknown Signature Algorithm')
+        raise UnexpectedAlgorithm.new('Unknown Signature Algorithm')
       end
     end
 
@@ -79,20 +80,20 @@ module JSON
         verify_ecdsa_group! public_key
         public_key.dsa_verify_asn1 digest.digest(signature_base_string), signature
       else
-        raise InvalidFormat.new('Unknown Signature Algorithm')
+        raise UnexpectedAlgorithm.new('Unknown Signature Algorithm')
       end
     end
 
     def verify_ecdsa_group!(key)
       group_name = case digest.digest_length * 8
       when 256
-        'secp256k1'
+        :secp256k1
       when 384
-        'secp384r1'
+        :secp384r1
       when 512
-        'secp521r1'
+        :secp521r1
       end
-      key.group = OpenSSL::PKey::EC::Group.new group_name
+      key.group = OpenSSL::PKey::EC::Group.new group_name.to_s
       key.check_key
     end
 
