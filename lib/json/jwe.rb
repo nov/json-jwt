@@ -8,7 +8,7 @@ module JSON
 
     attr_accessor :plain_text, :key, :iv, :cipher_text, :integrity_value
 
-    register_header_keys :enc
+    register_header_keys :enc, :epk, :zip, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :apu, :apv, :epu, :epv
     alias_method :encryption_method, :enc
 
     def initialize(jwt_or_plain_text)

@@ -4,6 +4,8 @@ module JSON
     class VerificationFailed < JWT::VerificationFailed; end
     class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end
 
+    register_header_keys :jku, :kid, :x5u, :x5t
+
     def initialize(jwt)
       replace jwt
       raise InvalidFormat.new('Signature Algorithm Required') unless algorithm

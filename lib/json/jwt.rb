@@ -28,7 +28,7 @@ module JSON
         end
       end
     end
-    register_header_keys :typ, :alg
+    register_header_keys :typ, :cty, :alg
     alias_method :algorithm, :alg
 
     def initialize(claims)
