@@ -67,6 +67,9 @@ module JSON
 
     def cipher
       unless @cipher
+        if gcm? && RUBY_VERSION < '2.0.0' && OpenSSL::OPENSSL_VERSION < 'OpenSSL 1.0.1c'
+          raise UnexpectedAlgorithm.new('AEC GCM requires Ruby 2.0+ and OpenSSL 1.0.1c+')
+        end
         cipher_name = case encryption_method.to_s
         when :A128GCM.to_s
           :'aes-128-gcm'
@@ -80,7 +83,7 @@ module JSON
           raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
         end
         @cipher  = OpenSSL::Cipher.new cipher_name.to_s
-        self.key = @cipher.random_key
+        self.key = @cipher.random_key unless :dir.to_s == algorithm.to_s
         self.iv  = @cipher.random_iv
       end
       @cipher
@@ -97,7 +100,7 @@ module JSON
       when :A256KW.to_s
         raise NotImplementedError.new('A256KW not implemented yet')
       when :dir.to_s
-        self.key = public_key_or_secret
+        self.key = cipher.key = public_key_or_secret
         ''
       when :'ECDH-ES'.to_s
         raise NotImplementedError.new('ECDH-ES not implemented yet')

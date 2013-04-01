@@ -4,88 +4,74 @@ describe JSON::JWE do
   let(:plain_text) { 'Hello World' }
   let(:jwe) { JSON::JWE.new plain_text }
 
-  describe 'encrypt!' do
-    context 'when alg=RSA-OAEP' do
-      before do
-        jwe.alg = :'RSA1_5'
-      end
-
+  shared_examples_for :gsm_encryption do
+    if RUBY_VERSION >= '2.0.0'
       context 'when enc=A128GCM' do
-        before do
-          jwe.enc = :A128GCM
-        end
+        before { jwe.enc = :A128GCM }
 
         it do
-          jwe.encrypt! public_key
+          jwe.encrypt! key
           p jwe.to_s
         end
       end
 
       context 'when enc=A256GCM' do
-        before do
-          jwe.enc = :A256GCM
-        end
+        before { jwe.enc = :A256GCM }
 
         it do
-          jwe.encrypt! public_key
+          jwe.encrypt! key
           p jwe.to_s
         end
+      end
+    else
+      it_behaves_like :gsm_encryption_unsupported
+    end
+  end
+  shared_examples_for :gsm_encryption_unsupported do
+    context 'when enc=A128GCM' do
+      before { jwe.enc = :A128GCM }
+
+      it do
+        expect do
+          jwe.encrypt! key
+        end.to raise_error JSON::JWE::UnexpectedAlgorithm
       end
     end
 
+    context 'when enc=A256GCM' do
+      before { jwe.enc = :A256GCM }
+
+      it do
+        expect do
+          jwe.encrypt! key
+        end.to raise_error JSON::JWE::UnexpectedAlgorithm
+      end
+    end
+  end
+
+  describe 'encrypt!' do
     context 'when alg=RSA-OAEP' do
-      before do
-        jwe.alg = :'RSA-OAEP'
-      end
+      let(:key) { public_key }
+      before { jwe.alg = :'RSA1_5' }
+      it_behaves_like :gsm_encryption
+    end
 
-      context 'when enc=A128GCM' do
-        before do
-          jwe.enc = :A128GCM
-        end
-
-        it do
-          jwe.encrypt! public_key
-          p jwe.to_s
-        end
-      end
-
-      context 'when enc=A256GCM' do
-        before do
-          jwe.enc = :A256GCM
-        end
-
-        it do
-          jwe.encrypt! public_key
-          p jwe.to_s
-        end
-      end
+    context 'when alg=RSA-OAEP' do
+      let(:key) { public_key }
+      before { jwe.alg = :'RSA-OAEP' }
+      it_behaves_like :gsm_encryption
     end
 
     context 'when alg=dir' do
-      before do
-        jwe.alg = :dir
-      end
+      let(:key) { SecureRandom.hex 16 }
+      before { jwe.alg = :dir }
+      it_behaves_like :gsm_encryption
 
-      context 'when enc=A128GCM' do
-        before do
-          jwe.enc = :A128GCM
-        end
-
-        it do
-          jwe.encrypt! shared_secret
-          p jwe.to_s
-        end
-      end
-
-      context 'when enc=A256GCM' do
-        before do
-          jwe.enc = :A256GCM
-        end
-
-        it do
-          jwe.encrypt! shared_secret
-          p jwe.to_s
-        end
+      it 'should use given key directly' do
+        jwe.enc = :A256GCM
+        jwe.key.should be_nil
+        jwe.encrypt! key
+        jwe.key.should == key
       end
     end
   end
