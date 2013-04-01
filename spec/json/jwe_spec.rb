@@ -9,9 +9,10 @@ describe JSON::JWE do
       jwe.alg, jwe.enc = :'RSA-OAEP', :A256GCM
     end
 
-    it do
-      jwe.encrypt! public_key
-      p jwe.to_s
-    end
+    # it do
+    #   expect do
+    #     jwe.encrypt! public_key
+    #   end.to raise_error NotImplementedError
+    # end
   end
 end
