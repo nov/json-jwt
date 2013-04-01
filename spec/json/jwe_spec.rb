@@ -4,15 +4,59 @@ describe JSON::JWE do
   let(:plain_text) { 'Hello World' }
   let(:jwe) { JSON::JWE.new plain_text }
 
-  context 'when alg=RSA-OAEP & enc=A256GCM' do
+  context 'when alg=RSA-OAEP' do
     before do
-      jwe.alg, jwe.enc = :'RSA-OAEP', :A256GCM
+      jwe.alg = :'RSA1_5'
     end
 
-    # it do
-    #   expect do
-    #     jwe.encrypt! public_key
-    #   end.to raise_error NotImplementedError
-    # end
+    context 'when enc=A128GCM' do
+      before do
+        jwe.enc = :A128GCM
+      end
+
+      it do
+        jwe.encrypt! public_key
+        p jwe.to_s
+      end
+    end
+
+    context 'when enc=A256GCM' do
+      before do
+        jwe.enc = :A256GCM
+      end
+
+      it do
+        jwe.encrypt! public_key
+        p jwe.to_s
+      end
+    end
+  end
+
+  context 'when alg=RSA-OAEP' do
+    before do
+      jwe.alg = :'RSA-OAEP'
+    end
+
+    context 'when enc=A128GCM' do
+      before do
+        jwe.enc = :A128GCM
+      end
+
+      it do
+        jwe.encrypt! public_key
+        p jwe.to_s
+      end
+    end
+
+    context 'when enc=A256GCM' do
+      before do
+        jwe.enc = :A256GCM
+      end
+
+      it do
+        jwe.encrypt! public_key
+        p jwe.to_s
+      end
+    end
   end
 end

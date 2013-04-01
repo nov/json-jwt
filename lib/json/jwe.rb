@@ -17,6 +17,7 @@ module JSON
 
     def encrypt!(public_key_or_secret)
       cipher.encrypt
+      self.encrypted_key = encrypt_key public_key_or_secret
       if gcm?
         cipher.auth_data = [header.to_json, encrypted_key, iv].collect do |segment|
           UrlSafeBase64.encode64 segment.to_s
@@ -85,23 +86,27 @@ module JSON
       @cipher
     end
 
-    def encrypted_key
-      unless @encrypted_key
-        @encrypted_key = case algorithm.to_s
-        when :RSA1_5.to_s
-        when :'RSA-OAEP'.to_s
-        when :A128KW .to_s
-        when :A256KW.to_s
-        when :dir.to_s
-          ''
-        when :'ECDH-ES'.to_s
-        when :'ECDH-ES+A128KW'.to_s
-        when :'ECDH-ES+A256KW'.to_s
-        else
-          raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
-        end
+    def encrypt_key(public_key_or_secret)
+      case algorithm.to_s
+      when :RSA1_5.to_s
+        public_key_or_secret.public_encrypt key
+      when :'RSA-OAEP'.to_s
+        public_key_or_secret.public_encrypt key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
+      when :A128KW .to_s
+        raise NotImplementedError.new('A128KW not implemented yet')
+      when :A256KW.to_s
+        raise NotImplementedError.new('A256KW not implemented yet')
+      when :dir.to_s
+        ''
+      when :'ECDH-ES'.to_s
+        raise NotImplementedError.new('ECDH-ES not implemented yet')
+      when :'ECDH-ES+A128KW'.to_s
+        raise NotImplementedError.new('ECDH-ES+A128KW not implemented yet')
+      when :'ECDH-ES+A256KW'.to_s
+        raise NotImplementedError.new('ECDH-ES+A256KW not implemented yet')
+      else
+        raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
       end
-      @encrypted_key
     end
 
     def integrity_value
@@ -113,48 +118,6 @@ module JSON
         end
       end
       @integrity_value
-    end
-
-    def algorithm_pair # remove later
-      [algorithm, encryption_method]
-    end
-
-    def rsa_oaep_a256gcm? # remove later
-      [:'RSA-OAEP', :A256GCM].collect(&:to_s) == algorithm_pair.collect(&:to_s)
-    end
-
-    def rsa1_5_a128cbc_hs256? # remove later
-      [:RSA1_5, :'A128CBC+HS256'].collect(&:to_s) == algorithm_pair.collect(&:to_s)
-    end
-
-    def a128kw_a128gcm? # remove later
-      [:A128KW, :A128GCM].collect(&:to_s) == algorithm_pair.collect(&:to_s)
-    end
-
-    def rsa_oaep_a256gcm(public_key) # remove later
-      if RUBY_VERSION >= '2.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1c'
-        cipher = OpenSSL::Cipher.new('aes-256-gcm')
-        cipher.encrypt
-        raw_key = cipher.random_key
-        self.iv = cipher.random_iv
-        self.key = public_key.public_encrypt raw_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-        cipher.auth_data = [header.to_json, key, iv].collect do |segment|
-          UrlSafeBase64.encode64 segment.to_s
-        end.join('.')
-        self.cipher_text = cipher.update(plain_text) + cipher.final
-        self.integrity_value = cipher.auth_tag
-        self
-      else
-        raise UnexpectedAlgorithm.new('AES256GCM requires Ruby 2.0+ and OpenSSL 1.0.1c+')
-      end
-    end
-
-    def rsa1_5_a128cbc_hs256(public_key) # remove later
-      raise NotImplementedError.new('RSA1_5 A128CBC+HS256 not implemented yet')
-    end
-
-    def a128kw_a128gcm(secret) # remove later
-      raise NotImplementedError.new('A128KW A128GCM not implemented yet')
     end
   end
 end
