@@ -2,7 +2,7 @@ require 'spec_helper'
 
 def gcm_supported?
   p OpenSSL::OPENSSL_VERSION
-  RUBY_VERSION >= '2.0.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1c'
+  RUBY_VERSION >= '2.0.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1'
 end
 
 describe JSON::JWE do

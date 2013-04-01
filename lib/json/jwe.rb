@@ -67,8 +67,8 @@ module JSON
 
     def cipher
       unless @cipher
-        if gcm? && RUBY_VERSION < '2.0.0' && OpenSSL::OPENSSL_VERSION < 'OpenSSL 1.0.1c'
-          raise UnexpectedAlgorithm.new('AEC GCM requires Ruby 2.0+ and OpenSSL 1.0.1c+')
+        if gcm? && RUBY_VERSION < '2.0.0' && OpenSSL::OPENSSL_VERSION < 'OpenSSL 1.0.1'
+          raise UnexpectedAlgorithm.new('AEC GCM requires Ruby 2.0+ and OpenSSL 1.0.1+')
         end
         cipher_name = case encryption_method.to_s
         when :A128GCM.to_s
