@@ -1,11 +1,15 @@
 require 'spec_helper'
 
+def gcm_supported?
+  RUBY_VERSION >= '2.0.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1c'
+end
+
 describe JSON::JWE do
   let(:plain_text) { 'Hello World' }
   let(:jwe) { JSON::JWE.new plain_text }
 
   shared_examples_for :gsm_encryption do
-    if RUBY_VERSION >= '2.0.0'
+    if gcm_supported?
       context 'when enc=A128GCM' do
         before { jwe.enc = :A128GCM }
 
@@ -67,12 +71,14 @@ describe JSON::JWE do
       before { jwe.alg = :dir }
       it_behaves_like :gsm_encryption
 
-      it 'should use given key directly' do
-        jwe.enc = :A256GCM
-        jwe.key.should be_nil
-        jwe.encrypt! key
-        jwe.key.should == key
-        jwe.encrypted_key.should == ''
+      if gcm_supported?
+        it 'should use given key directly' do
+          jwe.enc = :A256GCM
+          jwe.key.should be_nil
+          jwe.encrypt! key
+          jwe.key.should == key
+          jwe.encrypted_key.should == ''
+        end
       end
     end
   end
