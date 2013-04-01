@@ -72,6 +72,7 @@ describe JSON::JWE do
         jwe.key.should be_nil
         jwe.encrypt! key
         jwe.key.should == key
+        jwe.encrypted_key.should == ''
       end
     end
   end
