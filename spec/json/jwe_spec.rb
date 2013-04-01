@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 def gcm_supported?
+  p OpenSSL::OPENSSL_VERSION
   RUBY_VERSION >= '2.0.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1c'
 end
 
@@ -8,30 +9,26 @@ describe JSON::JWE do
   let(:plain_text) { 'Hello World' }
   let(:jwe) { JSON::JWE.new plain_text }
 
-  shared_examples_for :gsm_encryption do
-    if gcm_supported?
-      context 'when enc=A128GCM' do
-        before { jwe.enc = :A128GCM }
+  shared_examples_for :gcm_encryption do
+    context 'when enc=A128GCM' do
+      before { jwe.enc = :A128GCM }
 
-        it do
-          jwe.encrypt! key
-          p jwe.to_s
-        end
+      it do
+        jwe.encrypt! key
+        p jwe.to_s
       end
+    end
 
-      context 'when enc=A256GCM' do
-        before { jwe.enc = :A256GCM }
+    context 'when enc=A256GCM' do
+      before { jwe.enc = :A256GCM }
 
-        it do
-          jwe.encrypt! key
-          p jwe.to_s
-        end
+      it do
+        jwe.encrypt! key
+        p jwe.to_s
       end
-    else
-      it_behaves_like :gsm_encryption_unsupported
     end
   end
-  shared_examples_for :gsm_encryption_unsupported do
+  shared_examples_for :gcm_encryption_unsupported do
     context 'when enc=A128GCM' do
       before { jwe.enc = :A128GCM }
 
@@ -57,21 +54,32 @@ describe JSON::JWE do
     context 'when alg=RSA-OAEP' do
       let(:key) { public_key }
       before { jwe.alg = :'RSA1_5' }
-      it_behaves_like :gsm_encryption
+
+      if gcm_supported?
+        it_behaves_like :gcm_encryption
+      else
+        it_behaves_like :gcm_encryption_unsupported
+      end
     end
 
     context 'when alg=RSA-OAEP' do
       let(:key) { public_key }
       before { jwe.alg = :'RSA-OAEP' }
-      it_behaves_like :gsm_encryption
+
+      if gcm_supported?
+        it_behaves_like :gcm_encryption
+      else
+        it_behaves_like :gcm_encryption_unsupported
+      end
     end
 
     context 'when alg=dir' do
       let(:key) { SecureRandom.hex 16 }
       before { jwe.alg = :dir }
-      it_behaves_like :gsm_encryption
 
       if gcm_supported?
+        it_behaves_like :gcm_encryption
+
         it 'should use given key directly' do
           jwe.enc = :A256GCM
           jwe.key.should be_nil
@@ -79,6 +87,8 @@ describe JSON::JWE do
           jwe.key.should == key
           jwe.encrypted_key.should == ''
         end
+      else
+        it_behaves_like :gcm_encryption_unsupported
       end
     end
   end
