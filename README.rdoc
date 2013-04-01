@@ -2,6 +2,8 @@
 
 JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON Web Key) in Ruby
 
+{<img src="https://secure.travis-ci.org/nov/json-jwt.png" />}[http://travis-ci.org/nov/json-jwt]
+
 == Installation
 
   gem install json-jwt
@@ -41,7 +43,7 @@ For details about <code>key</code> and <code>algorithm</code>, see {JWS Spec}[ht
   JSON::JWT.decode(jwt_string, key)
 
 == Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
