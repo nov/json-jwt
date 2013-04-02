@@ -55,7 +55,7 @@ module JSON
 
     def cipher
       @cipher ||= if gcm? && !gcm_supported?
-        UnexpectedAlgorithm.new('AEC GCM requires Ruby 2.0+ and OpenSSL 1.0.1c+') if gcm? && !gcm_supported?
+        raise UnexpectedAlgorithm.new('AEC GCM requires Ruby 2.0+ and OpenSSL 1.0.1c+') if gcm? && !gcm_supported?
       else
         OpenSSL::Cipher.new cipher_name
       end
