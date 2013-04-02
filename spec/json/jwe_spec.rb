@@ -49,6 +49,26 @@ describe JSON::JWE do
     end
   end
 
+  shared_examples_for :cbc_encryption do
+    context 'when enc=A128CBC+HS256' do
+      before { jwe.enc = :'A128CBC+HS256' }
+
+      it do
+        jwe.encrypt! key
+        p jwe.to_s
+      end
+    end
+
+    context 'when enc=A256CBC+HS512' do
+      before { jwe.enc = :'A256CBC+HS512' }
+
+      it do
+        jwe.encrypt! key
+        p jwe.to_s
+      end
+    end
+  end
+
   describe 'encrypt!' do
     context 'when alg=RSA-OAEP' do
       let(:key) { public_key }
@@ -59,6 +79,7 @@ describe JSON::JWE do
       else
         it_behaves_like :gcm_encryption_unsupported
       end
+      it_behaves_like :cbc_encryption
     end
 
     context 'when alg=RSA-OAEP' do
@@ -70,6 +91,7 @@ describe JSON::JWE do
       else
         it_behaves_like :gcm_encryption_unsupported
       end
+      it_behaves_like :cbc_encryption
     end
 
     context 'when alg=dir' do
@@ -81,14 +103,15 @@ describe JSON::JWE do
 
         it 'should use given key directly' do
           jwe.enc = :A256GCM
-          jwe.key.should be_nil
+          jwe.master_key.should be_nil
           jwe.encrypt! key
-          jwe.key.should == key
-          jwe.encrypted_key.should == ''
+          jwe.master_key.should == key
+          jwe.send(:encrypted_master_key).should == ''
         end
       else
         it_behaves_like :gcm_encryption_unsupported
       end
+      it_behaves_like :cbc_encryption
     end
   end
 end
