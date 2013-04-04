@@ -115,6 +115,42 @@ module JSON
       OpenSSL::Digest::Digest.new "SHA#{sha_size}"
     end
 
+    def derive_cbc_encryption_and_integirity_keys!
+      encryption_key_size = sha_size / 2
+      integrity_key_size = sha_size
+      encryption_segments = [
+        1,
+        master_key,
+        encryption_key_size,
+        encryption_method,
+        epu || 0,
+        epv || 0,
+        'Encryption'
+      ]
+      integrity_segments = [
+        1,
+        master_key,
+        integrity_key_size,
+        encryption_method,
+        epu || 0,
+        epv || 0,
+        'Integrity'
+      ]
+      encryption_hash_input, integrity_hash_input = [encryption_segments, integrity_segments].collect do |segments|
+        segments.collect do |segment|
+          case segment
+          when Integer
+            BinData::Int32be.new(segment).to_binary_s
+          else
+            segment.to_s
+          end
+        end.join
+      end
+      self.encryption_key = sha_digest.digest(encryption_hash_input)[0, encryption_key_size / 8]
+      self.integrity_key = sha_digest.digest integrity_hash_input
+      self
+    end
+
     # encyption
 
     def encrypted_master_key
@@ -169,44 +205,12 @@ module JSON
     end
 
     def generate_cbc_keys!
-      encryption_key_size = sha_size / 2
-      integrity_key_size = master_key_size = sha_size
       self.master_key ||= if dir?
         public_key_or_secret
       else
-        SecureRandom.random_bytes master_key_size / 8
+        SecureRandom.random_bytes sha_size / 8
       end
-      encryption_segments = [
-        1,
-        master_key,
-        encryption_key_size,
-        encryption_method,
-        epu || 0,
-        epv || 0,
-        'Encryption'
-      ]
-      integrity_segments = [
-        1,
-        master_key,
-        integrity_key_size,
-        encryption_method,
-        epu || 0,
-        epv || 0,
-        'Integrity'
-      ]
-      encryption_hash_input, integrity_hash_input = [encryption_segments, integrity_segments].collect do |segments|
-        segments.collect do |segment|
-          case segment
-          when Integer
-            BinData::Int32be.new(segment).to_binary_s
-          else
-            segment.to_s
-          end
-        end.join
-      end
-      self.encryption_key = sha_digest.digest(encryption_hash_input)[0, encryption_key_size / 8]
-      self.integrity_key = sha_digest.digest integrity_hash_input
-      self
+      derive_cbc_encryption_and_integirity_keys!
     end
 
     def integrity_value
@@ -262,21 +266,21 @@ module JSON
       self.master_key = decrypt_master_key
       case
       when gcm?
-        cipher.key = master_key
-        cipher.iv = iv # NOTE: 'iv' has to be set after 'key'
+        self.encryption_key = master_key
+        self.integrity_key = :wont_be_used
+      when cbc?
+        derive_cbc_encryption_and_integirity_keys!
+      end
+      cipher.key = encryption_key
+      cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
+      if gcm?
         cipher.auth_tag = integrity_value
         cipher.auth_data = input.split('.')[0, 3].join('.')
-      when cbc?
-        restore_cbc_keys!
       end
     end
 
-    def restore_cbc_keys!
-      raise UnexpectedAlgorithm.new('TODO')
-    end
-
     def verify_cbc_integirity_value!
-      raise UnexpectedAlgorithm.new('TODO')
+      # raise UnexpectedAlgorithm.new('TODO')
     end
   end
 end

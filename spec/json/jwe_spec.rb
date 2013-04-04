@@ -160,7 +160,7 @@ describe JSON::JWE do
     let(:input) do
       _jwe_ = JSON::JWE.new plain_text
       _jwe_.alg, _jwe_.enc = alg, enc
-      _jwe_.encrypt! public_key
+      _jwe_.encrypt! key
       _jwe_.to_s
     end
     let(:jwe) do
@@ -169,9 +169,9 @@ describe JSON::JWE do
       _jwe_
     end
 
-    shared_examples_for :private_key_decryptable do
+    shared_examples_for :decryptable do
       it do
-        jwe.decrypt! private_key
+        jwe.decrypt! key
         jwe.to_s.should == plain_text
       end
     end
@@ -179,18 +179,19 @@ describe JSON::JWE do
     shared_examples_for :gcm_decryption_unsupported do
       it do
         expect do
-          jwe.decrypt! private_key
+          jwe.decrypt! key
         end.to raise_error JSON::JWE::UnexpectedAlgorithm
       end
     end
 
     context 'when alg=RSA1_5' do
       let(:alg) { :RSA1_5 }
+      let(:key) { private_key }
 
       context 'when enc=A128GCM' do
         let(:enc) { :A128GCM }
         if gcm_supported?
-          it_behaves_like :private_key_decryptable
+          it_behaves_like :decryptable
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -199,7 +200,7 @@ describe JSON::JWE do
       context 'when enc=A256GCM' do
         let(:enc) { :A256GCM }
         if gcm_supported?
-          it_behaves_like :private_key_decryptable
+          it_behaves_like :decryptable
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -207,22 +208,23 @@ describe JSON::JWE do
 
       context 'when enc=A128CBC+HS256' do
         let(:enc) { :'A128CBC+HS256' }
-        it :TODO
+        it_behaves_like :decryptable
       end
 
       context 'when enc=A256CBC+HS512' do
         let(:enc) { :'A256CBC+HS512' }
-        it :TODO
+        it_behaves_like :decryptable
       end
     end
 
     context 'when alg=RSA-OAEP' do
       let(:alg) { :'RSA-OAEP' }
+      let(:key) { private_key }
 
       context 'when enc=A128GCM' do
         let(:enc) { :A128GCM }
         if gcm_supported?
-          it_behaves_like :private_key_decryptable
+          it_behaves_like :decryptable
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -231,7 +233,7 @@ describe JSON::JWE do
       context 'when enc=A256GCM' do
         let(:enc) { :A256GCM }
         if gcm_supported?
-          it_behaves_like :private_key_decryptable
+          it_behaves_like :decryptable
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -239,13 +241,19 @@ describe JSON::JWE do
 
       context 'when enc=A128CBC+HS256' do
         let(:enc) { :'A128CBC+HS256' }
-        it :TODO
+        it_behaves_like :decryptable
       end
 
       context 'when enc=A256CBC+HS512' do
         let(:enc) { :'A256CBC+HS512' }
-        it :TODO
+        it_behaves_like :decryptable
       end
+    end
+
+    context 'when alg=dir' do
+      let(:alg) { :dir }
+      let(:key) { 'todo' }
+      it :TODO
     end
   end
 end
