@@ -26,15 +26,19 @@ JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON 
   }
 
   # No signature, no encryption
-  JSON::JWT.new(claim).to_s
+  jwt = JSON::JWT.new(claim).to_s
 
   # With signiture, no encryption
-  JSON::JWT.new(claim).sign(key, algorithm).to_s
+  jws = JSON::JWT.new(claim).sign(key, algorithm) # algorithm is optional. default HS256
+  jws.to_s # => header.payload.signature
 
   # With signature & encryption
-  JSON::JWT.new(claim).sign(key, algorithm).encrypt(key, algorithm).to_s
+  jwe = jws.encrypt(key, algorithm, encryption_method) # algorithm & encryption_method are optional. default RSA1_5 & A128CBC+HS256
+  jws.to_s # => header.master_key.iv.cipher_text.integrity_value
 
-For details about <code>key</code> and <code>algorithm</code>, see {JWS Spec}[https://github.com/nov/json-jwt/blob/master/spec/json/jws_spec.rb] and {Sign Key Fixture Generator}[https://github.com/nov/json-jwt/blob/master/spec/helpers/sign_key_fixture_helper.rb].
+For details about <code>key</code> and <code>algorithm</code>, see
+{JWS Spec}[https://github.com/nov/json-jwt/blob/master/spec/json/jws_spec.rb] and
+{Sign Key Fixture Generator}[https://github.com/nov/json-jwt/blob/master/spec/helpers/sign_key_fixture_helper.rb].
 
 === Decoding
 

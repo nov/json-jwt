@@ -46,13 +46,6 @@ module JSON
       jws.sign! private_key_or_secret
     end
 
-    def encrypt(public_key_or_secret, algorithm = :'RSA-OAEP', encryption_method = :A256GCM)
-      jwe = JWE.new(self)
-      jwe.alg = algorithm
-      jwe.enc = encryption_method
-      jwe.encrypt! public_key_or_secret
-    end
-
     def verify(signature_base_string, public_key_or_secret = nil)
       if alg.to_s == 'none'
         raise UnexpectedAlgorithm if public_key_or_secret
@@ -60,6 +53,13 @@ module JSON
       else
         JWS.new(self).verify(signature_base_string, public_key_or_secret)
       end
+    end
+
+    def encrypt(public_key_or_secret, algorithm = :RSA1_5, encryption_method = :'A128CBC+HS256')
+      jwe = JWE.new(self)
+      jwe.alg = algorithm
+      jwe.enc = encryption_method
+      jwe.encrypt! public_key_or_secret
     end
 
     def to_s
@@ -92,10 +92,12 @@ module JSON
           #  So we need to use raw base64 strings for signature verification.
           jwt.verify signature_base_string, key_or_secret unless key_or_secret == :skip_verification
           jwt
-        when 3 # JWE
-          # TODO: Concept code first.
-          #  jwt = JWE.decrypt ...
-          #  jwt.verify ...
+        when 4 # JWE
+          jwe = JWE.new jwt_string
+          jwe.header = MultiJson.load(
+            jwt_string.split('.').first
+          ).with_indifferent_access
+          jwe.decrypt! key_or_secret
         else
           raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 or 3 dots.')
         end

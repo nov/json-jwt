@@ -96,36 +96,20 @@ describe JSON::JWT do
   describe '#encrypt' do
     let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
 
-    [:RSA1_5, :'RSA-OAEP'].each do |algorithm|
-      context algorithm do
-        [:A128GCM, :A256GCM, :'A128CBC+HS256', :'A256CBC+HS512'].each do |encryption_method|
-          context encryption_method do
-            it 'should encryptable without signing' do
-              jwt.encrypt(public_key, algorithm, encryption_method).should be_a JSON::JWE
-            end
-
-            it 'should encryptable after signed' do
-              jwt.sign(shared_key).encrypt(public_key, algorithm, encryption_method).should be_a JSON::JWE
-            end
-          end
-        end
-      end
+    it 'should encryptable without signing' do
+      jwt.encrypt(public_key).should be_a JSON::JWE
     end
 
-    [:dir].each do |algorithm|
-      context algorithm do
-        [:A128GCM, :A256GCM, :'A128CBC+HS256', :'A256CBC+HS512'].each do |encryption_method|
-          context encryption_method do
-            it 'should encryptable' do
-              jwt.encrypt(shared_key, algorithm, encryption_method).should be_a JSON::JWE
-            end
+    it 'should encryptable after signed' do
+      jwt.sign(shared_key).encrypt(public_key).should be_a JSON::JWE
+    end
 
-            it 'should encryptable after signed' do
-              jwt.sign(shared_key).encrypt(shared_key, algorithm, encryption_method).should be_a JSON::JWE
-            end
-          end
-        end
-      end
+    it 'should accept optional algorithm' do
+      jwt.encrypt(shared_key, :dir).should be_a JSON::JWE
+    end
+
+    it 'should accept optional algorithm and encryption method' do
+      jwt.encrypt(shared_key, :dir, :'A256CBC+HS512').should be_a JSON::JWE
     end
   end
 

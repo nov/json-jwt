@@ -24,6 +24,10 @@ module JSON
       self
     end
 
+    def decrypt!
+      raise NotImplementedError.new('JWE decryption not supported yet')
+    end
+
     def to_s
       [
         header.to_json,
@@ -99,17 +103,17 @@ module JSON
       when :'RSA-OAEP'.to_s
         public_key_or_secret.public_encrypt master_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
       when :A128KW .to_s
-        raise NotImplementedError.new('A128KW not implemented yet')
+        raise NotImplementedError.new('A128KW not supported yet')
       when :A256KW.to_s
-        raise NotImplementedError.new('A256KW not implemented yet')
+        raise NotImplementedError.new('A256KW not supported yet')
       when :dir.to_s
         ''
       when :'ECDH-ES'.to_s
-        raise NotImplementedError.new('ECDH-ES not implemented yet')
+        raise NotImplementedError.new('ECDH-ES not supported yet')
       when :'ECDH-ES+A128KW'.to_s
-        raise NotImplementedError.new('ECDH-ES+A128KW not implemented yet')
+        raise NotImplementedError.new('ECDH-ES+A128KW not supported yet')
       when :'ECDH-ES+A256KW'.to_s
-        raise NotImplementedError.new('ECDH-ES+A256KW not implemented yet')
+        raise NotImplementedError.new('ECDH-ES+A256KW not supported yet')
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
       end
