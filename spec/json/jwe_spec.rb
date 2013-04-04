@@ -74,7 +74,7 @@ describe JSON::JWE do
       let(:plain_text) { 'Hello World' }
       let(:jwe) { JSON::JWE.new plain_text }
 
-      context 'when alg=RSA-OAEP' do
+      context 'when alg=RSA1_5' do
         let(:key) { public_key }
         before { jwe.alg = :'RSA1_5' }
 

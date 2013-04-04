@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'bindata'
 
 module JSON
   class JWE < JWT
@@ -128,55 +129,59 @@ module JSON
           UrlSafeBase64.encode64 segment.to_s
         end.join('.')
       end
+      self
     end
 
     def generate_gcm_keys!
-      self.master_key = if dir?
+      self.master_key ||= if dir?
         public_key_or_secret
       else
         @cipher.random_key
       end
       self.encryption_key = master_key
       self.integrity_key = :wont_be_used
+      self
     end
 
     def generate_cbc_keys!
-      self.master_key = if dir?
+      encryption_key_size = sha_size / 2
+      integrity_key_size = master_key_size = sha_size
+      self.master_key ||= if dir?
         public_key_or_secret
       else
-        SecureRandom.random_bytes(sha_size / 8)
+        SecureRandom.random_bytes master_key_size / 8
       end
       encryption_segments = [
-        [0, 0, 0, 1],
+        1,
         master_key,
-        [0, 0, sha_size / 2 / 256, (sha_size / 2) % 256],
-        encryption_method.to_s,
-        epu || [0, 0, 0, 0],
-        epv || [0, 0, 0, 0],
+        encryption_key_size,
+        encryption_method,
+        epu || 0,
+        epv || 0,
         'Encryption'
       ]
       integrity_segments = [
-        [0, 0, 0, 1],
+        1,
         master_key,
-        [0, 0, sha_size / 256, sha_size % 256],
-        encryption_method.to_s,
-        epu || [0, 0, 0, 0],
-        epv || [0, 0, 0, 0],
+        integrity_key_size,
+        encryption_method,
+        epu || 0,
+        epv || 0,
         'Integrity'
       ]
       encryption_hash_input, integrity_hash_input = [encryption_segments, integrity_segments].collect do |segments|
         segments.collect do |segment|
           case segment
-          when Array
-            segment.collect(&:chr).join
+          when Integer
+            BinData::Int32be.new(segment).to_binary_s
           else
-            segment
+            segment.to_s
           end
         end.join
       end
-      encryption_key_with_garbage = sha_digest.digest(encryption_hash_input)
-      self.encryption_key = encryption_key_with_garbage[0, encryption_key_with_garbage.size / 2]
+      self.encryption_key = sha_digest.digest(encryption_hash_input)[0, encryption_key_size / 8]
       self.integrity_key = sha_digest.digest integrity_hash_input
+      self
     end
 
     def integrity_value
@@ -188,11 +193,12 @@ module JSON
           encrypted_master_key,
           iv,
           cipher_text
-        ].each do |segment|
+        ].collect do |segment|
           UrlSafeBase64.encode64 segment.to_s
         end.join('.')
         OpenSSL::HMAC.digest sha_digest, integrity_key, secured_input
       end
+      @integrity_value
     end
   end
 end
