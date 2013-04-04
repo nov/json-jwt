@@ -33,9 +33,7 @@ module JSON
     def decrypt!(private_key_or_secret)
       self.mode = :decryption
       self.private_key_or_secret = private_key_or_secret
-      _header_json_, self.encrypted_master_key, self.iv, self.cipher_text, self.integrity_value = input.split('.').collect do |segment|
-        UrlSafeBase64.decode64 segment
-      end
+      decode_segments!
       cipher.decrypt
       restore_cipher_keys!
       self.plain_text = cipher.update(cipher_text) + cipher.final
@@ -229,6 +227,12 @@ module JSON
     end
 
     # decryption
+
+    def decode_segments!
+      _header_json_, self.encrypted_master_key, self.iv, self.cipher_text, self.integrity_value = input.split('.').collect do |segment|
+        UrlSafeBase64.decode64 segment
+      end
+    end
 
     def decrypt_master_key
       case algorithm.to_s
