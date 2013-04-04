@@ -4,10 +4,6 @@ def gcm_supported?
   RUBY_VERSION >= '2.0.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1c'
 end
 
-def nimbus_available?
-  !!defined? NimbusJWE
-end
-
 describe JSON::JWE do
   let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
   let(:private_key_path) { der_file_path 'rsa/private_key' }
@@ -80,7 +76,7 @@ describe JSON::JWE do
       let(:jwe) { JSON::JWE.new plain_text }
 
       context 'when alg=RSA1_5' do
-        if nimbus_available?
+        if NimbusSpecHelper.nimbus_available?
           let(:key) { public_key }
           before { jwe.alg = :'RSA1_5' }
 
@@ -96,7 +92,7 @@ describe JSON::JWE do
       end
 
       context 'when alg=RSA-OAEP' do
-        if nimbus_available?
+        if NimbusSpecHelper.nimbus_available?
           let(:key) { public_key }
           before { jwe.alg = :'RSA-OAEP' }
 
@@ -122,7 +118,7 @@ describe JSON::JWE do
       let(:jwe) { JSON::JWE.new jwt }
 
       context 'when alg=RSA-OAEP' do
-        if nimbus_available?
+        if NimbusSpecHelper.nimbus_available?
           let(:key) { public_key }
           before { jwe.alg = :'RSA1_5' }
 
@@ -138,7 +134,7 @@ describe JSON::JWE do
       end
 
       context 'when alg=RSA-OAEP' do
-        if nimbus_available?
+        if NimbusSpecHelper.nimbus_available?
           let(:key) { public_key }
           before { jwe.alg = :'RSA-OAEP' }
 
