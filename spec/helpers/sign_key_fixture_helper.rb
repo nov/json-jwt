@@ -4,11 +4,20 @@ module SignKeyFixtureHelper
   end
 
   def pem_file(file_name)
-    File.new(
-      File.join(
-        File.dirname(__FILE__),
-        "../fixtures/#{file_name}.pem"
-      )
+    File.new pem_file_path(file_name)
+  end
+
+  def pem_file_path(file_name)
+    File.join(
+      File.dirname(__FILE__),
+      "../fixtures/#{file_name}.pem"
+    )
+  end
+
+  def der_file_path(file_name)
+    File.join(
+      File.dirname(__FILE__),
+      "../fixtures/#{file_name}.der"
     )
   end
 
