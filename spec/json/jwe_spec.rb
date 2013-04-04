@@ -176,17 +176,33 @@ describe JSON::JWE do
       end
     end
 
+    shared_examples_for :gcm_decryption_unsupported do
+      it do
+        expect do
+          jwe.decrypt! private_key
+        end.to raise_error JSON::JWE::UnexpectedAlgorithm
+      end
+    end
+
     context 'when alg=RSA1_5' do
       let(:alg) { :RSA1_5 }
 
       context 'when enc=A128GCM' do
         let(:enc) { :A128GCM }
-        it_behaves_like :private_key_decryptable
+        if gcm_supported?
+          it_behaves_like :private_key_decryptable
+        else
+          it_behaves_like :gcm_decryption_unsupported
+        end
       end
 
       context 'when enc=A256GCM' do
         let(:enc) { :A256GCM }
-        it_behaves_like :private_key_decryptable
+        if gcm_supported?
+          it_behaves_like :private_key_decryptable
+        else
+          it_behaves_like :gcm_decryption_unsupported
+        end
       end
 
       context 'when enc=A128CBC+HS256' do
@@ -205,12 +221,20 @@ describe JSON::JWE do
 
       context 'when enc=A128GCM' do
         let(:enc) { :A128GCM }
-        it_behaves_like :private_key_decryptable
+        if gcm_supported?
+          it_behaves_like :private_key_decryptable
+        else
+          it_behaves_like :gcm_decryption_unsupported
+        end
       end
 
       context 'when enc=A256GCM' do
         let(:enc) { :A256GCM }
-        it_behaves_like :private_key_decryptable
+        if gcm_supported?
+          it_behaves_like :private_key_decryptable
+        else
+          it_behaves_like :gcm_decryption_unsupported
+        end
       end
 
       context 'when enc=A128CBC+HS256' do
