@@ -280,7 +280,7 @@ module JSON
     end
 
     def verify_cbc_integirity_value!
-      # raise UnexpectedAlgorithm.new('TODO')
+      raise UnexpectedAlgorithm.new('TODO')
     end
   end
 end
