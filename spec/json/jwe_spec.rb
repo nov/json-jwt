@@ -156,11 +156,11 @@ describe JSON::JWE do
   end
 
   describe 'decrypt!' do
-    let(:plain_text) { 'hello' }
+    let(:plain_text) { 'Hello World' }
     let(:input) do
       _jwe_ = JSON::JWE.new plain_text
       _jwe_.alg, _jwe_.enc = alg, enc
-      _jwe_.encrypt! private_key
+      _jwe_.encrypt! public_key
       _jwe_.to_s
     end
     let(:jwe) do

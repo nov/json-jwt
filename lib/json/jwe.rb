@@ -147,8 +147,8 @@ module JSON
       when cbc?
         generate_cbc_keys!
       end
-      @cipher.key = encryption_key
-      self.iv = @cipher.random_iv
+      cipher.key = encryption_key
+      self.iv = cipher.random_iv
       if gcm?
         cipher.auth_data = [header.to_json, encrypted_master_key, iv].collect do |segment|
           UrlSafeBase64.encode64 segment.to_s
@@ -161,7 +161,7 @@ module JSON
       self.master_key ||= if dir?
         public_key_or_secret
       else
-        @cipher.random_key
+        cipher.random_key
       end
       self.encryption_key = master_key
       self.integrity_key = :wont_be_used
@@ -232,6 +232,7 @@ module JSON
       _header_json_, self.encrypted_master_key, self.iv, self.cipher_text, self.integrity_value = input.split('.').collect do |segment|
         UrlSafeBase64.decode64 segment
       end
+      self
     end
 
     def decrypt_master_key
@@ -259,10 +260,10 @@ module JSON
 
     def restore_cipher_keys!
       self.master_key = decrypt_master_key
-      cipher.iv = iv
       case
       when gcm?
         cipher.key = master_key
+        cipher.iv = iv # NOTE: 'iv' has to be set after 'key'
         cipher.auth_tag = integrity_value
         cipher.auth_data = input.split('.')[0, 3].join('.')
       when cbc?
