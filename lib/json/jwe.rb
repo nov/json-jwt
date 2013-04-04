@@ -7,16 +7,22 @@ module JSON
     class DecryptionFailed < JWT::VerificationFailed; end
     class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end
 
-    attr_accessor :public_key_or_secret, :plain_text, :master_key, :encrypted_master_key, :encryption_key, :integrity_key, :integrity_value, :iv, :cipher_text
+    attr_accessor(
+      :public_key_or_secret, :private_key_or_secret, :mode,
+      :input, :plain_text, :cipher_text, :integrity_value, :iv,
+      :master_key, :encrypted_master_key, :encryption_key, :integrity_key
+    )
 
     register_header_keys :enc, :epk, :zip, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :apu, :apv, :epu, :epv
     alias_method :encryption_method, :enc
 
-    def initialize(jwt_or_plain_text)
-      self.plain_text = jwt_or_plain_text.to_s
+    def initialize(input)
+      self.input = input.to_s
     end
 
     def encrypt!(public_key_or_secret)
+      self.mode = :encyption
+      self.plain_text = input
       self.public_key_or_secret = public_key_or_secret
       cipher.encrypt
       generate_cipher_keys!
@@ -24,23 +30,38 @@ module JSON
       self
     end
 
-    def decrypt!
-      raise NotImplementedError.new('JWE decryption not supported yet')
+    def decrypt!(private_key_or_secret)
+      self.mode = :decryption
+      self.private_key_or_secret = private_key_or_secret
+      _header_json_, self.encrypted_master_key, self.iv, self.cipher_text, self.integrity_value = input.split('.').collect do |segment|
+        UrlSafeBase64.decode64 segment
+      end
+      cipher.decrypt
+      restore_cipher_keys!
+      self.plain_text = cipher.update(cipher_text) + cipher.final
+      verify_cbc_integirity_value! if cbc?
+      self
     end
 
     def to_s
-      [
-        header.to_json,
-        encrypted_master_key,
-        iv,
-        cipher_text,
-        integrity_value
-      ].collect do |segment|
-        UrlSafeBase64.encode64 segment.to_s
-      end.join('.')
+      if mode == :encyption
+        [
+          header.to_json,
+          encrypted_master_key,
+          iv,
+          cipher_text,
+          integrity_value
+        ].collect do |segment|
+          UrlSafeBase64.encode64 segment.to_s
+        end.join('.')
+      else
+        plain_text
+      end
     end
 
     private
+
+    # common
 
     def gcm_supported?
       RUBY_VERSION >= '2.0.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1c'
@@ -95,6 +116,8 @@ module JSON
     def sha_digest
       OpenSSL::Digest::Digest.new "SHA#{sha_size}"
     end
+
+    # encyption
 
     def encrypted_master_key
       @encrypted_master_key ||= case algorithm.to_s
@@ -189,9 +212,10 @@ module JSON
     end
 
     def integrity_value
-      @integrity_value ||= if gcm?
+      @integrity_value ||= case
+      when gcm?
         cipher.auth_tag
-      else
+      when cbc?
         secured_input = [
           header.to_json,
           encrypted_master_key,
@@ -202,7 +226,52 @@ module JSON
         end.join('.')
         OpenSSL::HMAC.digest sha_digest, integrity_key, secured_input
       end
-      @integrity_value
+    end
+
+    # decryption
+
+    def decrypt_master_key
+      case algorithm.to_s
+      when :RSA1_5.to_s
+        private_key_or_secret.private_decrypt encrypted_master_key
+      when :'RSA-OAEP'.to_s
+        private_key_or_secret.private_decrypt encrypted_master_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
+      when :A128KW .to_s
+        raise NotImplementedError.new('A128KW not supported yet')
+      when :A256KW.to_s
+        raise NotImplementedError.new('A256KW not supported yet')
+      when :dir.to_s
+        private_key_or_secret
+      when :'ECDH-ES'.to_s
+        raise NotImplementedError.new('ECDH-ES not supported yet')
+      when :'ECDH-ES+A128KW'.to_s
+        raise NotImplementedError.new('ECDH-ES+A128KW not supported yet')
+      when :'ECDH-ES+A256KW'.to_s
+        raise NotImplementedError.new('ECDH-ES+A256KW not supported yet')
+      else
+        raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
+      end
+    end
+
+    def restore_cipher_keys!
+      self.master_key = decrypt_master_key
+      cipher.iv = iv
+      case
+      when gcm?
+        cipher.key = master_key
+        cipher.auth_tag = integrity_value
+        cipher.auth_data = input.split('.')[0, 3].join('.')
+      when cbc?
+        restore_cbc_keys!
+      end
+    end
+
+    def restore_cbc_keys!
+      raise UnexpectedAlgorithm.new('TODO')
+    end
+
+    def verify_cbc_integirity_value!
+      raise UnexpectedAlgorithm.new('TODO')
     end
   end
 end

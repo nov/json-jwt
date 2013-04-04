@@ -154,4 +154,74 @@ describe JSON::JWE do
       end
     end
   end
+
+  describe 'decrypt!' do
+    let(:plain_text) { 'hello' }
+    let(:input) do
+      _jwe_ = JSON::JWE.new plain_text
+      _jwe_.alg, _jwe_.enc = alg, enc
+      _jwe_.encrypt! private_key
+      _jwe_.to_s
+    end
+    let(:jwe) do
+      _jwe_ = JSON::JWE.new input
+      _jwe_.alg, _jwe_.enc = alg, enc
+      _jwe_
+    end
+
+    shared_examples_for :private_key_decryptable do
+      it do
+        jwe.decrypt! private_key
+        jwe.to_s.should == plain_text
+      end
+    end
+
+    context 'when alg=RSA1_5' do
+      let(:alg) { :RSA1_5 }
+
+      context 'when enc=A128GCM' do
+        let(:enc) { :A128GCM }
+        it_behaves_like :private_key_decryptable
+      end
+
+      context 'when enc=A256GCM' do
+        let(:enc) { :A256GCM }
+        it_behaves_like :private_key_decryptable
+      end
+
+      context 'when enc=A128CBC+HS256' do
+        let(:enc) { :'A128CBC+HS256' }
+        it :TODO
+      end
+
+      context 'when enc=A256CBC+HS512' do
+        let(:enc) { :'A256CBC+HS512' }
+        it :TODO
+      end
+    end
+
+    context 'when alg=RSA-OAEP' do
+      let(:alg) { :'RSA-OAEP' }
+
+      context 'when enc=A128GCM' do
+        let(:enc) { :A128GCM }
+        it_behaves_like :private_key_decryptable
+      end
+
+      context 'when enc=A256GCM' do
+        let(:enc) { :A256GCM }
+        it_behaves_like :private_key_decryptable
+      end
+
+      context 'when enc=A128CBC+HS256' do
+        let(:enc) { :'A128CBC+HS256' }
+        it :TODO
+      end
+
+      context 'when enc=A256CBC+HS512' do
+        let(:enc) { :'A256CBC+HS512' }
+        it :TODO
+      end
+    end
+  end
 end
