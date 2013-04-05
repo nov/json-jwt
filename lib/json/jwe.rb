@@ -159,7 +159,7 @@ module JSON
         public_key_or_secret.public_encrypt master_key
       when :'RSA-OAEP'.to_s
         public_key_or_secret.public_encrypt master_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-      when :A128KW .to_s
+      when :A128KW.to_s
         raise NotImplementedError.new('A128KW not supported yet')
       when :A256KW.to_s
         raise NotImplementedError.new('A256KW not supported yet')
@@ -245,7 +245,7 @@ module JSON
         private_key_or_secret.private_decrypt encrypted_master_key
       when :'RSA-OAEP'.to_s
         private_key_or_secret.private_decrypt encrypted_master_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-      when :A128KW .to_s
+      when :A128KW.to_s
         raise NotImplementedError.new('A128KW not supported yet')
       when :A256KW.to_s
         raise NotImplementedError.new('A256KW not supported yet')
@@ -280,7 +280,11 @@ module JSON
     end
 
     def verify_cbc_integirity_value!
-      raise UnexpectedAlgorithm.new('TODO')
+      secured_input = input.split('.')[0, 4].join('.')
+      expected_integrity_value = OpenSSL::HMAC.digest sha_digest, integrity_key, secured_input
+      unless integrity_value == expected_integrity_value
+        raise DecryptionFailed.new('Invalid integrity value')
+      end
     end
   end
 end

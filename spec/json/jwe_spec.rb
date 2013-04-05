@@ -71,6 +71,22 @@ describe JSON::JWE do
       end
     end
 
+    shared_examples_for :unexpected_algorithm_for_encryption do
+      it do
+        expect do
+          jwe.encrypt!(key).to_s # NOTE: encrypt! won't raise, but to_s does. might need to fix.
+        end.to raise_error JSON::JWE::UnexpectedAlgorithm
+      end
+    end
+
+    shared_examples_for :unsupported_algorithm_for_encryption do
+      it do
+        expect do
+          jwe.encrypt!(key).to_s # NOTE: encrypt! won't raise, but to_s does. might need to fix.
+        end.to raise_error NotImplementedError
+      end
+    end
+
     context 'when plaintext given' do
       let(:plain_text) { 'Hello World' }
       let(:jwe) { JSON::JWE.new plain_text }
@@ -110,6 +126,30 @@ describe JSON::JWE do
       context 'when alg=dir' do
         it :TODO
       end
+
+      context 'when unknonw/unsupported algorithm given' do
+        let(:key) { public_key }
+        let(:alg) { :RSA1_5 }
+        let(:enc) { :'A128CBC+HS256' }
+        before { jwe.alg, jwe.enc = alg, enc }
+
+        context 'when alg=unknown' do
+          let(:alg) { :unknown }
+          it_behaves_like :unexpected_algorithm_for_encryption
+        end
+
+        context 'when enc=unknown' do
+          let(:enc) { :unknown }
+          it_behaves_like :unexpected_algorithm_for_encryption
+        end
+
+        [:A128KW, :A256KW, :'ECDH-ES', :'ECDH-ES+A128KW', :'ECDH-ES+A256KW'].each do |alg|
+          context "when alg=#{alg}" do
+            let(:alg) { alg }
+            it_behaves_like :unsupported_algorithm_for_encryption
+          end
+        end
+      end
     end
 
     context 'when jwt given' do
@@ -148,10 +188,6 @@ describe JSON::JWE do
           it :TODO
         end
       end
-
-      context 'when alg=dir' do
-        it :TODO
-      end
     end
   end
 
@@ -181,6 +217,37 @@ describe JSON::JWE do
         expect do
           jwe.decrypt! key
         end.to raise_error JSON::JWE::UnexpectedAlgorithm
+      end
+    end
+
+    shared_examples_for :verify_cbc_integrity_value do
+      let(:input) do
+        _jwe_ = JSON::JWE.new plain_text
+        _jwe_.alg, _jwe_.enc = alg, enc
+        _jwe_.encrypt! key
+        _jwe_.to_s + 'tampered'
+      end
+
+      it do
+        expect do
+          jwe.decrypt! key
+        end.to raise_error JSON::JWE::DecryptionFailed
+      end
+    end
+
+    shared_examples_for :unexpected_algorithm_for_decryption do
+      it do
+        expect do
+          jwe.decrypt! key
+        end.to raise_error JSON::JWE::UnexpectedAlgorithm
+      end
+    end
+
+    shared_examples_for :unsupported_algorithm_for_decryption do
+      it do
+        expect do
+          jwe.decrypt! key
+        end.to raise_error NotImplementedError
       end
     end
 
@@ -242,11 +309,13 @@ describe JSON::JWE do
       context 'when enc=A128CBC+HS256' do
         let(:enc) { :'A128CBC+HS256' }
         it_behaves_like :decryptable
+        it_behaves_like :verify_cbc_integrity_value
       end
 
       context 'when enc=A256CBC+HS512' do
         let(:enc) { :'A256CBC+HS512' }
         it_behaves_like :decryptable
+        it_behaves_like :verify_cbc_integrity_value
       end
     end
 
@@ -254,6 +323,30 @@ describe JSON::JWE do
       let(:alg) { :dir }
       let(:key) { 'todo' }
       it :TODO
+    end
+
+    context 'when unknonw/unsupported algorithm given' do
+      let(:input) { 'whatever' }
+      let(:key) { public_key }
+      let(:alg) { :RSA1_5 }
+      let(:enc) { :'A128CBC+HS256' }
+
+      context 'when alg=unknown' do
+        let(:alg) { :unknown }
+        it_behaves_like :unexpected_algorithm_for_decryption
+      end
+
+      context 'when enc=unknown' do
+        let(:enc) { :unknown }
+        it_behaves_like :unexpected_algorithm_for_decryption
+      end
+
+      [:A128KW, :A256KW, :'ECDH-ES', :'ECDH-ES+A128KW', :'ECDH-ES+A256KW'].each do |alg|
+        context "when alg=#{alg}" do
+          let(:alg) { alg }
+          it_behaves_like :unsupported_algorithm_for_decryption
+        end
+      end
     end
   end
 end

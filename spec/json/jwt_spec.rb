@@ -148,6 +148,15 @@ describe JSON::JWT do
       end
     end
 
+    context 'when encrypted' do
+      let(:input) { jwt.encrypt(public_key).to_s }
+      let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
+
+      it 'should decryptable' do
+        JSON::JWT.decode(input, private_key).should be_a JSON::JWE
+      end
+    end
+
     context 'when JSON parse failed' do
       it do
         expect do

@@ -95,7 +95,7 @@ module JSON
         when 4 # JWE
           jwe = JWE.new jwt_string
           jwe.header = MultiJson.load(
-            jwt_string.split('.').first
+            UrlSafeBase64.decode64 jwt_string.split('.').first
           ).with_indifferent_access
           jwe.decrypt! key_or_secret
         else
