@@ -31,7 +31,7 @@ module JSON
     register_header_keys :typ, :cty, :alg
     alias_method :algorithm, :alg
 
-    def initialize(claims)
+    def initialize(claims = {})
       self.typ = :JWT
       self.alg = :none
       [:exp, :nbf, :iat].each do |key|
