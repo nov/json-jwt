@@ -4,7 +4,7 @@ require 'multi_json'
 require 'active_support/core_ext'
 
 module JSON
-  class JWT < ActiveSupport::HashWithIndifferentAccess
+  class JWT < HashWithIndifferentAccess
     attr_accessor :header, :signature
 
     class Exception < StandardError; end
