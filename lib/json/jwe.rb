@@ -13,7 +13,7 @@ module JSON
       :master_key, :encrypted_master_key, :encryption_key, :integrity_key
     )
 
-    register_header_keys :enc, :epk, :zip, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :apu, :apv, :epu, :epv
+    register_header_keys :enc, :epk, :zip, :apu, :apv
     alias_method :encryption_method, :enc
 
     def initialize(input)
@@ -123,8 +123,8 @@ module JSON
         master_key,
         encryption_key_size,
         encryption_method,
-        epu || 0,
-        epv || 0,
+        0,
+        0,
         'Encryption'
       ]
       integrity_segments = [
@@ -132,8 +132,8 @@ module JSON
         master_key,
         integrity_key_size,
         encryption_method,
-        epu || 0,
-        epv || 0,
+        0,
+        0,
         'Integrity'
       ]
       encryption_hash_input, integrity_hash_input = [encryption_segments, integrity_segments].collect do |segments|
