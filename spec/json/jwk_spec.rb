@@ -1,6 +1,13 @@
 require 'spec_helper'
 
 describe JSON::JWK do
+  describe '#content_type' do
+    let(:jwk) { JSON::JWK.new public_key }
+    it do
+      jwk.content_type.should == 'application/jwk+json'
+    end
+  end
+
   context 'when RSA public key given' do
     let(:jwk) { JSON::JWK.new public_key }
     it { jwk.keys.should include :kty, :e, :n }

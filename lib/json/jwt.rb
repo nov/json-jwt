@@ -62,6 +62,10 @@ module JSON
       jwe.encrypt! public_key_or_secret
     end
 
+    def content_type
+      "application/#{self.class.name.split('::').last.downcase}"
+    end
+
     def to_s
       [
         header.to_json,

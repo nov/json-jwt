@@ -4,6 +4,12 @@ describe JSON::JWK::Set do
   let(:jwk) { JSON::JWK.new public_key }
   let(:set) { JSON::JWK::Set.new jwk }
 
+  describe '#content_type' do
+    it do
+      set.content_type.should == 'application/jwk-set+json'
+    end
+  end
+
   context 'when single JWK given' do
     subject { JSON::JWK::Set.new jwk }
     it { should == [jwk] }

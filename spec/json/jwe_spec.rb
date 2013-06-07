@@ -8,6 +8,13 @@ describe JSON::JWE do
   let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
   let(:private_key_path) { der_file_path 'rsa/private_key' }
 
+  describe '#content_type' do
+    let(:jwe) { JSON::JWE.new 'hello' }
+    it do
+      jwe.content_type.should == 'application/jwe'
+    end
+  end
+
   describe 'encrypt!' do
     shared_examples_for :gcm_encryption do
       context 'when enc=A128GCM' do

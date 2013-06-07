@@ -39,6 +39,12 @@ describe JSON::JWS do
     its(:signature) { should be_nil }
   end
 
+  describe '#content_type' do
+    it do
+      jws.content_type.should == 'application/jws'
+    end
+  end
+
   describe '#sign!' do
     shared_examples_for :generate_expected_signature do
       it do

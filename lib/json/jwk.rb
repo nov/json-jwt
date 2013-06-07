@@ -6,6 +6,10 @@ module JSON
       replace encode(public_key, options)
     end
 
+    def content_type
+      'application/jwk+json'
+    end
+
     private
 
     def ecdsa_curve_name(ecdsa_key)

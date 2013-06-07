@@ -25,6 +25,12 @@ describe JSON::JWT do
     end
   end
 
+  describe '#content_type' do
+    it do
+      jwt.content_type.should == 'application/jwt'
+    end
+  end
+
   describe '#sign' do
     [:HS256, :HS384, :HS512].each do |algorithm|
       context algorithm do
