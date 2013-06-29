@@ -109,6 +109,14 @@ NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
 
       it { should be_instance_of OpenSSL::PKey::RSA }
       its(:to_pem) { should == pem }
+
+      it 'should support string keys' do
+        JSON::JWK.decode(
+          'kty' => 'RSA',
+          'n' => n,
+          'e' => e
+        ).should be_instance_of OpenSSL::PKey::RSA
+      end
     end
 
     context 'when ECDSA' do

@@ -63,6 +63,7 @@ module JSON
 
     class << self
       def decode(jwk)
+        jwk = jwk.with_indifferent_access
         case jwk[:kty].to_s
         when 'RSA'
           e = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:e]), 2
