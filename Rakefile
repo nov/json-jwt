@@ -12,7 +12,7 @@ namespace :cover_me do
   end
 end
 task :spec do
-  Rake::Task['cover_me:report'].invoke
+  Rake::Task['cover_me:report'].invoke unless ENV['TRAVIS_RUBY_VERSION']
 end
 
 task default: :spec
