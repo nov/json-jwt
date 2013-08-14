@@ -41,7 +41,7 @@ describe JSON::JWS do
 
   describe '#content_type' do
     it do
-      jws.content_type.should == 'application/jws'
+      jws.content_type.should == 'application/jose'
     end
   end
 

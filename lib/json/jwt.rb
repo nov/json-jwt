@@ -12,10 +12,6 @@ module JSON
     class VerificationFailed < Exception; end
     class UnexpectedAlgorithm < VerificationFailed; end
 
-    def header
-      @header ||= {}
-    end
-
     class << self
       def register_header_keys(*keys)
         keys.each do |header_key|
@@ -40,6 +36,14 @@ module JSON
       replace claims
     end
 
+    def content_type
+      'application/jwt'
+    end
+
+    def header
+      @header ||= {}
+    end
+
     def sign(private_key_or_secret, algorithm = :HS256)
       jws = JWS.new(self)
       jws.alg = algorithm
@@ -60,10 +64,6 @@ module JSON
       jwe.alg = algorithm
       jwe.enc = encryption_method
       jwe.encrypt! public_key_or_secret
-    end
-
-    def content_type
-      "application/#{self.class.name.split('::').last.downcase}"
     end
 
     def to_s
@@ -112,6 +112,7 @@ module JSON
   end
 end
 
+require 'json/jose'
 require 'json/jws'
 require 'json/jwe'
 require 'json/jwk'

@@ -11,7 +11,7 @@ describe JSON::JWE do
   describe '#content_type' do
     let(:jwe) { JSON::JWE.new 'hello' }
     it do
-      jwe.content_type.should == 'application/jwe'
+      jwe.content_type.should == 'application/jose'
     end
   end
 

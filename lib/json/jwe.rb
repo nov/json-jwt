@@ -2,7 +2,7 @@ require 'securerandom'
 require 'bindata'
 
 module JSON
-  class JWE < JWT
+  class JWE < JOSE
     class InvalidFormat < JWT::InvalidFormat; end
     class DecryptionFailed < JWT::VerificationFailed; end
     class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end
@@ -18,6 +18,10 @@ module JSON
 
     def initialize(input)
       self.input = input.to_s
+    end
+
+    def content_type
+      'application/jose'
     end
 
     def encrypt!(public_key_or_secret)
