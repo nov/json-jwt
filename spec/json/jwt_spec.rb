@@ -149,6 +149,7 @@ describe JSON::JWT do
         it 'should skip verification' do
           expect do
             jwt = JSON::JWT.decode jws.to_s, :skip_verification
+            jwt.header.should == {'alg' => 'HS256', 'typ' => 'JWT'}
           end.not_to raise_error
         end
       end
@@ -160,6 +161,15 @@ describe JSON::JWT do
 
       it 'should decryptable' do
         JSON::JWT.decode(input, private_key).should be_a JSON::JWE
+      end
+
+      context 'when :skip_decryption given as secret/key' do
+        it 'should skip verification' do
+          expect do
+            jwe = JSON::JWT.decode input, :skip_decryption
+            jwe.header.should == {'alg' => 'RSA1_5', 'enc' => 'A128CBC+HS256'}
+          end.not_to raise_error
+        end
       end
     end
 

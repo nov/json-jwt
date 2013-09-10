@@ -101,7 +101,8 @@ module JSON
           jwe.header = MultiJson.load(
             UrlSafeBase64.decode64 jwt_string.split('.').first
           ).with_indifferent_access
-          jwe.decrypt! key_or_secret
+          jwe.decrypt! key_or_secret unless key_or_secret == :skip_decryption
+          jwe
         else
           raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 or 3 dots.')
         end
