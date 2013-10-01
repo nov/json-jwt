@@ -109,6 +109,12 @@ module JSON
       rescue MultiJson::DecodeError
         raise InvalidFormat.new("Invalid JSON Format")
       end
+
+      # NOTE: Ugly hack to avoid this ActiveSupport 4.0 bug.
+      #  https://github.com/rails/rails/issues/11087
+      def new_from_hash_copying_default(hash)
+        superclass.new_from_hash_copying_default hash
+      end
     end
   end
 end

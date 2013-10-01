@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.add_runtime_dependency "multi_json", ">= 1.3"
   s.add_runtime_dependency "url_safe_base64"
-  s.add_runtime_dependency "activesupport", "< 4"
+  s.add_runtime_dependency "activesupport"
   s.add_runtime_dependency "bindata"
   s.add_development_dependency "rake", ">= 0.8"
   s.add_development_dependency "cover_me", ">= 1.2.0"
