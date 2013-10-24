@@ -10,7 +10,7 @@ module JSON
     attr_accessor(
       :public_key_or_secret, :private_key_or_secret, :mode,
       :input, :plain_text, :cipher_text, :integrity_value, :iv,
-      :master_key, :encrypted_master_key, :encryption_key, :integrity_key
+      :content_encryption_key, :jwe_encrypted_key, :encryption_key, :integrity_key
     )
 
     register_header_keys :enc, :epk, :zip, :apu, :apv
@@ -49,7 +49,7 @@ module JSON
       if mode == :encyption
         [
           header.to_json,
-          encrypted_master_key,
+          jwe_encrypted_key,
           iv,
           cipher_text,
           integrity_value
@@ -124,7 +124,7 @@ module JSON
       integrity_key_size = sha_size
       encryption_segments = [
         1,
-        master_key,
+        content_encryption_key,
         encryption_key_size,
         encryption_method,
         0,
@@ -133,7 +133,7 @@ module JSON
       ]
       integrity_segments = [
         1,
-        master_key,
+        content_encryption_key,
         integrity_key_size,
         encryption_method,
         0,
@@ -157,12 +157,12 @@ module JSON
 
     # encyption
 
-    def encrypted_master_key
-      @encrypted_master_key ||= case algorithm.to_s
+    def jwe_encrypted_key
+      @jwe_encrypted_key ||= case algorithm.to_s
       when :RSA1_5.to_s
-        public_key_or_secret.public_encrypt master_key
+        public_key_or_secret.public_encrypt content_encryption_key
       when :'RSA-OAEP'.to_s
-        public_key_or_secret.public_encrypt master_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
+        public_key_or_secret.public_encrypt content_encryption_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
       when :A128KW.to_s
         raise NotImplementedError.new('A128KW not supported yet')
       when :A256KW.to_s
@@ -190,26 +190,24 @@ module JSON
       cipher.key = encryption_key
       self.iv = cipher.random_iv
       if gcm?
-        cipher.auth_data = [header.to_json, encrypted_master_key, iv].collect do |segment|
-          UrlSafeBase64.encode64 segment.to_s
-        end.join('.')
+        cipher.auth_data = UrlSafeBase64.encode64 header.to_json
       end
       self
     end
 
     def generate_gcm_keys!
-      self.master_key ||= if dir?
+      self.content_encryption_key ||= if dir?
         public_key_or_secret
       else
         cipher.random_key
       end
-      self.encryption_key = master_key
+      self.encryption_key = content_encryption_key
       self.integrity_key = :wont_be_used
       self
     end
 
     def generate_cbc_keys!
-      self.master_key ||= if dir?
+      self.content_encryption_key ||= if dir?
         public_key_or_secret
       else
         SecureRandom.random_bytes sha_size / 8
@@ -224,7 +222,7 @@ module JSON
       when cbc?
         secured_input = [
           header.to_json,
-          encrypted_master_key,
+          jwe_encrypted_key,
           iv,
           cipher_text
         ].collect do |segment|
@@ -237,18 +235,18 @@ module JSON
     # decryption
 
     def decode_segments!
-      _header_json_, self.encrypted_master_key, self.iv, self.cipher_text, self.integrity_value = input.split('.').collect do |segment|
+      _header_json_, self.jwe_encrypted_key, self.iv, self.cipher_text, self.integrity_value = input.split('.').collect do |segment|
         UrlSafeBase64.decode64 segment
       end
       self
     end
 
-    def decrypt_master_key
+    def decrypt_content_encryption_key
       case algorithm.to_s
       when :RSA1_5.to_s
-        private_key_or_secret.private_decrypt encrypted_master_key
+        private_key_or_secret.private_decrypt jwe_encrypted_key
       when :'RSA-OAEP'.to_s
-        private_key_or_secret.private_decrypt encrypted_master_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
+        private_key_or_secret.private_decrypt jwe_encrypted_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
       when :A128KW.to_s
         raise NotImplementedError.new('A128KW not supported yet')
       when :A256KW.to_s
@@ -267,10 +265,10 @@ module JSON
     end
 
     def restore_cipher_keys!
-      self.master_key = decrypt_master_key
+      self.content_encryption_key = decrypt_content_encryption_key
       case
       when gcm?
-        self.encryption_key = master_key
+        self.encryption_key = content_encryption_key
         self.integrity_key = :wont_be_used
       when cbc?
         derive_cbc_encryption_and_integirity_keys!
@@ -279,7 +277,7 @@ module JSON
       cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
       if gcm?
         cipher.auth_tag = integrity_value
-        cipher.auth_data = input.split('.')[0, 3].join('.')
+        cipher.auth_data = input.split('.').first
       end
     end
 
