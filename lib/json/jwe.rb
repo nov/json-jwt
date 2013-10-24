@@ -9,8 +9,8 @@ module JSON
 
     attr_accessor(
       :public_key_or_secret, :private_key_or_secret, :mode,
-      :input, :plain_text, :cipher_text, :integrity_value, :iv,
-      :content_encryption_key, :jwe_encrypted_key, :encryption_key, :integrity_key
+      :input, :plain_text, :cipher_text, :authentication_tag, :iv,
+      :content_encryption_key, :jwe_encrypted_key, :encryption_key, :mac_key
     )
 
     register_header_keys :enc, :epk, :zip, :apu, :apv
@@ -52,7 +52,7 @@ module JSON
           jwe_encrypted_key,
           iv,
           cipher_text,
-          integrity_value
+          authentication_tag
         ].collect do |segment|
           UrlSafeBase64.encode64 segment.to_s
         end.join('.')
@@ -119,42 +119,6 @@ module JSON
       OpenSSL::Digest::Digest.new "SHA#{sha_size}"
     end
 
-    def derive_cbc_encryption_and_integirity_keys!
-      encryption_key_size = sha_size / 2
-      integrity_key_size = sha_size
-      encryption_segments = [
-        1,
-        content_encryption_key,
-        encryption_key_size,
-        encryption_method,
-        0,
-        0,
-        'Encryption'
-      ]
-      integrity_segments = [
-        1,
-        content_encryption_key,
-        integrity_key_size,
-        encryption_method,
-        0,
-        0,
-        'Integrity'
-      ]
-      encryption_hash_input, integrity_hash_input = [encryption_segments, integrity_segments].collect do |segments|
-        segments.collect do |segment|
-          case segment
-          when Integer
-            BinData::Int32be.new(segment).to_binary_s
-          else
-            segment.to_s
-          end
-        end.join
-      end
-      self.encryption_key = sha_digest.digest(encryption_hash_input)[0, encryption_key_size / 8]
-      self.integrity_key = sha_digest.digest integrity_hash_input
-      self
-    end
-
     # encyption
 
     def jwe_encrypted_key
@@ -202,7 +166,6 @@ module JSON
         cipher.random_key
       end
       self.encryption_key = content_encryption_key
-      self.integrity_key = :wont_be_used
       self
     end
 
@@ -212,30 +175,32 @@ module JSON
       else
         SecureRandom.random_bytes sha_size / 8
       end
-      derive_cbc_encryption_and_integirity_keys!
+      self.mac_key, self.encryption_key = content_encryption_key.unpack("a#{content_encryption_key.length / 2}" * 2)
+      self
     end
 
-    def integrity_value
-      @integrity_value ||= case
+    def authentication_tag
+      @authentication_tag ||= case
       when gcm?
         cipher.auth_tag
       when cbc?
+        auth_data = UrlSafeBase64.encode64 header.to_json
         secured_input = [
-          header.to_json,
-          jwe_encrypted_key,
+          auth_data,
           iv,
-          cipher_text
-        ].collect do |segment|
-          UrlSafeBase64.encode64 segment.to_s
-        end.join('.')
-        OpenSSL::HMAC.digest sha_digest, integrity_key, secured_input
+          cipher_text,
+          BinData::Uint64be.new(auth_data.length * 8).to_binary_s
+        ].join
+        OpenSSL::HMAC.digest(
+          sha_digest, mac_key, secured_input
+        )[0, sha_size / 2 / 8]
       end
     end
 
     # decryption
 
     def decode_segments!
-      _header_json_, self.jwe_encrypted_key, self.iv, self.cipher_text, self.integrity_value = input.split('.').collect do |segment|
+      _header_json_, self.jwe_encrypted_key, self.iv, self.cipher_text, self.authentication_tag = input.split('.').collect do |segment|
         UrlSafeBase64.decode64 segment
       end
       self
@@ -269,22 +234,29 @@ module JSON
       case
       when gcm?
         self.encryption_key = content_encryption_key
-        self.integrity_key = :wont_be_used
       when cbc?
-        derive_cbc_encryption_and_integirity_keys!
+        self.mac_key, self.encryption_key = content_encryption_key.unpack("a#{content_encryption_key.length / 2}" * 2)
       end
       cipher.key = encryption_key
       cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
       if gcm?
-        cipher.auth_tag = integrity_value
+        cipher.auth_tag = authentication_tag
         cipher.auth_data = input.split('.').first
       end
     end
 
     def verify_cbc_integirity_value!
-      secured_input = input.split('.')[0, 4].join('.')
-      expected_integrity_value = OpenSSL::HMAC.digest sha_digest, integrity_key, secured_input
-      unless integrity_value == expected_integrity_value
+      auth_data = input.split('.').first
+      secured_input = [
+        auth_data,
+        iv,
+        cipher_text,
+        BinData::Uint64be.new(auth_data.length * 8).to_binary_s
+      ].join
+      expected_authentication_tag = OpenSSL::HMAC.digest(
+        sha_digest, mac_key, secured_input
+      )[0, sha_size / 2 / 8]
+      unless authentication_tag == expected_authentication_tag
         raise DecryptionFailed.new('Invalid integrity value')
       end
     end

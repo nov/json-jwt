@@ -115,7 +115,7 @@ describe JSON::JWT do
     end
 
     it 'should accept optional algorithm and encryption method' do
-      jwt.encrypt(shared_key, :dir, :'A256CBC-HS512').should be_a JSON::JWE
+      jwt.encrypt(SecureRandom.hex(32), :dir, :'A256CBC-HS512').should be_a JSON::JWE
     end
   end
 
