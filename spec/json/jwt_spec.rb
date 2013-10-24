@@ -115,7 +115,7 @@ describe JSON::JWT do
     end
 
     it 'should accept optional algorithm and encryption method' do
-      jwt.encrypt(shared_key, :dir, :'A256CBC+HS512').should be_a JSON::JWE
+      jwt.encrypt(shared_key, :dir, :'A256CBC-HS512').should be_a JSON::JWE
     end
   end
 
@@ -167,7 +167,7 @@ describe JSON::JWT do
         it 'should skip verification' do
           expect do
             jwe = JSON::JWT.decode input, :skip_decryption
-            jwe.header.should == {'alg' => 'RSA1_5', 'enc' => 'A128CBC+HS256'}
+            jwe.header.should == {'alg' => 'RSA1_5', 'enc' => 'A128CBC-HS256'}
           end.not_to raise_error
         end
       end

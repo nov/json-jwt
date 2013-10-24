@@ -59,8 +59,8 @@ describe JSON::JWE do
     end
 
     shared_examples_for :cbc_encryption do
-      context 'when enc=A128CBC+HS256' do
-        before { jwe.enc = :'A128CBC+HS256' }
+      context 'when enc=A128CBC-HS256' do
+        before { jwe.enc = :'A128CBC-HS256' }
 
         it 'should decryptable by Nimbus JOSE JWT' do
           jwe.encrypt! key
@@ -68,8 +68,8 @@ describe JSON::JWE do
         end
       end
 
-      context 'when enc=A256CBC+HS512' do
-        before { jwe.enc = :'A256CBC+HS512' }
+      context 'when enc=A256CBC-HS512' do
+        before { jwe.enc = :'A256CBC-HS512' }
 
         it 'should decryptable by Nimbus JOSE JWT' do
           jwe.encrypt! key
@@ -137,7 +137,7 @@ describe JSON::JWE do
       context 'when unknonw/unsupported algorithm given' do
         let(:key) { public_key }
         let(:alg) { :RSA1_5 }
-        let(:enc) { :'A128CBC+HS256' }
+        let(:enc) { :'A128CBC-HS256' }
         before { jwe.alg, jwe.enc = alg, enc }
 
         context 'when alg=unknown' do
@@ -280,13 +280,13 @@ describe JSON::JWE do
         end
       end
 
-      context 'when enc=A128CBC+HS256' do
-        let(:enc) { :'A128CBC+HS256' }
+      context 'when enc=A128CBC-HS256' do
+        let(:enc) { :'A128CBC-HS256' }
         it_behaves_like :decryptable
       end
 
-      context 'when enc=A256CBC+HS512' do
-        let(:enc) { :'A256CBC+HS512' }
+      context 'when enc=A256CBC-HS512' do
+        let(:enc) { :'A256CBC-HS512' }
         it_behaves_like :decryptable
       end
     end
@@ -313,14 +313,14 @@ describe JSON::JWE do
         end
       end
 
-      context 'when enc=A128CBC+HS256' do
-        let(:enc) { :'A128CBC+HS256' }
+      context 'when enc=A128CBC-HS256' do
+        let(:enc) { :'A128CBC-HS256' }
         it_behaves_like :decryptable
         it_behaves_like :verify_cbc_integrity_value
       end
 
-      context 'when enc=A256CBC+HS512' do
-        let(:enc) { :'A256CBC+HS512' }
+      context 'when enc=A256CBC-HS512' do
+        let(:enc) { :'A256CBC-HS512' }
         it_behaves_like :decryptable
         it_behaves_like :verify_cbc_integrity_value
       end
@@ -336,7 +336,7 @@ describe JSON::JWE do
       let(:input) { 'whatever' }
       let(:key) { public_key }
       let(:alg) { :RSA1_5 }
-      let(:enc) { :'A128CBC+HS256' }
+      let(:enc) { :'A128CBC-HS256' }
 
       context 'when alg=unknown' do
         let(:alg) { :unknown }

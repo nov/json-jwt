@@ -74,7 +74,7 @@ module JSON
     end
 
     def cbc?
-      [:'A128CBC+HS256', :'A256CBC+HS512'].collect(&:to_s).include? encryption_method.to_s
+      [:'A128CBC-HS256', :'A256CBC-HS512'].collect(&:to_s).include? encryption_method.to_s
     end
 
     def dir?
@@ -95,9 +95,9 @@ module JSON
         'aes-128-gcm'
       when :A256GCM.to_s
         'aes-256-gcm'
-      when :'A128CBC+HS256'.to_s
+      when :'A128CBC-HS256'.to_s
         'aes-128-cbc'
-      when :'A256CBC+HS512'.to_s
+      when :'A256CBC-HS512'.to_s
         'aes-256-cbc'
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
@@ -106,9 +106,9 @@ module JSON
 
     def sha_size
       case encryption_method.to_s
-      when :'A128CBC+HS256'.to_s
+      when :'A128CBC-HS256'.to_s
         256
-      when :'A256CBC+HS512'.to_s
+      when :'A256CBC-HS512'.to_s
         512
       else
         raise UnexpectedAlgorithm.new('Unknown Hash Size')

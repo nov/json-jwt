@@ -59,7 +59,7 @@ module JSON
       end
     end
 
-    def encrypt(public_key_or_secret, algorithm = :RSA1_5, encryption_method = :'A128CBC+HS256')
+    def encrypt(public_key_or_secret, algorithm = :RSA1_5, encryption_method = :'A128CBC-HS256')
       jwe = JWE.new(self)
       jwe.alg = algorithm
       jwe.enc = encryption_method
