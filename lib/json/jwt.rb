@@ -78,8 +78,8 @@ module JSON
 
     class << self
       def decode(jwt_string, key_or_secret = nil)
-        case jwt_string.count('.')
-        when 2 # JWT / JWS
+        case jwt_string.count('.') + 1
+        when JWS::NUM_OF_SEGMENTS # JWT / JWS
           header, claims, signature = jwt_string.split('.', 3).collect do |segment|
             UrlSafeBase64.decode64 segment.to_s
           end
@@ -96,7 +96,7 @@ module JSON
           #  So we need to use raw base64 strings for signature verification.
           jwt.verify signature_base_string, key_or_secret unless key_or_secret == :skip_verification
           jwt
-        when 4 # JWE
+        when JWE::NUM_OF_SEGMENTS
           jwe = JWE.new jwt_string
           jwe.header = MultiJson.load(
             UrlSafeBase64.decode64 jwt_string.split('.').first
@@ -104,7 +104,7 @@ module JSON
           jwe.decrypt! key_or_secret unless key_or_secret == :skip_decryption
           jwe
         else
-          raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 or 4 dots.')
+          raise InvalidFormat.new("Invalid JWT Format. JWT should include #{JWS::NUM_OF_SEGMENTS} or #{JWE::NUM_OF_SEGMENTS} segments.")
         end
       rescue MultiJson::DecodeError
         raise InvalidFormat.new("Invalid JSON Format")

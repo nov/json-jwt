@@ -7,6 +7,8 @@ module JSON
     class DecryptionFailed < JWT::VerificationFailed; end
     class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end
 
+    NUM_OF_SEGMENTS = 5
+
     attr_accessor(
       :public_key_or_secret, :private_key_or_secret, :mode,
       :input, :plain_text, :cipher_text, :authentication_tag, :iv,
@@ -119,6 +121,17 @@ module JSON
       OpenSSL::Digest::Digest.new "SHA#{sha_size}"
     end
 
+    def derive_encryption_and_mac_keys_cbc!
+      self.mac_key, self.encryption_key = content_encryption_key.unpack("a#{content_encryption_key.length / 2}" * 2)
+      self
+    end
+
+    def derive_encryption_and_mac_keys_gcm!
+      self.encryption_key = content_encryption_key
+      self.mac_key = :wont_be_used
+      self
+    end
+
     # encyption
 
     def jwe_encrypted_key
@@ -165,7 +178,7 @@ module JSON
       else
         cipher.random_key
       end
-      self.encryption_key = content_encryption_key
+      derive_encryption_and_mac_keys_gcm!
       self
     end
 
@@ -175,7 +188,7 @@ module JSON
       else
         SecureRandom.random_bytes sha_size / 8
       end
-      self.mac_key, self.encryption_key = content_encryption_key.unpack("a#{content_encryption_key.length / 2}" * 2)
+      derive_encryption_and_mac_keys_cbc!
       self
     end
 
@@ -200,6 +213,9 @@ module JSON
     # decryption
 
     def decode_segments!
+      unless input.count('.') + 1 == NUM_OF_SEGMENTS
+        raise InvalidFormat.new("Invalid JWE Format. JWE should include #{NUM_OF_SEGMENTS} segments.")
+      end
       _header_json_, self.jwe_encrypted_key, self.iv, self.cipher_text, self.authentication_tag = input.split('.').collect do |segment|
         UrlSafeBase64.decode64 segment
       end
@@ -233,9 +249,9 @@ module JSON
       self.content_encryption_key = decrypt_content_encryption_key
       case
       when gcm?
-        self.encryption_key = content_encryption_key
+        derive_encryption_and_mac_keys_gcm!
       when cbc?
-        self.mac_key, self.encryption_key = content_encryption_key.unpack("a#{content_encryption_key.length / 2}" * 2)
+        derive_encryption_and_mac_keys_cbc!
       end
       cipher.key = encryption_key
       cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM

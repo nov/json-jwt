@@ -4,6 +4,8 @@ module JSON
     class VerificationFailed < JWT::VerificationFailed; end
     class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end
 
+    NUM_OF_SEGMENTS = 3
+
     def initialize(jwt)
       replace jwt
       raise InvalidFormat.new('Signature Algorithm Required') unless algorithm

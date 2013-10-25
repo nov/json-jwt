@@ -333,7 +333,7 @@ describe JSON::JWE do
     end
 
     context 'when unknonw/unsupported algorithm given' do
-      let(:input) { 'whatever' }
+      let(:input) { 'header.key.iv.cipher_text.auth_tag' }
       let(:key) { public_key }
       let(:alg) { :RSA1_5 }
       let(:enc) { :'A128CBC-HS256' }
@@ -353,6 +353,17 @@ describe JSON::JWE do
           let(:alg) { alg }
           it_behaves_like :unsupported_algorithm_for_decryption
         end
+      end
+    end
+
+    context 'when invalid format of input given' do
+      let(:input) { 'header.payload.signature' }
+      let(:alg) { :RSA1_5 }
+      let(:enc) { :'A128CBC-HS256' }
+      it do
+        expect do
+          jwe.decrypt! public_key
+        end.to raise_error JSON::JWE::InvalidFormat
       end
     end
   end
