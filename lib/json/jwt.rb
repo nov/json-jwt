@@ -80,13 +80,13 @@ module JSON
       def decode(jwt_string, key_or_secret = nil)
         case jwt_string.count('.') + 1
         when JWS::NUM_OF_SEGMENTS # JWT / JWS
-          header, claims, signature = jwt_string.split('.', 3).collect do |segment|
+          header, claims, signature = jwt_string.split('.', JWS::NUM_OF_SEGMENTS).collect do |segment|
             UrlSafeBase64.decode64 segment.to_s
           end
           header, claims = [header, claims].collect do |json|
             MultiJson.load(json).with_indifferent_access
           end
-          signature_base_string = jwt_string.split('.')[0, 2].join('.')
+          signature_base_string = jwt_string.split('.')[0, JWS::NUM_OF_SEGMENTS - 1].join('.')
           jwt = new claims
           jwt.header = header
           jwt.signature = signature
