@@ -41,7 +41,7 @@ module JSON
       cipher.decrypt
       restore_cipher_keys!
       self.plain_text = cipher.update(cipher_text) + cipher.final
-      verify_cbc_integirity_value! if cbc?
+      verify_cbc_authentication_tag! if cbc?
       self
     end
 
@@ -245,7 +245,7 @@ module JSON
       end
     end
 
-    def verify_cbc_integirity_value!
+    def verify_cbc_authentication_tag!
       auth_data = input.split('.').first
       secured_input = [
         auth_data,
@@ -257,7 +257,7 @@ module JSON
         sha_digest, mac_key, secured_input
       )[0, sha_size / 2 / 8]
       unless authentication_tag == expected_authentication_tag
-        raise DecryptionFailed.new('Invalid integrity value')
+        raise DecryptionFailed.new('Invalid authentication tag')
       end
     end
   end

@@ -227,7 +227,7 @@ describe JSON::JWE do
       end
     end
 
-    shared_examples_for :verify_cbc_integrity_value do
+    shared_examples_for :verify_cbc_authentication_tag do
       let(:input) do
         _jwe_ = JSON::JWE.new plain_text
         _jwe_.alg, _jwe_.enc = alg, enc
@@ -316,13 +316,13 @@ describe JSON::JWE do
       context 'when enc=A128CBC-HS256' do
         let(:enc) { :'A128CBC-HS256' }
         it_behaves_like :decryptable
-        it_behaves_like :verify_cbc_integrity_value
+        it_behaves_like :verify_cbc_authentication_tag
       end
 
       context 'when enc=A256CBC-HS512' do
         let(:enc) { :'A256CBC-HS512' }
         it_behaves_like :decryptable
-        it_behaves_like :verify_cbc_integrity_value
+        it_behaves_like :verify_cbc_authentication_tag
       end
     end
 
