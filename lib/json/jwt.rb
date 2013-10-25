@@ -104,7 +104,7 @@ module JSON
           jwe.decrypt! key_or_secret unless key_or_secret == :skip_decryption
           jwe
         else
-          raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 or 3 dots.')
+          raise InvalidFormat.new('Invalid JWT Format. JWT should include 2 or 4 dots.')
         end
       rescue MultiJson::DecodeError
         raise InvalidFormat.new("Invalid JSON Format")
