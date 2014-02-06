@@ -16,6 +16,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "activesupport"
   gem.add_runtime_dependency "bindata"
   gem.add_development_dependency "rake", ">= 0.8"
-  gem.add_development_dependency "cover_me", ">= 1.2.0"
+  gem.add_development_dependency "simplecov"
   gem.add_development_dependency "rspec", ">= 2"
 end
