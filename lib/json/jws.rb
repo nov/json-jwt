@@ -68,8 +68,7 @@ module JSON
     def valid?(signature_base_string, public_key_or_secret)
       case
       when hmac?
-        secret = public_key_or_secret
-        sign(signature_base_string, secret) == signature
+        secure_compare sign(signature_base_string, public_key_or_secret), signature
       when rsa?
         public_key = public_key_or_secret
         public_key.verify digest, signature, signature_base_string
@@ -102,6 +101,18 @@ module JSON
         self.signature = hash_or_jwt.signature
       end
       self
+    end
+
+    private
+
+    # From devise: constant-time comparison algorithm to prevent timing attacks
+    def secure_compare(a, b)
+      return false if a.nil? || b.nil? || a.empty? || b.empty? || a.bytesize != b.bytesize
+      l = a.unpack "C#{a.bytesize}"
+
+      res = 0
+      b.each_byte { |byte| res |= byte ^ l.shift }
+      res == 0
     end
   end
 end
