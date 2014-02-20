@@ -272,7 +272,7 @@ module JSON
       expected_authentication_tag = OpenSSL::HMAC.digest(
         sha_digest, mac_key, secured_input
       )[0, sha_size / 2 / 8]
-      unless authentication_tag == expected_authentication_tag
+      unless secure_compare(authentication_tag, expected_authentication_tag)
         raise DecryptionFailed.new('Invalid authentication tag')
       end
     end

@@ -15,6 +15,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "url_safe_base64"
   gem.add_runtime_dependency "activesupport"
   gem.add_runtime_dependency "bindata"
+  gem.add_runtime_dependency "securecompare"
   gem.add_development_dependency "rake", ">= 0.8"
   gem.add_development_dependency "simplecov"
   gem.add_development_dependency "rspec", ">= 2"
