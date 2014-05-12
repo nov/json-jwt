@@ -24,7 +24,7 @@ module JSON
     private
 
     def digest
-      OpenSSL::Digest::Digest.new "SHA#{algorithm.to_s[2, 3]}"
+      OpenSSL::Digest.new "SHA#{algorithm.to_s[2, 3]}"
     end
 
     def hmac?

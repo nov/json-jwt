@@ -118,7 +118,7 @@ module JSON
     end
 
     def sha_digest
-      OpenSSL::Digest::Digest.new "SHA#{sha_size}"
+      OpenSSL::Digest.new "SHA#{sha_size}"
     end
 
     def derive_encryption_and_mac_keys_cbc!
