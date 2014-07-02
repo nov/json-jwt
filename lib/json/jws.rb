@@ -84,7 +84,7 @@ module JSON
     def verify_ecdsa_group!(key)
       group_name = case digest.digest_length * 8
       when 256
-        :secp256k1
+        :prime256v1
       when 384
         :secp384r1
       when 512

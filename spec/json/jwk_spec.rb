@@ -27,16 +27,16 @@ describe JSON::JWK do
     let(:expected_coodinates) do
       {
         256 => {
-          x: 'OTUyMUU1NjJFOEQ3NDA0MTRDOEEyQjk5RDQ2NkZERDVFNUYwQzUzMUFGNENBNkMxMTY2Q0NFQzUzQjVGRDMwRg',
-          y: 'MDIwQTRENTQwN0ExQkJFNzQwNkJDNjIyMUI5NjUxQTY1NjY5Mjg4QUU1OEE1NjRDNjcwN0Q1RkQ5REM3MDlCNw'
+          x: 'saPyrO4Lh9kh2FxrF9y1QVmZznWnRRJwpr12UHqzrVY',
+          y: 'MMz4W9zzqlrJhqr-JyrpvlnaIIyZQE6DfrgPkxMAw1M'
         },
         384 => {
-          x: 'QTY1Q0MwQTcyMTY3MkJCQUIzODYwRTU3OUM4NjVCMTYzREExNjY4MUY2NTVEOTc4RjkxMTY2RUMzOUVDMzRDMUJEQjcyQUFCQTVGQUI2NDcyOERGMjgwMDVCNzA1NDZE',
-          y: 'OEIxMDczN0RGODY0RERGNzFCOTlFOEE5MThCOTJGNDAxMzQyQ0RFMzY2RTkwMkY3ODRFNTEzMUZBMjA1MDczMzhCRDE4RUM3QjA2NEU4QTRENEQzQjI5MkUzOTYyQkRC'
+          x: 'plzApyFnK7qzhg5XnIZbFj2hZoH2Vdl4-RFm7DnsNMG9tyqrpfq2RyjfKABbcFRt',
+          y: 'ixBzffhk3fcbmeipGLkvQBNCzeNm6QL3hOUTH6IFBzOL0Y7HsGTopNTTspLjlivb'
         },
         512 => {
-          x: 'MDFDMzAyMEZFNkI0NkJBQUU3MTNENEVGMEI0OThFQTg1RkMzMTk3NDYwRTU4REUyNERCRTFFMUNEQzEzOUI2OTAzRUEyQkEzQzdEMzNGN0ZDNzdGMTQ2MUVCRDBFODY5QUIzMTI3RTJCNjBGNjE5QTJFMUFDNkM4M0M0ODBCRDJBRkZG',
-          y: 'MDE0MkQ4MTFERjI1RjlCNTdGMDQ4REJDRjVBN0IzODUyMkQ5RDUxMEM1REE1QjYwMENGMTMyRjU4RUQ4QjZBNjFBRTFDMjVDQTYyQ0IzNTQzMzI5NUQ2QzAxQTdBNzIzODNBNEQ3MjBEOTI4NTZCNTU3NjYxMzc4RDM4OEExQkI4MjM2'
+          x: 'AcMCD-a0a6rnE9TvC0mOqF_DGXRg5Y3iTb4eHNwTm2kD6iujx9M_f8d_FGHr0OhpqzEn4rYPYZouGsbIPEgL0q__',
+          y: 'AULYEd8l-bV_BI289aezhSLZ1RDF2ltgDPEy9Y7YtqYa4cJcpiyzVDMpXWwBp6cjg6TXINkoVrVXZhN404ihu4I2'
         }
       }
     end
@@ -121,14 +121,12 @@ NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
 
     context 'when ECDSA' do
       it do
-        expect do
-          JSON::JWK.decode(
-            kty: :EC,
-            crv: 'crv',
-            x: 'x',
-            y: 'y'
-          )
-        end.to raise_error NotImplementedError
+        JSON::JWK.decode(
+          kty: :EC,
+          crv: 'P-256',
+          x: 'MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4',
+          y: '4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'
+        ).should be_instance_of OpenSSL::PKey::EC
       end
     end
 

@@ -12,19 +12,6 @@ module JSON
 
     private
 
-    def ecdsa_curve_name(ecdsa_key)
-      case ecdsa_key.group.curve_name
-      when 'secp256k1'
-        :'P-256'
-      when 'secp384r1'
-        :'P-384'
-      when 'secp521r1'
-        :'P-521'
-      else
-        raise UnknownAlgorithm.new('Unknown ECDSA Curve')
-      end
-    end
-
     def ecdsa_coodinates(ecdsa_key)
       unless @ecdsa_coodinates
         hex = ecdsa_key.public_key.to_bn.to_s(16)
@@ -33,8 +20,8 @@ module JSON
         hex_x =  hex[2, data_len/2]
         hex_y = hex[2+data_len/2, data_len/2]
         @ecdsa_coodinates = {
-          :x => hex_x,
-          :y => hex_y,
+          :x => [hex_x].pack("H*"),
+          :y => [hex_y].pack("H*")
         }
       end
       @ecdsa_coodinates
@@ -51,7 +38,7 @@ module JSON
       when OpenSSL::PKey::EC
         {
           :kty => :EC,
-          :crv => ecdsa_curve_name(public_key),
+          :crv => self.class.ecdsa_curve_identifier_for(public_key.group.curve_name),
           :x   => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:x].to_s),
           :y   => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s),
         }
@@ -62,6 +49,32 @@ module JSON
     end
 
     class << self
+      def ecdsa_curve_name_for(curve_identifier)
+        case curve_identifier.to_s
+        when 'P-256'
+          'prime256v1'
+        when 'P-384'
+          'secp384r1'
+        when 'P-521'
+          'secp521r1'
+        else
+          raise UnknownAlgorithm.new('Unknown ECDSA Curve')
+        end
+      end
+
+      def ecdsa_curve_identifier_for(curve_name)
+        case curve_name
+        when 'prime256v1'
+          :'P-256'
+        when 'secp384r1'
+          :'P-384'
+        when 'secp521r1'
+          :'P-521'
+        else
+          raise UnknownAlgorithm.new('Unknown ECDSA Curve')
+        end
+      end
+
       def decode(jwk)
         jwk = jwk.with_indifferent_access
         case jwk[:kty].to_s
@@ -73,7 +86,13 @@ module JSON
           key.n = n
           key
         when 'EC'
-          raise NotImplementedError.new('Not Implemented Yet')
+          key = OpenSSL::PKey::EC.new ecdsa_curve_name_for(jwk[:crv])
+          x, y = [jwk[:x], jwk[:y]].collect do |decoded|
+            UrlSafeBase64.decode64(decoded).unpack('H*').first
+          end
+          key_bn = OpenSSL::BN.new ['04', x, y].join, 16
+          key.public_key = OpenSSL::PKey::EC::Point.new key.group, key_bn
+          key
         else
           raise UnknownAlgorithm.new('Unknown Algorithm')
         end

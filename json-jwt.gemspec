@@ -18,5 +18,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "securecompare"
   gem.add_development_dependency "rake", ">= 0.8"
   gem.add_development_dependency "simplecov"
-  gem.add_development_dependency "rspec", ">= 2"
+  gem.add_development_dependency "rspec"
+  gem.add_development_dependency 'rspec-its'
 end

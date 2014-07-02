@@ -67,7 +67,7 @@ describe JSON::JWT do
 
       context 'when no signature nor public_key_or_secret given' do
         it do
-          jwt.verify(signature_base_string).should be_true
+          jwt.verify(signature_base_string).should == true
         end
       end
 
