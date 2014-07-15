@@ -88,10 +88,9 @@ module JSON
         when 'EC'
           key = OpenSSL::PKey::EC.new ecdsa_curve_name_for(jwk[:crv])
           x, y = [jwk[:x], jwk[:y]].collect do |decoded|
-            UrlSafeBase64.decode64(decoded).unpack('H*').first
+            OpenSSL::BN.new UrlSafeBase64.decode64(decoded), 2
           end
-          key_bn = OpenSSL::BN.new ['04', x, y].join, 16
-          key.public_key = OpenSSL::PKey::EC::Point.new key.group, key_bn
+          key.public_key = OpenSSL::PKey::EC::Point.new(key.group).mul(x, y)
           key
         else
           raise UnknownAlgorithm.new('Unknown Algorithm')
