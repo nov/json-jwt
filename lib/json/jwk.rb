@@ -20,8 +20,8 @@ module JSON
         hex_x =  hex[2, data_len/2]
         hex_y = hex[2+data_len/2, data_len/2]
         @ecdsa_coodinates = {
-          :x => [hex_x].pack("H*"),
-          :y => [hex_y].pack("H*")
+          x: [hex_x].pack("H*"),
+          y: [hex_y].pack("H*")
         }
       end
       @ecdsa_coodinates
@@ -31,16 +31,16 @@ module JSON
       hash = case public_key
       when OpenSSL::PKey::RSA
         {
-          :kty => :RSA,
-          :e   => UrlSafeBase64.encode64(public_key.e.to_s(2)),
-          :n   => UrlSafeBase64.encode64(public_key.n.to_s(2)),
+          kty: :RSA,
+          e: UrlSafeBase64.encode64(public_key.e.to_s(2)),
+          n: UrlSafeBase64.encode64(public_key.n.to_s(2)),
         }
       when OpenSSL::PKey::EC
         {
-          :kty => :EC,
-          :crv => self.class.ecdsa_curve_identifier_for(public_key.group.curve_name),
-          :x   => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:x].to_s),
-          :y   => UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s),
+          kty: :EC,
+          crv: self.class.ecdsa_curve_identifier_for(public_key.group.curve_name),
+          x: UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:x].to_s),
+          y: UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s),
         }
       else
         raise UnknownAlgorithm.new('Unknown Algorithm')
@@ -86,12 +86,16 @@ module JSON
           key.n = n
           key
         when 'EC'
-          key = OpenSSL::PKey::EC.new ecdsa_curve_name_for(jwk[:crv])
-          x, y = [jwk[:x], jwk[:y]].collect do |decoded|
-            OpenSSL::BN.new UrlSafeBase64.decode64(decoded), 2
+          if RUBY_VERSION >= '2.0.0'
+            key = OpenSSL::PKey::EC.new ecdsa_curve_name_for(jwk[:crv])
+            x, y = [jwk[:x], jwk[:y]].collect do |decoded|
+              OpenSSL::BN.new UrlSafeBase64.decode64(decoded), 2
+            end
+            key.public_key = OpenSSL::PKey::EC::Point.new(key.group).mul(x, y)
+            key
+          else
+            raise UnknownAlgorithm.new('ECDSA JWK Decoding requires Ruby 2.0+')
           end
-          key.public_key = OpenSSL::PKey::EC::Point.new(key.group).mul(x, y)
-          key
         else
           raise UnknownAlgorithm.new('Unknown Algorithm')
         end

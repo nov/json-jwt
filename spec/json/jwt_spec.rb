@@ -92,8 +92,8 @@ describe JSON::JWT do
 
     context 'when signed' do
       it 'should delegate verification to JWS' do
-        jws.should_receive(:verify)
-        JSON::JWS.should_receive(:new).and_return(jws)
+        expect(jws).to receive(:verify)
+        expect(JSON::JWS).to receive(:new).and_return(jws)
         jwt.verify 'shared_secret'
       end
     end

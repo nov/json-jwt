@@ -120,13 +120,26 @@ NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
     end
 
     context 'when ECDSA' do
-      it do
-        JSON::JWK.decode(
-          kty: :EC,
-          crv: 'P-256',
-          x: 'MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4',
-          y: '4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'
-        ).should be_instance_of OpenSSL::PKey::EC
+      if RUBY_VERSION >= '2.0.0'
+        it do
+          JSON::JWK.decode(
+            kty: :EC,
+            crv: 'P-256',
+            x: 'MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4',
+            y: '4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'
+          ).should be_instance_of OpenSSL::PKey::EC
+        end
+      else
+        it do
+          expect do
+            JSON::JWK.decode(
+              kty: :EC,
+              crv: 'P-256',
+              x: 'MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4',
+              y: '4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'
+            )
+          end.to raise_error JSON::JWK::UnknownAlgorithm
+        end
       end
     end
 
