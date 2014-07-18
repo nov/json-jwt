@@ -121,13 +121,30 @@ NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
 
     context 'when ECDSA' do
       if RUBY_VERSION >= '2.0.0'
-        it do
-          JSON::JWK.decode(
-            kty: :EC,
-            crv: 'P-256',
-            x: 'MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4',
-            y: '4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'
-          ).should be_instance_of OpenSSL::PKey::EC
+        [{
+          alg: 'EC',
+          crv: 'P-256',
+          kty: 'EC',
+          x: 'eZXWiRe0I3TvHPXiGnvO944gjF1o4UmitH2CVwYIrPg',
+          y: 'AKFNss7S35tOsp5iY7-YuLGs2cLrTKFk80JvgVzMPHQ3'
+        }, {
+          alg: 'EC',
+          crv: 'P-384',
+          kty: 'EC',
+          x: 'XGp9ovRmtaBjlZKGI1XDBUB6F3d4Xov4JFKUCaeVjMD0_GAp20IB_wZz6howe3yi',
+          y: 'Vhy6zh3KOkDqSA5WP6BtDyS9CZR7RoCCWfwymBB3HIBIR_yl32hnSYXtlwEr2EoK'
+        }, {
+          alg: 'EC',
+          crv: 'P-521',
+          kty: 'EC',
+          x: 'KrVaPTvvYmUUSf_1UpwJt_Lg9UT-8OHD_AUd-d7-Q8Rfs4t-lTJ5KEyjbfMzTHsvNulWftuaMH6Ap3l5vbDb2nQ',
+          y: 'AIxSEGvlKlWZiN_Rc3VjBs5oVB5l-JfCZHm2LyZpOxAzWrpjHlK121H2ZngM8Ra8ggKa64hEMDE1fMV__C_EZv9m'
+        }].each do |jwk|
+          describe jwk['crv'] do
+            it do
+              JSON::JWK.decode(jwk).should be_instance_of OpenSSL::PKey::EC
+            end
+          end
         end
       else
         it do
