@@ -34,7 +34,7 @@ JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON 
 
   # With signature & encryption
   jwe = jws.encrypt(key, algorithm, encryption_method) # algorithm & encryption_method are optional. default RSA1_5 & A128CBC-HS256
-  jws.to_s # => header.encrypted_key.iv.cipher_text.authentication_tag
+  jwe.to_s # => header.encrypted_key.iv.cipher_text.authentication_tag
 
 For details about <code>key</code> and <code>algorithm</code>, see
 {JWS Spec}[https://github.com/nov/json-jwt/blob/master/spec/json/jws_spec.rb] and
