@@ -27,7 +27,7 @@ module JSON
     end
 
     def encrypt!(public_key_or_secret)
-      self.mode = :encyption
+      self.mode = :encryption
       self.plain_text = input
       self.public_key_or_secret = public_key_or_secret
       cipher.encrypt
@@ -48,7 +48,7 @@ module JSON
     end
 
     def to_s
-      if mode == :encyption
+      if mode == :encryption
         [
           header.to_json,
           jwe_encrypted_key,
@@ -132,7 +132,7 @@ module JSON
       self
     end
 
-    # encyption
+    # encryption
 
     def jwe_encrypted_key
       @jwe_encrypted_key ||= case algorithm.to_s
