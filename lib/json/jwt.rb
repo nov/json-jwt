@@ -102,8 +102,12 @@ module JSON
           jwe.header = MultiJson.load(
             UrlSafeBase64.decode64 jwt_string.split('.').first
           ).with_indifferent_access
-          jwe.decrypt! key_or_secret unless key_or_secret == :skip_decryption
-          jwe
+          if key_or_secret == :skip_decryption
+            jwe
+          else
+            jwe.decrypt! key_or_secret
+            JSON::JWT.decode jwe.plain_text, :skip_verification
+          end
         else
           raise InvalidFormat.new("Invalid JWT Format. JWT should include #{JWS::NUM_OF_SEGMENTS} or #{JWE::NUM_OF_SEGMENTS} segments.")
         end

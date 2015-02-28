@@ -160,13 +160,14 @@ describe JSON::JWT do
       let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
 
       it 'should decryptable' do
-        JSON::JWT.decode(input, private_key).should be_a JSON::JWE
+        JSON::JWT.decode(input, private_key).should be_instance_of JSON::JWT
       end
 
       context 'when :skip_decryption given as secret/key' do
         it 'should skip verification' do
           expect do
             jwe = JSON::JWT.decode input, :skip_decryption
+            jwe.should be_instance_of JSON::JWE
             jwe.header.should == {'alg' => 'RSA1_5', 'enc' => 'A128CBC-HS256'}
           end.not_to raise_error
         end
