@@ -145,6 +145,59 @@ describe JSON::JWT do
         end
       end
 
+      context 'when alg header malformed' do
+        context 'from alg=HS256' do
+          context 'to alg=none' do
+            let(:malformed_jwt) do
+              jwt = JSON::JWT.decode jws.to_s, :skip_verification
+              jwt.header[:alg] = :none
+              jwt.signature = ''
+              jwt
+            end
+
+            it 'should do verification' do
+              expect do
+                JSON::JWT.decode malformed_jwt.to_s, 'secret'
+              end.to raise_error JSON::JWT::VerificationFailed
+            end
+          end
+        end
+
+        context 'from alg=RS256' do
+          let(:jws) do
+            jwt.sign private_key, :RS256
+          end
+
+          context 'to alg=none' do
+            let(:malformed_jwt) do
+              jwt = JSON::JWT.decode jws.to_s, :skip_verification
+              jwt.header[:alg] = :none
+              jwt.signature = ''
+              jwt
+            end
+
+            it 'should fail verification' do
+              expect do
+                JSON::JWT.decode malformed_jwt.to_s, public_key
+              end.to raise_error JSON::JWT::UnexpectedAlgorithm
+            end
+          end
+
+          context 'to alg=HS256' do
+            let(:malformed_jwt) do
+              jwt = JSON::JWT.decode jws.to_s, :skip_verification
+              jwt.sign public_key.to_s, :HS256
+            end
+
+            it 'should fail verification' do
+              expect do
+                JSON::JWT.decode malformed_jwt.to_s, public_key
+              end.to raise_error JSON::JWS::UnexpectedAlgorithm
+            end
+          end
+        end
+      end
+
       context 'when :skip_verification given as secret/key' do
         it 'should skip verification' do
           expect do

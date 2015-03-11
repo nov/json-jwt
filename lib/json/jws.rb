@@ -79,6 +79,8 @@ module JSON
       else
         raise UnexpectedAlgorithm.new('Unknown Signature Algorithm')
       end
+    rescue TypeError => e
+      raise UnexpectedAlgorithm.new(e.message)
     end
 
     def verify_ecdsa_group!(key)
