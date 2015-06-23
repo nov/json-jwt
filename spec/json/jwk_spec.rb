@@ -82,27 +82,27 @@ describe JSON::JWK do
       let(:n) { 'AK8ppaAGn6N3jDic2DhDN5mI5mWzvhfL1AFZOS9q2EBM8L5sjZbYiaHeNoKillZGmEF9a9g6Z20bDnoHTuHPsx93HYkZqPumFZ8K9lLCbqKAMWw2Qgk10RgrZ-kblJotTBCeer9-tZSWO-OWFzP4gp8MpSuQOQbwTJwDgEkFIQLUK2YgzWbn1PoW8xcfbVyWhZD880ELGRW6GhRgYAl0DN_EQS8kyUa0CusYCzOOg2W3-7qjYeojyP6jiOEr-eyjC7hcUvTVoTfz84BiZv72KS3i5JS8ZNNuRp5Ce51wjoDDUoNxDLWv6Da6qMaGpKz6NTSNbvhE_KFhpp4wf5yRQD8=' }
       let(:pem) do
         if RUBY_VERSION >= '1.9.3'
-          <<-PEM
------BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArymloAafo3eMOJzYOEM3
-mYjmZbO+F8vUAVk5L2rYQEzwvmyNltiJod42gqKWVkaYQX1r2DpnbRsOegdO4c+z
-H3cdiRmo+6YVnwr2UsJuooAxbDZCCTXRGCtn6RuUmi1MEJ56v361lJY745YXM/iC
-nwylK5A5BvBMnAOASQUhAtQrZiDNZufU+hbzFx9tXJaFkPzzQQsZFboaFGBgCXQM
-38RBLyTJRrQK6xgLM46DZbf7uqNh6iPI/qOI4Sv57KMLuFxS9NWhN/PzgGJm/vYp
-LeLklLxk025GnkJ7nXCOgMNSg3EMta/oNrqoxoakrPo1NI1u+ET8oWGmnjB/nJFA
-PwIDAQAB
------END PUBLIC KEY-----
+          <<-PEM.strip_heredoc
+            -----BEGIN PUBLIC KEY-----
+            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArymloAafo3eMOJzYOEM3
+            mYjmZbO+F8vUAVk5L2rYQEzwvmyNltiJod42gqKWVkaYQX1r2DpnbRsOegdO4c+z
+            H3cdiRmo+6YVnwr2UsJuooAxbDZCCTXRGCtn6RuUmi1MEJ56v361lJY745YXM/iC
+            nwylK5A5BvBMnAOASQUhAtQrZiDNZufU+hbzFx9tXJaFkPzzQQsZFboaFGBgCXQM
+            38RBLyTJRrQK6xgLM46DZbf7uqNh6iPI/qOI4Sv57KMLuFxS9NWhN/PzgGJm/vYp
+            LeLklLxk025GnkJ7nXCOgMNSg3EMta/oNrqoxoakrPo1NI1u+ET8oWGmnjB/nJFA
+            PwIDAQAB
+            -----END PUBLIC KEY-----
           PEM
         else
-          <<-PEM
------BEGIN RSA PUBLIC KEY-----
-MIIBCgKCAQEArymloAafo3eMOJzYOEM3mYjmZbO+F8vUAVk5L2rYQEzwvmyNltiJ
-od42gqKWVkaYQX1r2DpnbRsOegdO4c+zH3cdiRmo+6YVnwr2UsJuooAxbDZCCTXR
-GCtn6RuUmi1MEJ56v361lJY745YXM/iCnwylK5A5BvBMnAOASQUhAtQrZiDNZufU
-+hbzFx9tXJaFkPzzQQsZFboaFGBgCXQM38RBLyTJRrQK6xgLM46DZbf7uqNh6iPI
-/qOI4Sv57KMLuFxS9NWhN/PzgGJm/vYpLeLklLxk025GnkJ7nXCOgMNSg3EMta/o
-NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
------END RSA PUBLIC KEY-----
+          <<-PEM.strip_heredoc
+            -----BEGIN RSA PUBLIC KEY-----
+            MIIBCgKCAQEArymloAafo3eMOJzYOEM3mYjmZbO+F8vUAVk5L2rYQEzwvmyNltiJ
+            od42gqKWVkaYQX1r2DpnbRsOegdO4c+zH3cdiRmo+6YVnwr2UsJuooAxbDZCCTXR
+            GCtn6RuUmi1MEJ56v361lJY745YXM/iCnwylK5A5BvBMnAOASQUhAtQrZiDNZufU
+            +hbzFx9tXJaFkPzzQQsZFboaFGBgCXQM38RBLyTJRrQK6xgLM46DZbf7uqNh6iPI
+            /qOI4Sv57KMLuFxS9NWhN/PzgGJm/vYpLeLklLxk025GnkJ7nXCOgMNSg3EMta/o
+            NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
+            -----END RSA PUBLIC KEY-----
           PEM
         end
       end
