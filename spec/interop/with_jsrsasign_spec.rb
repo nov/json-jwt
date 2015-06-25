@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe 'interoperability' do
-  context 'with jsjws' do
+describe 'interop' do
+  describe 'with jsrsasign' do
     context 'JWS' do
       let(:public_key) do
         pem = <<-PEM.strip_heredoc
@@ -23,9 +23,7 @@ describe 'interoperability' do
         OpenSSL::PKey::EC.new pem
       end
       let(:jws_string) do
-        <<-JWS_STRING.strip_heredoc
-          eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2p3dC1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG86bWlrZUBleGFtcGxlLmNvbSIsIm5iZiI6MTQzNTA2MjUyMywiZXhwIjoxNDM1MDY2MTIzLCJpYXQiOjE0MzUwNjI1MjMsImp0aSI6ImlkMTIzNDU2IiwidHlwIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9yZWdpc3RlciJ9.HFmKrExGIFm5SwzTq_ayG80ELUIKnrR9psedV_6ZsuHl5ZLZ-1nV35o0yjKkN7qPQipQMK90xMvDYpi7e2XU9Q
-        JWS_STRING
+        'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2p3dC1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG86bWlrZUBleGFtcGxlLmNvbSIsIm5iZiI6MTQzNTA2MjUyMywiZXhwIjoxNDM1MDY2MTIzLCJpYXQiOjE0MzUwNjI1MjMsImp0aSI6ImlkMTIzNDU2IiwidHlwIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9yZWdpc3RlciJ9.HFmKrExGIFm5SwzTq_ayG80ELUIKnrR9psedV_6ZsuHl5ZLZ-1nV35o0yjKkN7qPQipQMK90xMvDYpi7e2XU9Q'
       end
       let(:payload) do
         {
@@ -39,18 +37,10 @@ describe 'interoperability' do
         }
       end
 
-      describe 'sign' do
-        it 'should generate same output' do
-          JSON::JWT.new(payload).sign(
-            private_key, :ES256
-          ).to_s.should == jws_string
-        end
-      end
-
       describe 'verify' do
         it 'should succeed' do
           expect do
-            JSON::JWT.decode(jws_string, public_key).should be_true
+            JSON::JWT.decode(jws_string, public_key)
           end.not_to raise_error
         end
       end

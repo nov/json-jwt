@@ -59,7 +59,10 @@ module JSON
       when ecdsa?
         private_key = private_key_or_secret
         verify_ecdsa_group! private_key
-        private_key.dsa_sign_asn1 digest.digest(signature_base_string)
+        asn1_to_raw(
+          private_key.dsa_sign_asn1(digest.digest signature_base_string),
+          private_key
+        )
       else
         raise UnexpectedAlgorithm.new('Unknown Signature Algorithm')
       end
@@ -75,7 +78,10 @@ module JSON
       when ecdsa?
         public_key = public_key_or_secret
         verify_ecdsa_group! public_key
-        public_key.dsa_verify_asn1 digest.digest(signature_base_string), signature
+        public_key.dsa_verify_asn1(
+          digest.digest(signature_base_string),
+          raw_to_asn1(signature, public_key)
+        )
       else
         raise UnexpectedAlgorithm.new('Unknown Signature Algorithm')
       end
@@ -103,6 +109,18 @@ module JSON
         self.signature = hash_or_jwt.signature
       end
       self
+    end
+
+    def raw_to_asn1(signature, public_key)
+      byte_size = (public_key.group.degree + 7) / 8
+      r = signature[0..(byte_size - 1)]
+      s = signature[byte_size..-1]
+      OpenSSL::ASN1::Sequence.new([r, s].map { |int| OpenSSL::ASN1::Integer.new(OpenSSL::BN.new(int, 2)) }).to_der
+    end
+
+    def asn1_to_raw(signature, private_key)
+      byte_size = (private_key.group.degree + 7) / 8
+      OpenSSL::ASN1.decode(signature).value.map { |value| value.value.to_s(2).rjust(byte_size, "\x00") }.join
     end
   end
 end

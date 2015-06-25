@@ -69,6 +69,22 @@ describe JSON::JWS do
         it_behaves_like :jwt_with_alg
         it_behaves_like :generate_expected_signature
       end
+
+      [:ES256, :ES384, :ES512].each do |algorithm|
+        describe algorithm do
+          let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+          let(:public_key_or_secret)  { public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+          it 'should be self-verifiable' do
+            expect do
+              JSON::JWT.decode(
+                JSON::JWT.new(claims).sign(
+                  private_key_or_secret, algorithm
+                ).to_s, public_key_or_secret
+              )
+            end.not_to raise_error
+          end
+        end
+      end
     end
 
     describe 'unknown algorithm' do
