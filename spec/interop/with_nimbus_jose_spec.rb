@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'interop' do
   describe 'with Nimbus JOSE' do
-    if !NimbusSpecHelper.nimbus_available?
+    if NimbusSpecHelper.nimbus_available?
       context 'JWE' do
         let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
         let(:private_key_path) { der_file_path 'rsa/private_key' }
