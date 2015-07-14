@@ -10,6 +10,18 @@ module JSON
       'application/jwk+json'
     end
 
+    def thumbprint(digest = OpenSSL::Digest::SHA256.new)
+      digest = case digest
+      when OpenSSL::Digest
+        digest
+      when String, Symbol
+        OpenSSL::Digest.new digest.to_s
+      else
+        raise UnknownAlgorithm.new('Unknown Digest Algorithm')
+      end
+      UrlSafeBase64.encode64 digest.digest(normalize.to_json)
+    end
+
     private
 
     def ecdsa_coodinates(ecdsa_key)
@@ -17,7 +29,7 @@ module JSON
         hex = ecdsa_key.public_key.to_bn.to_s(16)
         data_len = hex.length - 2
         type = hex[0,2]
-        hex_x =  hex[2, data_len/2]
+        hex_x = hex[2, data_len/2]
         hex_y = hex[2+data_len/2, data_len/2]
         @ecdsa_coodinates = {
           x: [hex_x].pack("H*"),
@@ -43,9 +55,29 @@ module JSON
           y: UrlSafeBase64.encode64(ecdsa_coodinates(public_key)[:y].to_s),
         }
       else
-        raise UnknownAlgorithm.new('Unknown Algorithm')
+        raise UnknownAlgorithm.new('Unknown Key Type')
       end
       hash.merge(options)
+    end
+
+    def normalize
+      case self[:kty].try(:to_sym)
+      when :RSA
+        {
+          e: self[:e],
+          kty: self[:kty],
+          n: self[:n]
+        }
+      when :EC
+        {
+          crv: self[:crv],
+          kty: self[:kty],
+          x: self[:x],
+          y: self[:y]
+        }
+      else
+        raise UnknownAlgorithm.new('Unknown Key Type')
+      end
     end
 
     class << self
@@ -97,7 +129,7 @@ module JSON
             raise UnknownAlgorithm.new('ECDSA JWK Decoding requires Ruby 2.0+')
           end
         else
-          raise UnknownAlgorithm.new('Unknown Algorithm')
+          raise UnknownAlgorithm.new('Unknown Key Type')
         end
       end
 

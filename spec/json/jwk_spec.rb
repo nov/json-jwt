@@ -21,6 +21,18 @@ describe JSON::JWK do
       its(:kid) { jwk[:kid].should == '12345' }
       its(:use) { jwk[:use].should == :sig }
     end
+
+    describe '#thumbprint' do
+      context 'using default hash function' do
+        subject { jwk.thumbprint }
+        it { should == 'nuBTimkcSt_AuEsD8Yv3l8CoGV31bu_3gsRDGN1iVKA' }
+      end
+
+      context 'using SHA512 hash function' do
+        subject { jwk.thumbprint :SHA512 }
+        it { should == '6v7pXTnQLMiQgvJlPJUdhAUSuGLzgF8C1r3ABAMFet6bc53ea-Pq4ZGbGu3RoAFsNRT1-RhTzDqtqXuLU6NOtw' }
+      end
+    end
   end
 
   context 'when ECDSA public key given' do
@@ -60,12 +72,12 @@ describe JSON::JWK do
     end
   end
 
-  describe 'unknown algorithm' do
+  describe 'unknown key type' do
     it do
       key = OpenSSL::PKey::DSA.generate 256
       expect do
         JSON::JWK.new key
-      end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown Algorithm'
+      end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown Key Type'
     end
   end
 
