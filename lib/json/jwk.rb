@@ -50,12 +50,12 @@ module JSON
 
     class << self
       def ecdsa_curve_name_for(curve_identifier)
-        case curve_identifier.to_s
-        when 'P-256'
+        case curve_identifier.try(:to_sym)
+        when :'P-256'
           'prime256v1'
-        when 'P-384'
+        when :'P-384'
           'secp384r1'
-        when 'P-521'
+        when :'P-521'
           'secp521r1'
         else
           raise UnknownAlgorithm.new('Unknown ECDSA Curve')
@@ -77,15 +77,15 @@ module JSON
 
       def decode(jwk)
         jwk = jwk.with_indifferent_access
-        case jwk[:kty].to_s
-        when 'RSA'
+        case jwk[:kty].try(:to_sym)
+        when :RSA
           e = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:e]), 2
           n = OpenSSL::BN.new UrlSafeBase64.decode64(jwk[:n]), 2
           key = OpenSSL::PKey::RSA.new
           key.e = e
           key.n = n
           key
-        when 'EC'
+        when :EC
           if RUBY_VERSION >= '2.0.0'
             key = OpenSSL::PKey::EC.new ecdsa_curve_name_for(jwk[:crv])
             x, y = [jwk[:x], jwk[:y]].collect do |decoded|

@@ -28,15 +28,15 @@ module JSON
     end
 
     def hmac?
-      [:HS256, :HS384, :HS512].collect(&:to_s).include? algorithm.to_s
+      [:HS256, :HS384, :HS512].include? algorithm.try(:to_sym)
     end
 
     def rsa?
-      [:RS256, :RS384, :RS512].collect(&:to_s).include? algorithm.to_s
+      [:RS256, :RS384, :RS512].include? algorithm.try(:to_sym)
     end
 
     def ecdsa?
-      [:ES256, :ES384, :ES512].collect(&:to_s).include? algorithm.to_s
+      [:ES256, :ES384, :ES512].include? algorithm.try(:to_sym)
     end
 
     def signature_base_string

@@ -52,7 +52,7 @@ module JSON
     end
 
     def verify(signature_base_string, public_key_or_secret = nil)
-      if alg.to_s == 'none'
+      if alg.try(:to_sym) == :none
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
       else

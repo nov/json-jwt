@@ -72,15 +72,15 @@ module JSON
     end
 
     def gcm?
-      [:A128GCM, :A256GCM].collect(&:to_s).include? encryption_method.to_s
+      [:A128GCM, :A256GCM].include? encryption_method.try(:to_sym)
     end
 
     def cbc?
-      [:'A128CBC-HS256', :'A256CBC-HS512'].collect(&:to_s).include? encryption_method.to_s
+      [:'A128CBC-HS256', :'A256CBC-HS512'].include? encryption_method.try(:to_sym)
     end
 
     def dir?
-      :dir.to_s == algorithm.to_s
+      :dir == algorithm.try(:to_sym)
     end
 
     def cipher
@@ -92,14 +92,14 @@ module JSON
     end
 
     def cipher_name
-      case encryption_method.to_s
-      when :A128GCM.to_s
+      case encryption_method.try(:to_sym)
+      when :A128GCM
         'aes-128-gcm'
-      when :A256GCM.to_s
+      when :A256GCM
         'aes-256-gcm'
-      when :'A128CBC-HS256'.to_s
+      when :'A128CBC-HS256'
         'aes-128-cbc'
-      when :'A256CBC-HS512'.to_s
+      when :'A256CBC-HS512'
         'aes-256-cbc'
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
@@ -107,10 +107,10 @@ module JSON
     end
 
     def sha_size
-      case encryption_method.to_s
-      when :'A128CBC-HS256'.to_s
+      case encryption_method.try(:to_sym)
+      when :'A128CBC-HS256'
         256
-      when :'A256CBC-HS512'.to_s
+      when :'A256CBC-HS512'
         512
       else
         raise UnexpectedAlgorithm.new('Unknown Hash Size')
@@ -135,22 +135,22 @@ module JSON
     # encryption
 
     def jwe_encrypted_key
-      @jwe_encrypted_key ||= case algorithm.to_s
-      when :RSA1_5.to_s
+      @jwe_encrypted_key ||= case algorithm.try(:to_sym)
+      when :RSA1_5
         public_key_or_secret.public_encrypt content_encryption_key
-      when :'RSA-OAEP'.to_s
+      when :'RSA-OAEP'
         public_key_or_secret.public_encrypt content_encryption_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-      when :A128KW.to_s
+      when :A128KW
         raise NotImplementedError.new('A128KW not supported yet')
-      when :A256KW.to_s
+      when :A256KW
         raise NotImplementedError.new('A256KW not supported yet')
-      when :dir.to_s
+      when :dir
         ''
-      when :'ECDH-ES'.to_s
+      when :'ECDH-ES'
         raise NotImplementedError.new('ECDH-ES not supported yet')
-      when :'ECDH-ES+A128KW'.to_s
+      when :'ECDH-ES+A128KW'
         raise NotImplementedError.new('ECDH-ES+A128KW not supported yet')
-      when :'ECDH-ES+A256KW'.to_s
+      when :'ECDH-ES+A256KW'
         raise NotImplementedError.new('ECDH-ES+A256KW not supported yet')
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
@@ -223,22 +223,22 @@ module JSON
     end
 
     def decrypt_content_encryption_key
-      case algorithm.to_s
-      when :RSA1_5.to_s
+      case algorithm.try(:to_sym)
+      when :RSA1_5
         private_key_or_secret.private_decrypt jwe_encrypted_key
-      when :'RSA-OAEP'.to_s
+      when :'RSA-OAEP'
         private_key_or_secret.private_decrypt jwe_encrypted_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-      when :A128KW.to_s
+      when :A128KW
         raise NotImplementedError.new('A128KW not supported yet')
-      when :A256KW.to_s
+      when :A256KW
         raise NotImplementedError.new('A256KW not supported yet')
-      when :dir.to_s
+      when :dir
         private_key_or_secret
-      when :'ECDH-ES'.to_s
+      when :'ECDH-ES'
         raise NotImplementedError.new('ECDH-ES not supported yet')
-      when :'ECDH-ES+A128KW'.to_s
+      when :'ECDH-ES+A128KW'
         raise NotImplementedError.new('ECDH-ES+A128KW not supported yet')
-      when :'ECDH-ES+A256KW'.to_s
+      when :'ECDH-ES+A256KW'
         raise NotImplementedError.new('ECDH-ES+A256KW not supported yet')
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
