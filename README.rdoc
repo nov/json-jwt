@@ -31,6 +31,8 @@ JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON 
   # With signiture, no encryption
   jws = JSON::JWT.new(claim).sign(key, algorithm) # algorithm is optional. default HS256
   jws.to_s # => header.payload.signature
+  jws.to_json(syntax: :general) # => General JWS JSON Serialization
+  jws.to_json(syntax: :flatten) # => Flattened JWS JSON Serialization
 
   # With signature & encryption
   jwe = jws.encrypt(key, algorithm, encryption_method) # algorithm & encryption_method are optional. default RSA1_5 & A128CBC-HS256
