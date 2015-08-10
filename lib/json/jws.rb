@@ -21,6 +21,25 @@ module JSON
       raise VerificationFailed
     end
 
+    def as_json(options = {})
+      case options[:syntax]
+      when :general
+        {
+          payload: UrlSafeBase64.encode64(self.to_json),
+          signatures: {
+            protected: UrlSafeBase64.encode64(header),
+            signature: UrlSafeBase64.encode64(signature)
+          }
+        }
+      else
+        {
+          protected: UrlSafeBase64.encode64(header),
+          payload:   UrlSafeBase64.encode64(self.to_json),
+          signature: UrlSafeBase64.encode64(signature)
+        }
+      end
+    end
+
     private
 
     def digest
