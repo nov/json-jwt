@@ -158,4 +158,61 @@ describe JSON::JWS do
       end
     end
   end
+
+  describe 'to_json' do
+    let(:alg) { :RS256 }
+    let(:private_key_or_secret) { private_key }
+
+    context 'as default' do
+      it 'should JSONize payload' do
+        jws.to_json.should == claims.to_json
+      end
+    end
+
+    context 'when syntax option given' do
+      context 'when general' do
+        it 'should return General JWS JSON Serialization' do
+          signed.to_json(syntax: :general).should == {
+            payload: UrlSafeBase64.encode64(claims.to_json),
+            signatures: {
+              protected: UrlSafeBase64.encode64(signed.header.to_json),
+              signature: UrlSafeBase64.encode64(signed.signature)
+            }
+          }.to_json
+        end
+
+        context 'when not signed yet' do
+          it 'should not fail' do
+            jws.to_json(syntax: :general).should == {
+              payload: UrlSafeBase64.encode64(claims.to_json),
+              signatures: {
+                protected: UrlSafeBase64.encode64(jws.header.to_json),
+                signature: UrlSafeBase64.encode64('')
+              }
+            }.to_json
+          end
+        end
+      end
+
+      context 'when flattened' do
+        it 'should return Flattened JWS JSON Serialization' do
+          signed.to_json(syntax: :flattened).should == {
+            protected: UrlSafeBase64.encode64(signed.header.to_json),
+            payload: UrlSafeBase64.encode64(claims.to_json),
+            signature: UrlSafeBase64.encode64(signed.signature)
+          }.to_json
+        end
+
+        context 'when not signed yet' do
+          it 'should not fail' do
+            jws.to_json(syntax: :flattened).should == {
+              protected: UrlSafeBase64.encode64(jws.header.to_json),
+              payload: UrlSafeBase64.encode64(claims.to_json),
+              signature: UrlSafeBase64.encode64('')
+            }.to_json
+          end
+        end
+      end
+    end
+  end
 end

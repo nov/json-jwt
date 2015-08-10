@@ -28,14 +28,14 @@ module JSON
           payload: UrlSafeBase64.encode64(self.to_json),
           signatures: {
             protected: UrlSafeBase64.encode64(header.to_json),
-            signature: UrlSafeBase64.encode64(signature)
+            signature: UrlSafeBase64.encode64(signature.to_s)
           }
         }
       when :flattened
         {
           protected: UrlSafeBase64.encode64(header.to_json),
           payload:   UrlSafeBase64.encode64(self.to_json),
-          signature: UrlSafeBase64.encode64(signature)
+          signature: UrlSafeBase64.encode64(signature.to_s)
         }
       else
         super
