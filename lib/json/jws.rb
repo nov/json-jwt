@@ -21,26 +21,26 @@ module JSON
       raise VerificationFailed
     end
 
-    # FIXME: JOSE::JWS#to_json is already used. another way needed.
-    #
-    # def as_json(options = {})
-    #   case options[:syntax]
-    #   when :general
-    #     {
-    #       payload: UrlSafeBase64.encode64(self.to_json),
-    #       signatures: {
-    #         protected: UrlSafeBase64.encode64(header),
-    #         signature: UrlSafeBase64.encode64(signature)
-    #       }
-    #     }
-    #   else
-    #     {
-    #       protected: UrlSafeBase64.encode64(header),
-    #       payload:   UrlSafeBase64.encode64(self.to_json),
-    #       signature: UrlSafeBase64.encode64(signature)
-    #     }
-    #   end
-    # end
+    def as_json(options = {})
+      case options[:syntax]
+      when :general
+        {
+          payload: UrlSafeBase64.encode64(self.to_json),
+          signatures: {
+            protected: UrlSafeBase64.encode64(header.to_json),
+            signature: UrlSafeBase64.encode64(signature)
+          }
+        }
+      when :flattened
+        {
+          protected: UrlSafeBase64.encode64(header.to_json),
+          payload:   UrlSafeBase64.encode64(self.to_json),
+          signature: UrlSafeBase64.encode64(signature)
+        }
+      else
+        super
+      end
+    end
 
     private
 
