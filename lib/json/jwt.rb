@@ -78,7 +78,7 @@ module JSON
     end
 
     class << self
-      def decode(jwt_string, key_or_secret = nil)
+      def decode_with_keys(jwt_string, keys)
         case jwt_string.count('.') + 1
         when JWS::NUM_OF_SEGMENTS # JWT / JWS
           header, claims, signature = jwt_string.split('.', JWS::NUM_OF_SEGMENTS).collect do |segment|
@@ -87,25 +87,33 @@ module JSON
           header, claims = [header, claims].collect do |json|
             MultiJson.load(json).with_indifferent_access
           end
+
           signature_base_string = jwt_string.split('.')[0, JWS::NUM_OF_SEGMENTS - 1].join('.')
           jwt = new claims
           jwt.header = header
           jwt.signature = signature
 
+          key = keys.find {|k| k[:kid] == header[:kid]}
+          raise VerificationFailed.new("No key found") if key.nil?
+
           # NOTE:
           #  Some JSON libraries generates wrong format of JSON (spaces between keys and values etc.)
           #  So we need to use raw base64 strings for signature verification.
-          jwt.verify signature_base_string, key_or_secret unless key_or_secret == :skip_verification
+          jwt.verify signature_base_string, key[:key] unless key[:key] == :skip_verification
           jwt
         when JWE::NUM_OF_SEGMENTS
           jwe = JWE.new jwt_string
           jwe.header = MultiJson.load(
             UrlSafeBase64.decode64 jwt_string.split('.').first
           ).with_indifferent_access
-          if key_or_secret == :skip_decryption
+
+          key = keys.find {|k| k[:kid] == jwe.header[:kid]}
+          raise VerificationFailed.new("No key found") if key.nil?
+
+          if key[:key] == :skip_decryption
             jwe
           else
-            jwe.decrypt! key_or_secret
+            jwe.decrypt! key[:key]
             JSON::JWT.decode jwe.plain_text, :skip_verification
           end
         else
@@ -113,6 +121,10 @@ module JSON
         end
       rescue MultiJson::DecodeError
         raise InvalidFormat.new("Invalid JSON Format")
+      end
+
+      def decode(jwt_string, key_or_secret = nil)
+        decode_with_keys(jwt_string, [{:kid => nil, :key => key_or_secret}])
       end
 
       # NOTE: Ugly hack to avoid this ActiveSupport 4.0 bug.

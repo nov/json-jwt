@@ -253,4 +253,59 @@ describe JSON::JWT do
       end
     end
   end
+
+  describe '.decode_with_keys' do
+    context 'when no keys given' do
+      it 'should fail verification' do
+        expect do
+          JSON::JWT.decode_with_keys jws.to_s, []
+        end.to raise_error JSON::JWT::VerificationFailed
+      end
+    end
+
+    context 'when multiple keys given' do
+      let(:kid_jwt) do
+        jwt = JSON::JWT.decode jws.to_s, :skip_verification
+        jwt.header[:kid] = '123'
+        jwt
+      end
+
+      let(:public_keys1) do
+        [
+          {:kid => '123', :key => :skip_verification},
+          {:kid => '456', :key => public_key}
+        ]
+      end
+      let(:public_keys2) do
+        [
+          {:kid => '123', :key => public_key},
+          {:kid => '456', :key => :skip_verification}
+        ]
+      end
+      let(:public_keys3) do
+        [
+          {:kid => 'aaa', :key => :skip_verificatio},
+          {:kid => 'bbb', :key => :skip_verification}
+        ]
+      end
+
+      it 'should choose matching key' do
+        expect do
+          JSON::JWT.decode_with_keys kid_jwt.to_s, public_keys1
+        end.not_to raise_error
+      end
+
+      it 'should fail if matching key is broken' do
+        expect do
+          JSON::JWT.decode_with_keys kid_jwt.to_s, public_keys2
+        end.to raise_error JSON::JWT::UnexpectedAlgorithm
+      end
+
+      it 'should fail there is no matching key' do
+        expect do
+          JSON::JWT.decode_with_keys kid_jwt.to_s, public_keys3
+        end.to raise_error JSON::JWT::VerificationFailed
+      end
+    end
+  end
 end
