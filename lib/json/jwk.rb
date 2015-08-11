@@ -26,6 +26,7 @@ module JSON
         key = OpenSSL::PKey::RSA.new
         key.e = e
         key.n = n
+        key.d = d if d
         key
       when :EC
         key = OpenSSL::PKey::EC.new full_curve_name

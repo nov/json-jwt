@@ -8,12 +8,21 @@ module JSON
             e: UrlSafeBase64.encode64(e.to_s(2)),
             n: UrlSafeBase64.encode64(n.to_s(2))
           }.merge ex_params
+          if private?
+            params.merge!(
+              d: UrlSafeBase64.encode64(d.to_s(2))
+            )
+          end
           JWK.new params
         end
       end
 
       module EC
         def to_jwk(ex_params = {})
+          if private_key?
+            # TODO: how to calculate "d" ?
+            raise UnknownAlgorithm.new('EC private key not supported yet.')
+          end
           params = {
             kty: :EC,
             crv: curve_name,

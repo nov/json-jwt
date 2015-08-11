@@ -30,7 +30,7 @@ module SignKeyFixtureHelper
       )
     when :ecdsa
       OpenSSL::PKey::EC.new(
-        pem_file("#{algorithm}/#{options[:digest_length]}/private_key")
+        pem_file("#{algorithm}/#{options[:digest_length] || 256}/private_key")
       )
     end
   end
@@ -43,7 +43,7 @@ module SignKeyFixtureHelper
       )
     when :ecdsa
       OpenSSL::PKey::EC.new(
-        pem_file("#{algorithm}/#{options[:digest_length]}/public_key")
+        pem_file("#{algorithm}/#{options[:digest_length] || 256}/public_key")
       )
     end
   end
