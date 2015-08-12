@@ -34,7 +34,7 @@ module JSON
       [:exp, :nbf, :iat].each do |key|
         claims[key] = claims[key].to_i if claims[key]
       end
-      replace claims
+      update claims
     end
 
     def content_type
@@ -115,11 +115,11 @@ module JSON
         raise InvalidFormat.new("Invalid JSON Format")
       end
 
-      # NOTE: Ugly hack to avoid this ActiveSupport 4.0 bug.
-      #  https://github.com/rails/rails/issues/11087
-      def new_from_hash_copying_default(hash)
-        superclass.new_from_hash_copying_default hash
-      end
+      # # NOTE: Ugly hack to avoid this ActiveSupport 4.0 bug.
+      # #  https://github.com/rails/rails/issues/11087
+      # def new_from_hash_copying_default(hash)
+      #   superclass.new_from_hash_copying_default hash
+      # end
     end
   end
 end
@@ -128,3 +128,5 @@ require 'json/jose'
 require 'json/jws'
 require 'json/jwe'
 require 'json/jwk'
+require 'json/jwk/jwkizable'
+require 'json/jwk/set'

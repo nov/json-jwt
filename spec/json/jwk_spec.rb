@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe JSON::JWK do
+  describe '#initialize' do
+    it :TODO
+  end
+
   describe '#content_type' do
     let(:jwk) { JSON::JWK.new public_key }
     it do
@@ -67,7 +71,7 @@ describe JSON::JWK do
         key = OpenSSL::PKey::EC.new('secp112r2').generate_key
         expect do
           JSON::JWK.new key
-        end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown ECDSA Curve'
+        end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown EC Curve'
       end
     end
   end
