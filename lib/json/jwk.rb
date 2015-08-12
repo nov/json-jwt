@@ -45,12 +45,16 @@ module JSON
         key.d = d if d
         key
       when :EC
-        key = OpenSSL::PKey::EC.new full_curve_name
-        x, y = [self[:x], self[:y]].collect do |decoded|
-          OpenSSL::BN.new UrlSafeBase64.decode64(decoded), 2
+        if RUBY_VERSION >= '2.0.0'
+          key = OpenSSL::PKey::EC.new full_curve_name
+          x, y = [self[:x], self[:y]].collect do |decoded|
+            OpenSSL::BN.new UrlSafeBase64.decode64(decoded), 2
+          end
+          key.public_key = OpenSSL::PKey::EC::Point.new(key.group).mul(x, y)
+          key
+        else
+          raise UnknownAlgorithm.new('This feature requires Ruby 2.0+')
         end
-        key.public_key = OpenSSL::PKey::EC::Point.new(key.group).mul(x, y)
-        key
       else
         raise UnknownAlgorithm.new('Unknown Key Type')
       end
