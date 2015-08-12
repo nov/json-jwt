@@ -2,6 +2,19 @@ module JSON
   class JWK < ActiveSupport::HashWithIndifferentAccess
     class UnknownAlgorithm < JWT::Exception; end
 
+    def initialize(constructor = {}, ex_params = {})
+      if constructor.is_a? OpenSSL::PKey::PKey
+        if constructor.respond_to? :to_jwk
+          super constructor.to_jwk(ex_params)
+        else
+          raise UnknownAlgorithm.new('Unknown Key Type')
+        end
+      else
+        super constructor
+        merge! ex_params
+      end
+    end
+
     def content_type
       'application/jwk+json'
     end
@@ -21,8 +34,11 @@ module JSON
     def to_key
       case self[:kty].try(:to_sym)
       when :RSA
-        e = OpenSSL::BN.new UrlSafeBase64.decode64(self[:e]), 2
-        n = OpenSSL::BN.new UrlSafeBase64.decode64(self[:n]), 2
+        e, n, d = [:e, :n, :d].collect do |key|
+          if self[key]
+            OpenSSL::BN.new UrlSafeBase64.decode64(self[key]), 2
+          end
+        end
         key = OpenSSL::PKey::RSA.new
         key.e = e
         key.n = n
@@ -72,6 +88,15 @@ module JSON
         'secp521r1'
       else
         raise UnknownAlgorithm.new('Unknown ECDSA Curve')
+      end
+    end
+
+    class << self
+      def decode(jwk)
+        # NOTE:
+        #  returning OpenSSL::PKey::RSA/EC instance for backward compatibility.
+        #  `new` is recommended instead of this method.
+        new(jwk).to_key
       end
     end
   end
