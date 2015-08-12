@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe JSON::JWK do
   describe '#content_type' do
-    let(:jwk) { JSON::JWK.new public_key }
+    let(:jwk) { JSON::JWK.new }
     it do
       jwk.content_type.should == 'application/jwk+json'
     end

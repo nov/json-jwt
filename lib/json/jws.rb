@@ -7,7 +7,7 @@ module JSON
     NUM_OF_SEGMENTS = 3
 
     def initialize(jwt)
-      replace jwt
+      update jwt
       raise InvalidFormat.new('Signature Algorithm Required') unless algorithm
     end
 
@@ -41,6 +41,16 @@ module JSON
         super
       end
     end
+
+    def update_with_jose_attributes(hash_or_jwt)
+      update_without_jose_attributes hash_or_jwt
+      if hash_or_jwt.is_a? JSON::JWT
+        self.header = hash_or_jwt.header
+        self.signature = hash_or_jwt.signature
+      end
+      self
+    end
+    alias_method_chain :update, :jose_attributes
 
     private
 
@@ -121,15 +131,6 @@ module JSON
       end
       key.group = OpenSSL::PKey::EC::Group.new group_name.to_s
       key.check_key
-    end
-
-    def replace(hash_or_jwt)
-      super
-      if hash_or_jwt.is_a? JSON::JWT
-        self.header = hash_or_jwt.header
-        self.signature = hash_or_jwt.signature
-      end
-      self
     end
 
     def raw_to_asn1(signature, public_key)
