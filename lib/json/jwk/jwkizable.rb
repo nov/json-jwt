@@ -69,5 +69,5 @@ module JSON
   end
 end
 
-OpenSSL::PKey::RSA.include JSON::JWK::JWKizable::RSA
-OpenSSL::PKey::EC.include JSON::JWK::JWKizable::EC
+OpenSSL::PKey::RSA.send :include, JSON::JWK::JWKizable::RSA
+OpenSSL::PKey::EC.send :include, JSON::JWK::JWKizable::EC
