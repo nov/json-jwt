@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe JSON::JWK::Set do
-  let(:jwk) { JSON::JWK.new public_key }
+  let(:jwk) { public_key.to_jwk }
   let(:set) { JSON::JWK::Set.new jwk }
 
   describe '#content_type' do
@@ -23,6 +23,26 @@ describe JSON::JWK::Set do
   context 'when an Array of JWKs given' do
     subject { JSON::JWK::Set.new [jwk, jwk] }
     it { should == [jwk, jwk] }
+  end
+
+  context 'when JSON::JWK given' do
+    subject { JSON::JWK::Set.new jwk }
+
+    it 'should keep JSON::JWK' do
+      subject.each do |jwk|
+        jwk.should be_instance_of JSON::JWK
+      end
+    end
+  end
+
+  context 'when pure Hash given' do
+    subject { JSON::JWK::Set.new jwk.as_json }
+
+    it 'should convert into JSON::JWK' do
+      subject.each do |jwk|
+        jwk.should be_instance_of JSON::JWK
+      end
+    end
   end
 
   describe '#as_json' do
