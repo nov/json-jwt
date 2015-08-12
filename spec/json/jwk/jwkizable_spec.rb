@@ -8,16 +8,6 @@ describe JSON::JWK::JWKizable do
     end
   end
 
-  shared_examples_for :non_jwkizable do
-    describe '#to_jwk' do
-      it do
-        expect do
-          key.to_jwk
-        end.to raise_error JSON::JWK::UnknownAlgorithm
-      end
-    end
-  end
-
   describe OpenSSL::PKey::RSA do
     describe :public_key do
       let(:key) { public_key :rsa }
@@ -41,7 +31,17 @@ describe JSON::JWK::JWKizable do
 
     describe :private_key do
       let(:key) { private_key :ecdsa }
-      it_behaves_like :non_jwkizable
+      let(:expected_attributes) { [:kty, :crv, :x, :y] } # NOTE: handled as public key
+      it_behaves_like :jwkizable
+
+      context 'when public key is not contained' do
+        before { key.public_key = nil }
+        it do
+          expect do
+            key.to_jwk
+          end.to raise_error JSON::JWK::UnknownAlgorithm, 'EC private key is not supported yet'
+        end
+      end
     end
   end
 end
