@@ -84,7 +84,7 @@ JSON::JWT.decode(jwt_string, key)
 ### JWK
 
 `JSON::JWK.new` accepts these instances as key inputs
-* `String` # NOTE: for shared key (typ=oct)
+* `String` # NOTE: for shared key (kty=oct)
 * `OpenSSL::PKey::RSA`
 * `OpenSSL::PKey::EC`
 * `JSON::JWK`
