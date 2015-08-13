@@ -51,20 +51,21 @@ Supported `key` are
 
 Supported `algorithm` are
 
-* For JWS
-** `HS256`
-** `HS384`
-** `HS512`
-** `RS256`
-** `RS384`
-** `RS512`
-** `ES256`
-** `ES384`
-** `ES512`
-* For JWE
-** `RSA1_5`
-** `RSA-OAEP`
-** `dir`
+For JWS
+* `HS256`
+* `HS384`
+* `HS512`
+* `RS256`
+* `RS384`
+* `RS512`
+* `ES256`
+* `ES384`
+* `ES512`
+
+For JWE
+* `RSA1_5`
+* `RSA-OAEP`
+* `dir`
 
 Supported `encryption_method` are
 * `A128GCM`
