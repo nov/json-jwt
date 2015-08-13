@@ -111,11 +111,17 @@ module JSON
       else
         raise UnknownAlgorithm.new('Unknown EC Curve')
       end
-      key = OpenSSL::PKey::EC.new curve_name
-      x, y = [self[:x], self[:y]].collect do |decoded|
-        OpenSSL::BN.new UrlSafeBase64.decode64(decoded), 2
+      x, y, d = [:x, :y, :d].collect do |key|
+        if self[key]
+          OpenSSL::BN.new UrlSafeBase64.decode64(self[key]), 2
+        end
       end
-      key.public_key = OpenSSL::PKey::EC::Point.new(key.group).mul(x, y)
+      key = OpenSSL::PKey::EC.new curve_name
+      key.private_key = d if d
+      key.public_key = OpenSSL::PKey::EC::Point.new(
+        OpenSSL::PKey::EC::Group.new(curve_name),
+        OpenSSL::BN.new(['04' + x.to_s(16) + y.to_s(16)].pack('H*'), 2)
+      )
       key
     end
 

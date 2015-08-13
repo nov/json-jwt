@@ -8,11 +8,7 @@ module JSON
             e: UrlSafeBase64.encode64(e.to_s(2)),
             n: UrlSafeBase64.encode64(n.to_s(2))
           }.merge ex_params
-          if private?
-            params.merge!(
-              d: UrlSafeBase64.encode64(d.to_s(2))
-            )
-          end
+          params[:d] = UrlSafeBase64.encode64(d.to_s(2)) if private?
           JWK.new params
         end
       end
@@ -29,9 +25,10 @@ module JSON
           params = {
             kty: :EC,
             crv: curve_name,
-            x: UrlSafeBase64.encode64(coodinates[:x].to_s),
-            y: UrlSafeBase64.encode64(coodinates[:y].to_s)
+            x: UrlSafeBase64.encode64(coordinates[:x].to_s(2)),
+            y: UrlSafeBase64.encode64(coordinates[:y].to_s(2))
           }.merge ex_params
+          params[:d] = UrlSafeBase64.encode64(coordinates[:d].to_s(2)) if private_key?
           JWK.new params
         end
 
@@ -50,19 +47,19 @@ module JSON
           end
         end
 
-        def coodinates
-          unless @coodinates
+        def coordinates
+          unless @coordinates
             hex = public_key.to_bn.to_s(16)
             data_len = hex.length - 2
-            type = hex[0, 2]
             hex_x = hex[2, data_len / 2]
             hex_y = hex[2 + data_len / 2, data_len / 2]
-            @coodinates = {
-              x: [hex_x].pack("H*"),
-              y: [hex_y].pack("H*")
+            @coordinates = {
+              x: OpenSSL::BN.new([hex_x].pack('H*'), 2),
+              y: OpenSSL::BN.new([hex_y].pack('H*'), 2)
             }
+            @coordinates[:d] = private_key if private_key?
           end
-          @coodinates
+          @coordinates
         end
       end
     end
