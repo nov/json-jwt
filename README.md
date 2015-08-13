@@ -81,6 +81,14 @@ jwt_string = "jwt_header.jwt_claims.jwt_signature"
 JSON::JWT.decode(jwt_string, key)
 ```
 
+Supported `key` are
+* `String`
+* `OpenSSL::PKey::RSA`
+* `OpenSSL::PKey::EC`
+* `JSON::JWK`
+* `JSON::JWK::Set` # NOTE: proper `JSON::JWK` in the set will be selected by `kid` in the header.
+* `:skip_verification` # NOTE: skip signature verification
+
 ### JWK
 
 `JSON::JWK.new` accepts these instances as key inputs
