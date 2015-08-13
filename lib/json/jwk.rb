@@ -41,6 +41,8 @@ module JSON
         else
           raise UnknownAlgorithm.new('This feature requires Ruby 2.0+')
         end
+      when oct?
+        self[:k]
       else
         raise UnknownAlgorithm.new('Unknown Key Type')
       end
@@ -54,6 +56,10 @@ module JSON
 
     def ec?
       self[:kty].try(:to_sym) == :EC
+    end
+
+    def oct?
+      self[:kty].try(:to_sym) == :oct
     end
 
     def normalize
@@ -70,6 +76,11 @@ module JSON
           kty: self[:kty],
           x:   self[:x],
           y:   self[:y]
+        }
+      when oct?
+        {
+          k:   self[:k],
+          kty: self[:kty]
         }
       else
         raise UnknownAlgorithm.new('Unknown Key Type')
