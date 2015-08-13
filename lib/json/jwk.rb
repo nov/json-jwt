@@ -2,15 +2,19 @@ module JSON
   class JWK < ActiveSupport::HashWithIndifferentAccess
     class UnknownAlgorithm < JWT::Exception; end
 
-    def initialize(constructor = {}, ex_params = {})
-      if constructor.is_a? OpenSSL::PKey::PKey
-        if constructor.respond_to? :to_jwk
-          super constructor.to_jwk(ex_params)
-        else
-          raise UnknownAlgorithm.new('Unknown Key Type')
-        end
+    def initialize(params = {}, ex_params = {})
+      case params
+      when OpenSSL::PKey::RSA, OpenSSL::PKey::EC
+        super params.to_jwk(ex_params)
+      when OpenSSL::PKey::PKey
+        raise UnknownAlgorithm.new('Unknown Key Type')
+      when String
+        super(
+          k: params,
+          kty: :oct
+        )
       else
-        super constructor
+        super params
         merge! ex_params
       end
     end
@@ -88,7 +92,7 @@ module JSON
     end
 
     def to_rsa_key
-      e, n, d = [:e, :n, :d].collect do |key|
+      e, n, d, p, q = [:e, :n, :d, :p, :q].collect do |key|
         if self[key]
           OpenSSL::BN.new UrlSafeBase64.decode64(self[key]), 2
         end
@@ -97,6 +101,8 @@ module JSON
       key.e = e
       key.n = n
       key.d = d if d
+      key.p = p if p
+      key.q = q if q
       key
     end
 

@@ -8,7 +8,13 @@ module JSON
             e: UrlSafeBase64.encode64(e.to_s(2)),
             n: UrlSafeBase64.encode64(n.to_s(2))
           }.merge ex_params
-          params[:d] = UrlSafeBase64.encode64(d.to_s(2)) if private?
+          if private?
+            params.merge!(
+              d: UrlSafeBase64.encode64(d.to_s(2)),
+              p: UrlSafeBase64.encode64(p.to_s(2)),
+              q: UrlSafeBase64.encode64(q.to_s(2))
+            )
+          end
           JWK.new params
         end
       end

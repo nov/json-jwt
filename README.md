@@ -103,16 +103,17 @@ jwk.to_key
 #### EC
 
 ```ruby
-k = OpenSSL::PKey::RSA.new(2048).generate_key
+k = OpenSSL::PKey::RSA.new(2048)
 k.to_jwk
 # => JSON::JWK
 
 jwk = JSON::JWK.new(
-  kty: "EC",
-  crv: "P-256",
-  x: "D4L5V9QocZvfuEEGfGD5YCEbIcXR-KfF7RqqZUaovJ8",
-  y: "VX0T94KUo0YkhuvT2q0MXMOTtfaIjDS4fb9ii54g4gU",
-  d: "MCOTV6Ncg7KTuGh1hTa029ZVkqdlaXaYnfLSkZjJ_uE"
+  kty: "RSA",
+  e: "AQAB",
+  n: "0OIOijENzP0AXnxP-X8Dnazt3m4NTamfNsSCkH4xzgZAJj2Eur9-zmq9IukwN37lIrm3oAE6lL4ytNkv-DQpAivKLE8bh4c9qlB9o32VWyg-mg-2af-JlfGXYoaCW2GDMOV6EKqHBxE0x1EI0tG4gcNwO6A_kYtK6_ACgTQudWz_gnPrL-QCunjIMbbrK9JqgMZhgMARMQpB-j8oet2FFsEcquR5MWtBeAn7qC1AD2ya0EmzplZJP6oCka_VVuxAnyWfRGA0bzCBRIVbcGUXVNIXpRtA_4960e7AlGfMSA-ofN-vo7v0CMkA8BwpZHai9CAJ-cTCX1AVbov83LVIWw",
+  d: "BZCgNopMBdQPuHSzZMA_hmnfBHgGHrWQKlNd7x-NkCGWf-5PpPIJHNK3K0DvKetVi3FLNRYTS3ctvqeyoXgyR36HKlsJLrkpqWnvjvV_jygpUs1sXLKUJcyD7foLawfUCO90KxF_-24367967rLrqXldehkw2F3Ppy2Dw5FyU2qBqcpLeruBt6-UdMmBufzNQLisPJ67vhCTVrTNaHDDeCK2gHI3gqsnnbzOMS45VknmFOgKUp1C8GZu5BsT-AdDApEtY-DRZqnr6BxZv4-hG5OdEUA4_LCaI6JwlaAzv0Z74jpBZDC73cXWKJPgVuhARZcll5cexB2_EpgZDB6akQ",
+  p: "6GFVNgaXcW39NG-sRqKPzFtz1usfAkdCydPmfZirfHRhSh3OojX3Glbe7BI_SRSOLc2d2xw2_ZwKRlruY44aGEf4s5gD_nKgq2QS-1cA5uNAU91wRtY2rdoAuCnk2BX3WTZPnzyxkokFY0S0R_9IpJhRz72ggxYyhx0ymRUBIWc",
+  q: "5h1QX2JWLbcIT_cfrkmMoES1z06Fu88MLORYppiRDqkXl3CJFxKFtKJtDPLTf0MeTFexh81V52Ztsd8UttPInyDl9l5T0AOy8NmqHKqjI1063uy4bnHWetN7ovHftc_TOlnldAoQh9bmhZAhEyGlwa5Kros2YD2amIgDhcOmRO0"
 )
 jwk.to_key
 # => OpenSSL::PKey::EC
