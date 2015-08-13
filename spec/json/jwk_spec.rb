@@ -2,7 +2,42 @@ require 'spec_helper'
 
 describe JSON::JWK do
   describe '#initialize' do
-    it :TODO
+    subject { JSON::JWK.new key }
+
+    context 'with OpenSSL::PKey::RSA' do
+      let(:key) { public_key }
+      it { should be_instance_of JSON::JWK }
+    end
+
+    context 'with OpenSSL::PKey::EC' do
+      let(:key) { public_key :ecdsa }
+      it { should be_instance_of JSON::JWK }
+    end
+
+    context 'with String' do
+      let(:key) { 'secret' }
+      it { should be_instance_of JSON::JWK }
+    end
+
+    context 'with JSON::JWK' do
+      let(:key) do
+        JSON::JWK.new(
+          k: 'secret',
+          kty: :oct
+        )
+      end
+      it { should be_instance_of JSON::JWK }
+    end
+
+    context 'with Hash' do
+      let(:key) do
+        {
+          k: 'secret',
+          kty: :oct
+        }
+      end
+      it { should be_instance_of JSON::JWK }
+    end
   end
 
   describe '#content_type' do
@@ -82,6 +117,41 @@ describe JSON::JWK do
       expect do
         JSON::JWK.new key
       end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown Key Type'
+    end
+  end
+
+  describe '#thumbprint' do
+    context 'when kty=RSA' do
+      subject do
+        JSON::JWK.new(
+          kty: :RSA,
+          e: 'AQAB',
+          n: '0OIOijENzP0AXnxP-X8Dnazt3m4NTamfNsSCkH4xzgZAJj2Eur9-zmq9IukwN37lIrm3oAE6lL4ytNkv-DQpAivKLE8bh4c9qlB9o32VWyg-mg-2af-JlfGXYoaCW2GDMOV6EKqHBxE0x1EI0tG4gcNwO6A_kYtK6_ACgTQudWz_gnPrL-QCunjIMbbrK9JqgMZhgMARMQpB-j8oet2FFsEcquR5MWtBeAn7qC1AD2ya0EmzplZJP6oCka_VVuxAnyWfRGA0bzCBRIVbcGUXVNIXpRtA_4960e7AlGfMSA-ofN-vo7v0CMkA8BwpZHai9CAJ-cTCX1AVbov83LVIWw'
+        )
+      end
+      its(:thumbprint) { should == 'fFn3D1P0H7Qo1ugQ-5LM6LC63LtArbkPsbQcs2F-1yA' }
+    end
+
+    context 'when kty=EC' do
+      subject do
+        JSON::JWK.new(
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'saPyrO4Lh9kh2FxrF9y1QVmZznWnRRJwpr12UHqzrVY',
+          y: 'MMz4W9zzqlrJhqr-JyrpvlnaIIyZQE6DfrgPkxMAw1M'
+        )
+      end
+      its(:thumbprint) { should == '-egRpLjyZCqxBh4OOfd8JSvXwayHmNFAUNkbi8exfhc' }
+    end
+
+    context 'when kty=oct' do
+      subject do
+        JSON::JWK.new(
+          kty: 'oct',
+          k: 'secret'
+        )
+      end
+      its(:thumbprint) { should == 'XZPWsTEZFIerowAF9GHzBtq5CkAOcVvIBnkMu0IIQH0' }
     end
   end
 

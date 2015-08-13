@@ -87,38 +87,42 @@ describe JSON::JWS do
           it_behaves_like :generate_expected_signature
         end
       end
+    end
 
-      [:ES256, :ES384, :ES512].each do |algorithm|
-        describe algorithm do
-          let(:alg) { algorithm }
+    [:ES256, :ES384, :ES512].each do |algorithm|
+      describe algorithm do
+        let(:alg) { algorithm }
 
-          shared_examples_for :self_verifiable do
-            it 'should be self-verifiable' do
-              expect do
-                JSON::JWT.decode(
-                  JSON::JWT.new(claims).sign(
-                    private_key_or_secret, algorithm
-                  ).to_s, public_key_or_secret
-                )
-              end.not_to raise_error
-            end
-          end
-
-          context 'when OpenSSL::PKey::EC key given' do
-            let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
-            let(:public_key_or_secret)  { public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
-            it_behaves_like :jwt_with_alg
-            it_behaves_like :self_verifiable
-          end
-
-          context 'when JSON::JWK key given' do
-            let(:private_key_or_secret) { JSON::JWK.new(private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
-            let(:public_key_or_secret)  { JSON::JWK.new(public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
-            it_behaves_like :jwt_with_alg
-            it_behaves_like :self_verifiable
+        shared_examples_for :self_verifiable do
+          it 'should be self-verifiable' do
+            expect do
+              JSON::JWT.decode(
+                JSON::JWT.new(claims).sign(
+                  private_key_or_secret, algorithm
+                ).to_s, public_key_or_secret
+              )
+            end.not_to raise_error
           end
         end
+
+        context 'when OpenSSL::PKey::EC key given' do
+          let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+          let(:public_key_or_secret)  { public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+          it_behaves_like :jwt_with_alg
+          it_behaves_like :self_verifiable
+        end
+
+        context 'when JSON::JWK key given' do
+          let(:private_key_or_secret) { JSON::JWK.new(private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
+          let(:public_key_or_secret)  { JSON::JWK.new(public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
+          it_behaves_like :jwt_with_alg
+          it_behaves_like :self_verifiable
+        end
       end
+    end
+
+    context 'when JSON::JWK::Set key given' do
+      it :TODO
     end
 
     describe 'unknown algorithm' do
@@ -158,28 +162,52 @@ describe JSON::JWS do
 
     [:HS256, :HS384, :HS512].each do |algorithm|
       describe algorithm do
-        let(:private_key_or_secret) { shared_secret }
-        let(:public_key_or_secret) { shared_secret }
         let(:alg) { algorithm }
-        it_behaves_like :success_signature_verification
+        let(:private_key_or_secret) { shared_secret }
+
+        context 'when String key given' do
+          let(:public_key_or_secret) { shared_secret }
+          it_behaves_like :success_signature_verification
+        end
+
+        context 'when JSON::JWK key given' do
+          let(:public_key_or_secret) { JSON::JWK.new shared_secret }
+          it_behaves_like :success_signature_verification
+        end
       end
     end
 
     [:RS256, :RS384, :RS512].each do |algorithm|
       describe algorithm do
-        let(:private_key_or_secret) { private_key }
-        let(:public_key_or_secret) { public_key }
         let(:alg) { algorithm }
-        it_behaves_like :success_signature_verification
+        let(:private_key_or_secret) { private_key }
+
+        context 'when OpenSSL::PKey::RSA key given' do
+          let(:public_key_or_secret) { public_key }
+          it_behaves_like :success_signature_verification
+        end
+
+        context 'when JSON::JWK key given' do
+          let(:public_key_or_secret) { JSON::JWK.new public_key }
+          it_behaves_like :success_signature_verification
+        end
       end
     end
 
     [:ES256, :ES384, :ES512].each do |algorithm|
       describe algorithm do
-        let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
-        let(:public_key_or_secret)  { public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
         let(:alg) { algorithm }
-        it_behaves_like :success_signature_verification
+        let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+
+        context 'when OpenSSL::PKey::EC key given' do
+          let(:public_key_or_secret) { public_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+          it_behaves_like :success_signature_verification
+        end
+
+        context 'when JSON::JWK key given' do
+          let(:public_key_or_secret) { JSON::JWK.new public_key(:ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
+          it_behaves_like :success_signature_verification
+        end
       end
     end
 
