@@ -80,6 +80,7 @@ module JSON
     end
 
     def sign(signature_base_string, private_key_or_secret)
+      private_key_or_secret = with_jwk_support private_key_or_secret
       case
       when hmac?
         secret = private_key_or_secret
@@ -100,16 +101,7 @@ module JSON
     end
 
     def valid?(signature_base_string, public_key_or_secret)
-      public_key_or_secret = case public_key_or_secret
-      when JSON::JWK
-        public_key_or_secret.to_key
-      when JSON::JWK::Set
-        public_key_or_secret.detect do |jwk|
-          jwk[:kid] && jwk[:kid] == header[:kid]
-        end.try(:to_key)
-      else
-        public_key_or_secret
-      end
+      public_key_or_secret = with_jwk_support public_key_or_secret
       case
       when hmac?
         secure_compare sign(signature_base_string, public_key_or_secret), signature
@@ -128,6 +120,19 @@ module JSON
       end
     rescue TypeError => e
       raise UnexpectedAlgorithm.new(e.message)
+    end
+
+    def with_jwk_support(key)
+      case key
+      when JSON::JWK
+        key.to_key
+      when JSON::JWK::Set
+        key.detect do |jwk|
+          jwk[:kid] && jwk[:kid] == header[:kid]
+        end.try(:to_key)
+      else
+        key
+      end
     end
 
     def verify_ecdsa_group!(key)
