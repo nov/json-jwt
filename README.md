@@ -73,10 +73,6 @@ Supported `encryption_method` are
 * `A128CBC-HS256`
 * `A256CBC-HS512`
 
-For details about `key` and `algorithm`, see
-[JWS Spec](https://github.com/nov/json-jwt/blob/master/spec/json/jws_spec.rb) and
-[Sign Key Fixture Generator](https://github.com/nov/json-jwt/blob/master/spec/helpers/sign_key_fixture_helper.rb).
-
 #### Decoding
 
 ```ruby
