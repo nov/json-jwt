@@ -167,30 +167,17 @@ describe JSON::JWK do
       let(:e) { 'AQAB' }
       let(:n) { 'AK8ppaAGn6N3jDic2DhDN5mI5mWzvhfL1AFZOS9q2EBM8L5sjZbYiaHeNoKillZGmEF9a9g6Z20bDnoHTuHPsx93HYkZqPumFZ8K9lLCbqKAMWw2Qgk10RgrZ-kblJotTBCeer9-tZSWO-OWFzP4gp8MpSuQOQbwTJwDgEkFIQLUK2YgzWbn1PoW8xcfbVyWhZD880ELGRW6GhRgYAl0DN_EQS8kyUa0CusYCzOOg2W3-7qjYeojyP6jiOEr-eyjC7hcUvTVoTfz84BiZv72KS3i5JS8ZNNuRp5Ce51wjoDDUoNxDLWv6Da6qMaGpKz6NTSNbvhE_KFhpp4wf5yRQD8=' }
       let(:pem) do
-        if RUBY_VERSION >= '1.9.3'
-          <<-PEM.strip_heredoc
-            -----BEGIN PUBLIC KEY-----
-            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArymloAafo3eMOJzYOEM3
-            mYjmZbO+F8vUAVk5L2rYQEzwvmyNltiJod42gqKWVkaYQX1r2DpnbRsOegdO4c+z
-            H3cdiRmo+6YVnwr2UsJuooAxbDZCCTXRGCtn6RuUmi1MEJ56v361lJY745YXM/iC
-            nwylK5A5BvBMnAOASQUhAtQrZiDNZufU+hbzFx9tXJaFkPzzQQsZFboaFGBgCXQM
-            38RBLyTJRrQK6xgLM46DZbf7uqNh6iPI/qOI4Sv57KMLuFxS9NWhN/PzgGJm/vYp
-            LeLklLxk025GnkJ7nXCOgMNSg3EMta/oNrqoxoakrPo1NI1u+ET8oWGmnjB/nJFA
-            PwIDAQAB
-            -----END PUBLIC KEY-----
-          PEM
-        else
-          <<-PEM.strip_heredoc
-            -----BEGIN RSA PUBLIC KEY-----
-            MIIBCgKCAQEArymloAafo3eMOJzYOEM3mYjmZbO+F8vUAVk5L2rYQEzwvmyNltiJ
-            od42gqKWVkaYQX1r2DpnbRsOegdO4c+zH3cdiRmo+6YVnwr2UsJuooAxbDZCCTXR
-            GCtn6RuUmi1MEJ56v361lJY745YXM/iCnwylK5A5BvBMnAOASQUhAtQrZiDNZufU
-            +hbzFx9tXJaFkPzzQQsZFboaFGBgCXQM38RBLyTJRrQK6xgLM46DZbf7uqNh6iPI
-            /qOI4Sv57KMLuFxS9NWhN/PzgGJm/vYpLeLklLxk025GnkJ7nXCOgMNSg3EMta/o
-            NrqoxoakrPo1NI1u+ET8oWGmnjB/nJFAPwIDAQAB
-            -----END RSA PUBLIC KEY-----
-          PEM
-        end
+        <<-PEM.strip_heredoc
+          -----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArymloAafo3eMOJzYOEM3
+          mYjmZbO+F8vUAVk5L2rYQEzwvmyNltiJod42gqKWVkaYQX1r2DpnbRsOegdO4c+z
+          H3cdiRmo+6YVnwr2UsJuooAxbDZCCTXRGCtn6RuUmi1MEJ56v361lJY745YXM/iC
+          nwylK5A5BvBMnAOASQUhAtQrZiDNZufU+hbzFx9tXJaFkPzzQQsZFboaFGBgCXQM
+          38RBLyTJRrQK6xgLM46DZbf7uqNh6iPI/qOI4Sv57KMLuFxS9NWhN/PzgGJm/vYp
+          LeLklLxk025GnkJ7nXCOgMNSg3EMta/oNrqoxoakrPo1NI1u+ET8oWGmnjB/nJFA
+          PwIDAQAB
+          -----END PUBLIC KEY-----
+        PEM
       end
 
       it { should be_instance_of OpenSSL::PKey::RSA }
@@ -206,42 +193,29 @@ describe JSON::JWK do
     end
 
     context 'when ECDSA' do
-      if RUBY_VERSION >= '2.0.0'
-        [{
-          alg: 'EC',
-          crv: 'P-256',
-          kty: 'EC',
-          x: 'saPyrO4Lh9kh2FxrF9y1QVmZznWnRRJwpr12UHqzrVY',
-          y: 'MMz4W9zzqlrJhqr-JyrpvlnaIIyZQE6DfrgPkxMAw1M'
-        }, {
-          alg: 'EC',
-          crv: 'P-384',
-          kty: 'EC',
-          x: 'plzApyFnK7qzhg5XnIZbFj2hZoH2Vdl4-RFm7DnsNMG9tyqrpfq2RyjfKABbcFRt',
-          y: 'ixBzffhk3fcbmeipGLkvQBNCzeNm6QL3hOUTH6IFBzOL0Y7HsGTopNTTspLjlivb'
-        }, {
-          alg: 'EC',
-          crv: 'P-521',
-          kty: 'EC',
-          x: 'AcMCD-a0a6rnE9TvC0mOqF_DGXRg5Y3iTb4eHNwTm2kD6iujx9M_f8d_FGHr0OhpqzEn4rYPYZouGsbIPEgL0q__',
-          y: 'AULYEd8l-bV_BI289aezhSLZ1RDF2ltgDPEy9Y7YtqYa4cJcpiyzVDMpXWwBp6cjg6TXINkoVrVXZhN404ihu4I2'
-        }].each do |jwk|
-          describe jwk['crv'] do
-            it do
-              JSON::JWK.decode(jwk).should be_instance_of OpenSSL::PKey::EC
-            end
+      [{
+        alg: 'EC',
+        crv: 'P-256',
+        kty: 'EC',
+        x: 'saPyrO4Lh9kh2FxrF9y1QVmZznWnRRJwpr12UHqzrVY',
+        y: 'MMz4W9zzqlrJhqr-JyrpvlnaIIyZQE6DfrgPkxMAw1M'
+      }, {
+        alg: 'EC',
+        crv: 'P-384',
+        kty: 'EC',
+        x: 'plzApyFnK7qzhg5XnIZbFj2hZoH2Vdl4-RFm7DnsNMG9tyqrpfq2RyjfKABbcFRt',
+        y: 'ixBzffhk3fcbmeipGLkvQBNCzeNm6QL3hOUTH6IFBzOL0Y7HsGTopNTTspLjlivb'
+      }, {
+        alg: 'EC',
+        crv: 'P-521',
+        kty: 'EC',
+        x: 'AcMCD-a0a6rnE9TvC0mOqF_DGXRg5Y3iTb4eHNwTm2kD6iujx9M_f8d_FGHr0OhpqzEn4rYPYZouGsbIPEgL0q__',
+        y: 'AULYEd8l-bV_BI289aezhSLZ1RDF2ltgDPEy9Y7YtqYa4cJcpiyzVDMpXWwBp6cjg6TXINkoVrVXZhN404ihu4I2'
+      }].each do |jwk|
+        describe jwk['crv'] do
+          it do
+            JSON::JWK.decode(jwk).should be_instance_of OpenSSL::PKey::EC
           end
-        end
-      else
-        it do
-          expect do
-            JSON::JWK.decode(
-              kty: :EC,
-              crv: 'P-256',
-              x: 'MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4',
-              y: '4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'
-            )
-          end.to raise_error JSON::JWK::UnknownAlgorithm
         end
       end
     end

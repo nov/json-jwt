@@ -40,11 +40,7 @@ module JSON
       when rsa?
         to_rsa_key
       when ec?
-        if RUBY_VERSION >= '2.0.0'
-          to_ec_key
-        else
-          raise UnknownAlgorithm.new('This feature requires Ruby 2.0+')
-        end
+        to_ec_key
       when oct?
         self[:k]
       else
