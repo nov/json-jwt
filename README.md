@@ -102,26 +102,15 @@ Supported `key` are
 
 ```ruby
 k = OpenSSL::PKey::RSA.new(2048)
-p k.to_jwk
-# => JSON::JWK
 
-jwk = JSON::JWK.new(
-  kty: "RSA",
-  e: "AQAB",
-  n: "utwietJHu65N7kIa52bMkKgbS1CGmhKNDx3gTBEvQmQhg1BbKHfdmqapMt699T-aloeslYxeO9ItOhprnE0vG-pbDUE7Jg51gtK6kjpLFZOLNpRHJnRikyF6dav1IdJa4fSpOiEJiHk_DuFnAMI04_1H_NISn1TzEBflbyb6BSyIPkfO9433zR2-clvHdIXppq-N272vHA64Xp5hslzY91QodXo5--9iIblPVxzd9aH-aBMSkRbmlIKuz14tWhR-6RLNsWtqxWfKvgeoBLh5e9E5MrlNuRnaaLqHOMWrW1l9985eqmCD3PD4wjwINFKrU4L0fMBCHgCDAZLhbLfUJw",
-  d: "NtFBpDpwJNT7s7vc3KnBtWY7q5qSAj0S-K5REL-x1448bqNyOqr_bdEarfu-SmZAWYyvyqeFNZNxBSyfCRlzioLz9y19xqpTOu_LH_7N7CR-oKJbRSK7kGIv5Llvjl6BnuwBgTYT799x6lGhwA05KvEw3zBZmjh3ne8Etdj_W-i2LDBDUimgmVrgXWY1KvWFgh2zpptIINX2Q8UxV121bdcBIbj008Cs64m2mMpaa3ggqqNoXnYb8HnJDnYx-WIbUMHJ2-hpZAsVFNet8ZVEMt4cTKaTHY23m9Ditj-7VfFzkoiH9Yj45ewJMpcssadnAPrBgKbjTFuTdJfP8IqMoQ"
-)
-jwk.to_key
-# => OpenSSL::PKey::RSA
+k.to_jwk
+# => JSON::JWK (private key)
+
+k.public_key.to_jwk
+# => JSON::JWK (public key)
 ```
 
-#### EC
-
 ```ruby
-k = OpenSSL::PKey::RSA.new(2048)
-k.to_jwk
-# => JSON::JWK
-
 jwk = JSON::JWK.new(
   kty: "RSA",
   e: "AQAB",
@@ -131,7 +120,66 @@ jwk = JSON::JWK.new(
   q: "5h1QX2JWLbcIT_cfrkmMoES1z06Fu88MLORYppiRDqkXl3CJFxKFtKJtDPLTf0MeTFexh81V52Ztsd8UttPInyDl9l5T0AOy8NmqHKqjI1063uy4bnHWetN7ovHftc_TOlnldAoQh9bmhZAhEyGlwa5Kros2YD2amIgDhcOmRO0"
 )
 jwk.to_key
-# => OpenSSL::PKey::EC
+# => OpenSSL::PKey::RSA (private key)
+
+jwk = JSON::JWK.new(
+  kty: "RSA",
+  e: "AQAB",
+  n: "0OIOijENzP0AXnxP-X8Dnazt3m4NTamfNsSCkH4xzgZAJj2Eur9-zmq9IukwN37lIrm3oAE6lL4ytNkv-DQpAivKLE8bh4c9qlB9o32VWyg-mg-2af-JlfGXYoaCW2GDMOV6EKqHBxE0x1EI0tG4gcNwO6A_kYtK6_ACgTQudWz_gnPrL-QCunjIMbbrK9JqgMZhgMARMQpB-j8oet2FFsEcquR5MWtBeAn7qC1AD2ya0EmzplZJP6oCka_VVuxAnyWfRGA0bzCBRIVbcGUXVNIXpRtA_4960e7AlGfMSA-ofN-vo7v0CMkA8BwpZHai9CAJ-cTCX1AVbov83LVIWw"
+)
+jwk.to_key
+# => OpenSSL::PKey::RSA (public key)
+```
+
+#### EC
+
+```ruby
+k = OpenSSL::PKey::EC.new('prime256v1').generate_key
+
+k.to_jwk
+# => JSON::JWK (private key)
+
+k.private_key = nil
+k.to_jwk
+# => JSON::JWK (public key)
+```
+
+```ruby
+jwk = JSON::JWK.new(
+  kty: "EC",
+  crv: "P-256",
+  x: "D4L5V9QocZvfuEEGfGD5YCEbIcXR-KfF7RqqZUaovJ8",
+  y: "VX0T94KUo0YkhuvT2q0MXMOTtfaIjDS4fb9ii54g4gU",
+  d: "MCOTV6Ncg7KTuGh1hTa029ZVkqdlaXaYnfLSkZjJ_uE"
+)
+jwk.to_key
+# => OpenSSL::PKey::EC (private key)
+
+jwk = JSON::JWK.new(
+  kty: "EC",
+  crv: "P-256",
+  x: "D4L5V9QocZvfuEEGfGD5YCEbIcXR-KfF7RqqZUaovJ8",
+  y: "VX0T94KUo0YkhuvT2q0MXMOTtfaIjDS4fb9ii54g4gU"
+)
+jwk.to_key
+# => OpenSSL::PKey::EC (public key)
+```
+
+#### oct
+
+```ruby
+k = JSON::JWK.new 'secret'
+k.to_jwk
+# => JSON::JWK
+```
+
+```ruby
+jwk = JSON::JWK.new(
+  kty: "oct",
+  k: "secret"
+)
+jwk.to_key
+# => String
 ```
 
 ## Note on Patches/Pull Requests
