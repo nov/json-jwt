@@ -32,26 +32,12 @@ module JSON
     end
 
     def to_key
-      case self[:kty].try(:to_sym)
-      when :RSA
-        e, n, d = [:e, :n, :d].collect do |key|
-          if self[key]
-            OpenSSL::BN.new UrlSafeBase64.decode64(self[key]), 2
-          end
-        end
-        key = OpenSSL::PKey::RSA.new
-        key.e = e
-        key.n = n
-        key.d = d if d
-        key
-      when :EC
+      case
+      when rsa?
+        to_rsa_key
+      when ec?
         if RUBY_VERSION >= '2.0.0'
-          key = OpenSSL::PKey::EC.new full_curve_name
-          x, y = [self[:x], self[:y]].collect do |decoded|
-            OpenSSL::BN.new UrlSafeBase64.decode64(decoded), 2
-          end
-          key.public_key = OpenSSL::PKey::EC::Point.new(key.group).mul(x, y)
-          key
+          to_ec_key
         else
           raise UnknownAlgorithm.new('This feature requires Ruby 2.0+')
         end
@@ -62,28 +48,49 @@ module JSON
 
     private
 
+    def rsa?
+      self[:kty].try(:to_sym) == :RSA
+    end
+
+    def ec?
+      self[:kty].try(:to_sym) == :EC
+    end
+
     def normalize
-      case self[:kty].try(:to_sym)
-      when :RSA
+      case
+      when rsa?
         {
-          e: self[:e],
+          e:   self[:e],
           kty: self[:kty],
-          n: self[:n]
+          n:   self[:n]
         }
-      when :EC
+      when ec?
         {
           crv: self[:crv],
           kty: self[:kty],
-          x: self[:x],
-          y: self[:y]
+          x:   self[:x],
+          y:   self[:y]
         }
       else
         raise UnknownAlgorithm.new('Unknown Key Type')
       end
     end
 
-    def full_curve_name
-      case self[:crv].try(:to_sym)
+    def to_rsa_key
+      e, n, d = [:e, :n, :d].collect do |key|
+        if self[key]
+          OpenSSL::BN.new UrlSafeBase64.decode64(self[key]), 2
+        end
+      end
+      key = OpenSSL::PKey::RSA.new
+      key.e = e
+      key.n = n
+      key.d = d if d
+      key
+    end
+
+    def to_ec_key
+      curve_name = case self[:crv].try(:to_sym)
       when :'P-256'
         'prime256v1'
       when :'P-384'
@@ -91,8 +98,14 @@ module JSON
       when :'P-521'
         'secp521r1'
       else
-        raise UnknownAlgorithm.new('Unknown ECDSA Curve')
+        raise UnknownAlgorithm.new('Unknown EC Curve')
       end
+      key = OpenSSL::PKey::EC.new curve_name
+      x, y = [self[:x], self[:y]].collect do |decoded|
+        OpenSSL::BN.new UrlSafeBase64.decode64(decoded), 2
+      end
+      key.public_key = OpenSSL::PKey::EC::Point.new(key.group).mul(x, y)
+      key
     end
 
     class << self
