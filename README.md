@@ -42,6 +42,36 @@ jwe = jws.encrypt(key, algorithm, encryption_method) # algorithm & encryption_me
 jwe.to_s # => header.encrypted_key.iv.cipher_text.authentication_tag
 ```
 
+Supported `key` are
+* `String`
+* `OpenSSL::PKey::RSA`
+* `OpenSSL::PKey::EC`
+* `JSON::JWK`
+* `JSON::JWK::Set` # NOTE: proper `JSON::JWK` in the set will be selected by `kid` in the header.
+
+Supported `algorithm` are
+
+* For JWS
+** `HS256`
+** `HS384`
+** `HS512`
+** `RS256`
+** `RS384`
+** `RS512`
+** `ES256`
+** `ES384`
+** `ES512`
+* For JWE
+** `RSA1_5`
+** `RSA-OAEP`
+** `dir`
+
+Supported `encryption_method` are
+* `A128GCM`
+* `A256GCM`
+* `A128CBC-HS256`
+* `A256CBC-HS512`
+
 For details about `key` and `algorithm`, see
 [JWS Spec](https://github.com/nov/json-jwt/blob/master/spec/json/jws_spec.rb) and
 [Sign Key Fixture Generator](https://github.com/nov/json-jwt/blob/master/spec/helpers/sign_key_fixture_helper.rb).
