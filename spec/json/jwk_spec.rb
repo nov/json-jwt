@@ -40,7 +40,7 @@ describe JSON::JWK do
   end
 
   context 'when ECDSA public key given' do
-    let(:expected_coodinates) do
+    let(:expected_coordinates) do
       {
         256 => {
           x: 'saPyrO4Lh9kh2FxrF9y1QVmZznWnRRJwpr12UHqzrVY',
@@ -61,8 +61,8 @@ describe JSON::JWK do
         let(:jwk) { JSON::JWK.new public_key(:ecdsa, digest_length: digest_length) }
         it { jwk.keys.collect(&:to_sym).should include :kty, :crv, :x, :y }
         its(:kty) { jwk[:kty].should == :EC }
-        its(:x) { jwk[:x].should == expected_coodinates[digest_length][:x] }
-        its(:y) { jwk[:y].should == expected_coodinates[digest_length][:y] }
+        its(:x) { jwk[:x].should == expected_coordinates[digest_length][:x] }
+        its(:y) { jwk[:y].should == expected_coordinates[digest_length][:y] }
       end
     end
 
@@ -141,20 +141,20 @@ describe JSON::JWK do
           alg: 'EC',
           crv: 'P-256',
           kty: 'EC',
-          x: 'eZXWiRe0I3TvHPXiGnvO944gjF1o4UmitH2CVwYIrPg',
-          y: 'AKFNss7S35tOsp5iY7-YuLGs2cLrTKFk80JvgVzMPHQ3'
+          x: 'saPyrO4Lh9kh2FxrF9y1QVmZznWnRRJwpr12UHqzrVY',
+          y: 'MMz4W9zzqlrJhqr-JyrpvlnaIIyZQE6DfrgPkxMAw1M'
         }, {
           alg: 'EC',
           crv: 'P-384',
           kty: 'EC',
-          x: 'XGp9ovRmtaBjlZKGI1XDBUB6F3d4Xov4JFKUCaeVjMD0_GAp20IB_wZz6howe3yi',
-          y: 'Vhy6zh3KOkDqSA5WP6BtDyS9CZR7RoCCWfwymBB3HIBIR_yl32hnSYXtlwEr2EoK'
+          x: 'plzApyFnK7qzhg5XnIZbFj2hZoH2Vdl4-RFm7DnsNMG9tyqrpfq2RyjfKABbcFRt',
+          y: 'ixBzffhk3fcbmeipGLkvQBNCzeNm6QL3hOUTH6IFBzOL0Y7HsGTopNTTspLjlivb'
         }, {
           alg: 'EC',
           crv: 'P-521',
           kty: 'EC',
-          x: 'KrVaPTvvYmUUSf_1UpwJt_Lg9UT-8OHD_AUd-d7-Q8Rfs4t-lTJ5KEyjbfMzTHsvNulWftuaMH6Ap3l5vbDb2nQ',
-          y: 'AIxSEGvlKlWZiN_Rc3VjBs5oVB5l-JfCZHm2LyZpOxAzWrpjHlK121H2ZngM8Ra8ggKa64hEMDE1fMV__C_EZv9m'
+          x: 'AcMCD-a0a6rnE9TvC0mOqF_DGXRg5Y3iTb4eHNwTm2kD6iujx9M_f8d_FGHr0OhpqzEn4rYPYZouGsbIPEgL0q__',
+          y: 'AULYEd8l-bV_BI289aezhSLZ1RDF2ltgDPEy9Y7YtqYa4cJcpiyzVDMpXWwBp6cjg6TXINkoVrVXZhN404ihu4I2'
         }].each do |jwk|
           describe jwk['crv'] do
             it do
