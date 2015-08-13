@@ -98,12 +98,16 @@ Supported `key` are
 * `JSON::JWK`
 * `Hash`
 
+This gem also defines
+* `OpenSSL::PKey::RSA#to_jwk`
+* `OpenSSL::PKey::EC#to_jwk`
+
 #### RSA
 
 ```ruby
 k = OpenSSL::PKey::RSA.new(2048)
 
-k.to_jwk
+k.to_jwk # NOTE: same with `JSON::JWK.new(k)`
 # => JSON::JWK (private key)
 
 k.public_key.to_jwk
@@ -167,9 +171,10 @@ jwk.to_key
 
 #### oct
 
+NOTE: no `String#to_jwk` is defined for now.
+
 ```ruby
-k = JSON::JWK.new 'secret'
-k.to_jwk
+JSON::JWK.new 'secret'
 # => JSON::JWK
 ```
 
