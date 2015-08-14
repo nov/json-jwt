@@ -1,46 +1,48 @@
 require 'spec_helper'
 
 describe JSON::JWK::JWKizable do
-  shared_examples_for :jwkizable do
-    describe '#to_jwk' do
-      it { key.to_jwk.should be_instance_of JSON::JWK }
-      it { key.to_jwk.should include *expected_attributes.collect(&:to_s) }
-    end
-  end
+  describe '#to_jwk' do
+    subject { key.to_jwk }
 
-  describe OpenSSL::PKey::RSA do
-    describe :public_key do
-      let(:key) { public_key :rsa }
-      let(:expected_attributes) { [:kty, :n, :e] }
-      it_behaves_like :jwkizable
+    shared_examples_for :jwkizable_as_public do
+      it { should be_instance_of JSON::JWK }
+      it { should include *public_key_attributes.collect(&:to_s) }
+      it { should_not include *private_key_attributes.collect(&:to_s) }
     end
 
-    describe :private_key do
-      let(:key) { private_key :rsa }
-      let(:expected_attributes) { [:kty, :n, :e, :d] }
-      it_behaves_like :jwkizable
-    end
-  end
-
-  describe OpenSSL::PKey::EC do
-    describe :public_key do
-      let(:key) { public_key :ecdsa }
-      let(:expected_attributes) { [:kty, :crv, :x, :y] }
-      it_behaves_like :jwkizable
+    shared_examples_for :jwkizable_as_private do
+      it { should be_instance_of JSON::JWK }
+      it { should include *public_key_attributes.collect(&:to_s) }
+      it { should include *private_key_attributes.collect(&:to_s) }
     end
 
-    describe :private_key do
-      let(:key) { private_key :ecdsa }
-      let(:expected_attributes) { [:kty, :crv, :x, :y] } # NOTE: handled as public key
-      it_behaves_like :jwkizable
+    describe OpenSSL::PKey::RSA do
+      let(:public_key_attributes) { [:kty, :n, :e] }
+      let(:private_key_attributes) { [:d, :p, :q] }
 
-      context 'when public key is not contained' do
-        before { key.public_key = nil }
-        it do
-          expect do
-            key.to_jwk
-          end.to raise_error JSON::JWK::UnknownAlgorithm, 'EC private key is not supported yet'
-        end
+      describe :public_key do
+        let(:key) { public_key :rsa }
+        it_behaves_like :jwkizable_as_public
+      end
+
+      describe :private_key do
+        let(:key) { private_key :rsa }
+        it_behaves_like :jwkizable_as_private
+      end
+    end
+
+    describe OpenSSL::PKey::EC do
+      let(:public_key_attributes) { [:kty, :crv, :x, :y] }
+      let(:private_key_attributes) { [:d] }
+
+      describe :public_key do
+        let(:key) { public_key :ecdsa }
+        it_behaves_like :jwkizable_as_public
+      end
+
+      describe :private_key do
+        let(:key) { private_key :ecdsa }
+        it_behaves_like :jwkizable_as_private
       end
     end
   end
