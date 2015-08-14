@@ -99,7 +99,17 @@ module JSON
     end
 
     class << self
-      def decode(jwt_string, key_or_secret = nil)
+      def decode(input, key_or_secret = nil)
+        if input.is_a? Hash
+          decode_json_serialized input, key_or_secret
+        else
+          decode_compact_serialized input, key_or_secret
+        end
+      end
+
+      private
+
+      def decode_compact_serialized(jwt_string, key_or_secret)
         case jwt_string.count('.') + 1
         when JWS::NUM_OF_SEGMENTS # JWT / JWS
           header, claims, signature = jwt_string.split('.', JWS::NUM_OF_SEGMENTS).collect do |segment|
@@ -134,6 +144,25 @@ module JSON
         end
       rescue MultiJson::DecodeError
         raise InvalidFormat.new("Invalid JSON Format")
+      end
+
+      def decode_json_serialized(input, key_or_secret)
+        input = input.with_indifferent_access
+        header, payload, signature = if input[:signatures].present?
+          [
+            input[:signatures].first[:protected],
+            input[:payload],
+            input[:signatures].first[:signature]
+          ].collect do |segment|
+            segment
+          end
+        else
+          [:protected, :payload, :signature].collect do |key|
+            input[key]
+          end
+        end
+        jwt_string = [header, payload, signature].join('.')
+        decode_compact_serialized jwt_string, key_or_secret
       end
     end
   end

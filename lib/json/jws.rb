@@ -138,31 +138,5 @@ module JSON
       byte_size = (private_key.group.degree + 7) / 8
       OpenSSL::ASN1.decode(signature).value.map { |value| value.value.to_s(2).rjust(byte_size, "\x00") }.join
     end
-
-    class << self
-      def decode(input, key_or_secret = nil)
-        jwt_string = case input
-        when Hash
-          input = input.with_indifferent_access
-          header, payload, signature = if input[:signatures].present?
-            [
-              input[:signatures].first[:protected],
-              input[:payload],
-              input[:signatures].first[:signature]
-            ].collect do |segment|
-              segment
-            end
-          else
-            [:protected, :payload, :signature].collect do |key|
-              input[key]
-            end
-          end
-          [header, payload, signature].join('.')
-        else
-          input
-        end
-        JSON::JWT.decode jwt_string, key_or_secret
-      end
-    end
   end
 end

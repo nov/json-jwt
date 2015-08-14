@@ -6,7 +6,9 @@ JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON 
 
 ## Installation
 
-  gem install json-jwt
+```
+gem install json-jwt
+```
 
 ## Resources
 
@@ -76,10 +78,13 @@ Supported `encryption_method` are
 #### Decoding
 
 ```ruby
-jwt_string = "jwt_header.jwt_claims.jwt_signature"
-
-JSON::JWT.decode(jwt_string, key)
+input = "jwt_header.jwt_claims.jwt_signature"
+JSON::JWT.decode(input, key)
 ```
+
+`input` can be JSON, in that case, it's handled as General/Flattened JWS JSON Serialization.
+
+NOTE: General JWS JSON Serialization with multiple signatures aren't supported.
 
 Supported `key` are
 * `String`
