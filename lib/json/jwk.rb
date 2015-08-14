@@ -13,6 +13,7 @@ module JSON
           k: params,
           kty: :oct
         )
+        merge! ex_params
       else
         super params
         merge! ex_params

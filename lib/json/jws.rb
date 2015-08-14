@@ -129,7 +129,7 @@ module JSON
       when JSON::JWK::Set
         key.detect do |jwk|
           jwk[:kid] && jwk[:kid] == header[:kid]
-        end.try(:to_key)
+        end.try(:to_key) or raise JWK::Set::KidNotFound
       else
         key
       end

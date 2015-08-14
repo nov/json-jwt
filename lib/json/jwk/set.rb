@@ -1,6 +1,8 @@
 module JSON
   class JWK
     class Set < Array
+      class KidNotFound < JWT::Exception; end
+
       def initialize(*jwks)
         jwks = Array(jwks).flatten.collect do |jwk|
           JWK.new jwk

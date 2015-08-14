@@ -122,7 +122,26 @@ describe JSON::JWS do
     end
 
     context 'when JSON::JWK::Set key given' do
-      it :TODO
+      let(:alg) { :HS256 }
+      let(:kid) { 'kid' }
+      let(:jwks) do
+        jwk = JSON::JWK.new shared_secret, kid: kid
+        JSON::JWK::Set.new jwk, JSON::JWK.new('another')
+      end
+      let(:signed) { jws.sign!(jwks) }
+
+      context 'when jwk is found by given kid' do
+        before { jws.header[:kid] = kid }
+        it { should == jws.sign!('secret') }
+      end
+
+      context 'otherwise' do
+        it do
+          expect do
+            subject
+          end.to raise_error JSON::JWK::Set::KidNotFound
+        end
+      end
     end
 
     describe 'unknown algorithm' do
@@ -207,6 +226,31 @@ describe JSON::JWS do
         context 'when JSON::JWK key given' do
           let(:public_key_or_secret) { JSON::JWK.new public_key(:ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
           it_behaves_like :success_signature_verification
+        end
+      end
+    end
+
+    context 'when JSON::JWK::Set key given' do
+      subject { JSON::JWT.decode signed.to_s, jwks }
+
+      let(:alg) { :HS256 }
+      let(:kid) { 'kid' }
+      let(:jwks) do
+        jwk = JSON::JWK.new shared_secret, kid: kid
+        JSON::JWK::Set.new jwk, JSON::JWK.new('another')
+      end
+      let(:signed) { jws.sign!(jwks) }
+
+      context 'when jwk is found by given kid' do
+        before { jws.header[:kid] = kid }
+        it { should == signed }
+      end
+
+      context 'otherwise' do
+        it do
+          expect do
+            subject
+          end.to raise_error JSON::JWK::Set::KidNotFound
         end
       end
     end
