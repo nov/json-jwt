@@ -21,13 +21,6 @@ module JSON
 
       module EC
         def to_jwk(ex_params = {})
-          # NOTE:
-          #  OpenSSL::PKey::EC instance can be both public & private key at the same time.
-          #  In such case, is it handled as public key or private key?
-          #  For now, this gem handles any OpenSSL::PKey::EC instances as public key.
-          unless public_key?
-            raise UnknownAlgorithm.new('EC private key is not supported yet')
-          end
           params = {
             kty: :EC,
             crv: curve_name,
