@@ -150,7 +150,7 @@ describe JSON::JWT do
           context 'to alg=none' do
             let(:malformed_jwt) do
               jwt = JSON::JWT.decode jws.to_s, :skip_verification
-              jwt.header[:alg] = :none
+              jwt.alg = :none
               jwt.signature = ''
               jwt
             end
@@ -171,7 +171,7 @@ describe JSON::JWT do
           context 'to alg=none' do
             let(:malformed_jwt) do
               jwt = JSON::JWT.decode jws.to_s, :skip_verification
-              jwt.header[:alg] = :none
+              jwt.alg = :none
               jwt.signature = ''
               jwt
             end

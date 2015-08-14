@@ -131,7 +131,7 @@ describe JSON::JWS do
       let(:signed) { jws.sign!(jwks) }
 
       context 'when jwk is found by given kid' do
-        before { jws.header[:kid] = kid }
+        before { jws.kid = kid }
         it { should == jws.sign!('secret') }
       end
 
@@ -242,7 +242,7 @@ describe JSON::JWS do
       let(:signed) { jws.sign!(jwks) }
 
       context 'when jwk is found by given kid' do
-        before { jws.header[:kid] = kid }
+        before { jws.kid = kid }
         it { should == signed }
       end
 

@@ -107,7 +107,7 @@ module JSON
         key.to_key
       when JSON::JWK::Set
         key.detect do |jwk|
-          jwk[:kid] && jwk[:kid] == header[:kid]
+          jwk[:kid] && jwk[:kid] == kid
         end.try(:to_key) or raise JWK::Set::KidNotFound
       else
         key
