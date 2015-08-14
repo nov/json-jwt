@@ -72,9 +72,14 @@ describe JSON::JWK do
         it { should == '6v7pXTnQLMiQgvJlPJUdhAUSuGLzgF8C1r3ABAMFet6bc53ea-Pq4ZGbGu3RoAFsNRT1-RhTzDqtqXuLU6NOtw' }
       end
     end
+
+    describe '#to_key' do
+      it { jwk.to_key.should be_instance_of OpenSSL::PKey::RSA }
+    end
   end
 
-  context 'when ECDSA public key given' do
+  context 'when EC public key given' do
+    let(:jwk) { JSON::JWK.new public_key(:ecdsa) }
     let(:expected_coordinates) do
       {
         256 => {
@@ -91,6 +96,7 @@ describe JSON::JWK do
         }
       }
     end
+
     [256, 384, 512].each do |digest_length|
       describe "EC#{digest_length}" do
         let(:jwk) { JSON::JWK.new public_key(:ecdsa, digest_length: digest_length) }
@@ -109,6 +115,44 @@ describe JSON::JWK do
         end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown EC Curve'
       end
     end
+
+    describe '#thumbprint' do
+      context 'using default hash function' do
+        subject { jwk.thumbprint }
+        it { should == '-egRpLjyZCqxBh4OOfd8JSvXwayHmNFAUNkbi8exfhc' }
+      end
+
+      context 'using SHA512 hash function' do
+        subject { jwk.thumbprint :SHA512 }
+        it { should == 'B_yXDZJ9doudaVCj5q5vqxshvVtW2IFnz_ypvRt5O60gemkDAhO78L6YMyTWH0ZRm15cO2_laTSaNO9yZQFsvQ' }
+      end
+    end
+
+    describe '#to_key' do
+      it { jwk.to_key.should be_instance_of OpenSSL::PKey::EC }
+    end
+  end
+
+  context 'when shared secret given' do
+    let(:jwk) { JSON::JWK.new 'secret' }
+    its(:kty) { jwk[:kty].should == :oct }
+    its(:x) { jwk[:k].should == 'secret' }
+
+    describe '#thumbprint' do
+      context 'using default hash function' do
+        subject { jwk.thumbprint }
+        it { should == 'XZPWsTEZFIerowAF9GHzBtq5CkAOcVvIBnkMu0IIQH0' }
+      end
+
+      context 'using SHA512 hash function' do
+        subject { jwk.thumbprint :SHA512 }
+        it { should == 'rK7EtcEe9Xr0kryR9lNnyOTRe7Vb_BglbTBtbcVG2LzvL26_PFaMCwOtiUiXWfCK-wV8vcxjmvbcvV4ZxDE0FQ' }
+      end
+    end
+
+    describe '#to_key' do
+      it { jwk.to_key.should be_instance_of String }
+    end
   end
 
   describe 'unknown key type' do
@@ -117,41 +161,6 @@ describe JSON::JWK do
       expect do
         JSON::JWK.new key
       end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown Key Type'
-    end
-  end
-
-  describe '#thumbprint' do
-    context 'when kty=RSA' do
-      subject do
-        JSON::JWK.new(
-          kty: :RSA,
-          e: 'AQAB',
-          n: '0OIOijENzP0AXnxP-X8Dnazt3m4NTamfNsSCkH4xzgZAJj2Eur9-zmq9IukwN37lIrm3oAE6lL4ytNkv-DQpAivKLE8bh4c9qlB9o32VWyg-mg-2af-JlfGXYoaCW2GDMOV6EKqHBxE0x1EI0tG4gcNwO6A_kYtK6_ACgTQudWz_gnPrL-QCunjIMbbrK9JqgMZhgMARMQpB-j8oet2FFsEcquR5MWtBeAn7qC1AD2ya0EmzplZJP6oCka_VVuxAnyWfRGA0bzCBRIVbcGUXVNIXpRtA_4960e7AlGfMSA-ofN-vo7v0CMkA8BwpZHai9CAJ-cTCX1AVbov83LVIWw'
-        )
-      end
-      its(:thumbprint) { should == 'fFn3D1P0H7Qo1ugQ-5LM6LC63LtArbkPsbQcs2F-1yA' }
-    end
-
-    context 'when kty=EC' do
-      subject do
-        JSON::JWK.new(
-          kty: 'EC',
-          crv: 'P-256',
-          x: 'saPyrO4Lh9kh2FxrF9y1QVmZznWnRRJwpr12UHqzrVY',
-          y: 'MMz4W9zzqlrJhqr-JyrpvlnaIIyZQE6DfrgPkxMAw1M'
-        )
-      end
-      its(:thumbprint) { should == '-egRpLjyZCqxBh4OOfd8JSvXwayHmNFAUNkbi8exfhc' }
-    end
-
-    context 'when kty=oct' do
-      subject do
-        JSON::JWK.new(
-          kty: 'oct',
-          k: 'secret'
-        )
-      end
-      its(:thumbprint) { should == 'XZPWsTEZFIerowAF9GHzBtq5CkAOcVvIBnkMu0IIQH0' }
     end
   end
 
