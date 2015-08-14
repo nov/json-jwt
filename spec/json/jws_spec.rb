@@ -280,10 +280,10 @@ describe JSON::JWS do
         it 'should return General JWS JSON Serialization' do
           signed.to_json(syntax: :general).should == {
             payload: UrlSafeBase64.encode64(claims.to_json),
-            signatures: {
+            signatures: [{
               protected: UrlSafeBase64.encode64(signed.header.to_json),
               signature: UrlSafeBase64.encode64(signed.signature)
-            }
+            }]
           }.to_json
         end
 
@@ -291,10 +291,10 @@ describe JSON::JWS do
           it 'should not fail' do
             jws.to_json(syntax: :general).should == {
               payload: UrlSafeBase64.encode64(claims.to_json),
-              signatures: {
+              signatures: [{
                 protected: UrlSafeBase64.encode64(jws.header.to_json),
                 signature: UrlSafeBase64.encode64('')
-              }
+              }]
             }.to_json
           end
         end

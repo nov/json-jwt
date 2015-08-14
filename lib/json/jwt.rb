@@ -46,7 +46,7 @@ module JSON
     end
 
     def sign(private_key_or_secret, algorithm = :HS256)
-      jws = JWS.new(self)
+      jws = JWS.new self
       jws.alg = algorithm
       jws.sign! private_key_or_secret
     end
@@ -61,7 +61,7 @@ module JSON
     end
 
     def encrypt(public_key_or_secret, algorithm = :RSA1_5, encryption_method = :'A128CBC-HS256')
-      jwe = JWE.new(self)
+      jwe = JWE.new self
       jwe.alg = algorithm
       jwe.enc = encryption_method
       jwe.encrypt! public_key_or_secret
@@ -75,6 +75,27 @@ module JSON
       ].collect do |segment|
         UrlSafeBase64.encode64 segment.to_s
       end.join('.')
+    end
+
+    def as_json(options = {})
+      case options[:syntax]
+      when :general
+        {
+          payload: UrlSafeBase64.encode64(self.to_json),
+          signatures: [{
+            protected: UrlSafeBase64.encode64(header.to_json),
+            signature: UrlSafeBase64.encode64(signature.to_s)
+          }]
+        }
+      when :flattened
+        {
+          protected: UrlSafeBase64.encode64(header.to_json),
+          payload:   UrlSafeBase64.encode64(self.to_json),
+          signature: UrlSafeBase64.encode64(signature.to_s)
+        }
+      else
+        super
+      end
     end
 
     class << self
@@ -114,12 +135,6 @@ module JSON
       rescue MultiJson::DecodeError
         raise InvalidFormat.new("Invalid JSON Format")
       end
-
-      # # NOTE: Ugly hack to avoid this ActiveSupport 4.0 bug.
-      # #  https://github.com/rails/rails/issues/11087
-      # def new_from_hash_copying_default(hash)
-      #   superclass.new_from_hash_copying_default hash
-      # end
     end
   end
 end
