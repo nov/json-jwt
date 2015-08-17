@@ -45,6 +45,20 @@ describe JSON::JWK::Set do
     end
   end
 
+  context 'when pure Hash with :keys key given' do
+    subject do
+      JSON::JWK::Set.new(
+        keys: jwk.as_json
+      )
+    end
+
+    it 'should convert into JSON::JWK' do
+      subject.each do |jwk|
+        jwk.should be_instance_of JSON::JWK
+      end
+    end
+  end
+
   describe '#as_json' do
     it 'should become proper JWK set format' do
       json = set.as_json

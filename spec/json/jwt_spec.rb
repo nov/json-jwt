@@ -206,6 +206,52 @@ describe JSON::JWT do
           end.not_to raise_error
         end
       end
+
+      context 'when JSON Serialization given' do
+        let(:signed) { JSON::JWT.new(claims).sign('secret') }
+
+        shared_examples_for :json_serialization_parser do
+          context 'when proper secret given' do
+            it { JSON::JWT.decode(serialized, 'secret').should == signed }
+          end
+
+          context 'when verification skipped' do
+            it { JSON::JWT.decode(serialized, :skip_verification).should == signed }
+          end
+
+          context 'when wrong secret given' do
+            it do
+              expect do
+                JSON::JWT.decode serialized, 'wrong'
+              end.to raise_error JSON::JWT::VerificationFailed
+            end
+          end
+        end
+
+        context 'when general' do
+          let(:serialized) do
+            {
+              payload: UrlSafeBase64.encode64(claims.to_json),
+              signatures: [{
+                protected: UrlSafeBase64.encode64(signed.header.to_json),
+                signature: UrlSafeBase64.encode64(signed.signature)
+              }]
+            }
+          end
+          it_behaves_like :json_serialization_parser
+        end
+
+        context 'when flattened' do
+          let(:serialized) do
+            {
+              protected: UrlSafeBase64.encode64(signed.header.to_json),
+              payload: UrlSafeBase64.encode64(claims.to_json),
+              signature: UrlSafeBase64.encode64(signed.signature)
+            }
+          end
+          it_behaves_like :json_serialization_parser
+        end
+      end
     end
 
     context 'when encrypted' do
