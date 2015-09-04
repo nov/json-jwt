@@ -137,7 +137,8 @@ module JSON
             jwe
           else
             jwe.decrypt! key_or_secret
-            JSON::JWT.decode jwe.plain_text, :skip_verification
+            jwe.input = JSON::JWT.decode jwe.plain_text, :skip_verification
+            jwe
           end
         else
           raise InvalidFormat.new("Invalid JWT Format. JWT should include #{JWS::NUM_OF_SEGMENTS} or #{JWE::NUM_OF_SEGMENTS} segments.")

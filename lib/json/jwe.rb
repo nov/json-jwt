@@ -19,7 +19,7 @@ module JSON
     alias_method :encryption_method, :enc
 
     def initialize(input)
-      self.input = input.to_s
+      self.input = input
     end
 
     def content_type
@@ -45,6 +45,11 @@ module JSON
       self.plain_text = cipher.update(cipher_text) + cipher.final
       verify_cbc_authentication_tag! if cbc?
       self
+    end
+
+    def input=(_input_)
+      @input = _input_.to_s
+      update _input_ if _input_.is_a? JSON::JWT
     end
 
     def to_s
