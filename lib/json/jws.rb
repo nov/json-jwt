@@ -6,9 +6,10 @@ module JSON
 
     NUM_OF_SEGMENTS = 3
 
+    attr_accessor :signature_base_string
+
     def initialize(jwt)
       update jwt
-      raise InvalidFormat.new('Signature Algorithm Required') unless algorithm
     end
 
     def sign!(private_key_or_secret)
@@ -16,9 +17,14 @@ module JSON
       self
     end
 
-    def verify(signature_base_string, public_key_or_secret)
-      public_key_or_secret && valid?(signature_base_string, public_key_or_secret) or
-      raise VerificationFailed
+    def verify!(public_key_or_secret)
+      if alg.try(:to_sym) == :none
+        raise UnexpectedAlgorithm if public_key_or_secret
+        signature == '' or raise VerificationFailed
+      else
+        public_key_or_secret && valid?(public_key_or_secret) or
+        raise VerificationFailed
+      end
     end
 
     def update_with_jose_attributes(hash_or_jwt)
@@ -50,7 +56,7 @@ module JSON
     end
 
     def signature_base_string
-      [
+      @signature_base_string ||= [
         header.to_json,
         self.to_json
       ].collect do |segment|
@@ -79,7 +85,7 @@ module JSON
       end
     end
 
-    def valid?(signature_base_string, public_key_or_secret)
+    def valid?(public_key_or_secret)
       public_key_or_secret = with_jwk_support public_key_or_secret
       case
       when hmac?
@@ -137,6 +143,28 @@ module JSON
     def asn1_to_raw(signature, private_key)
       byte_size = (private_key.group.degree + 7) / 8
       OpenSSL::ASN1.decode(signature).value.map { |value| value.value.to_s(2).rjust(byte_size, "\x00") }.join
+    end
+
+    class << self
+      def decode(input, public_key_or_secret)
+        unless input.count('.') + 1 == NUM_OF_SEGMENTS
+          raise InvalidFormat.new("Invalid JWS Format. JWS should include #{NUM_OF_SEGMENTS} segments.")
+        end
+        header, claims, signature = input.split('.', JWS::NUM_OF_SEGMENTS).collect do |segment|
+          UrlSafeBase64.decode64 segment.to_s
+        end
+        header, claims = [header, claims].collect do |json|
+          MultiJson.load(json).with_indifferent_access
+        end
+        jws = new claims
+        jws.header = header
+        jws.signature = signature
+        jws.signature_base_string = input.split('.')[0, JWS::NUM_OF_SEGMENTS - 1].join('.')
+        jws.verify! public_key_or_secret unless public_key_or_secret == :skip_verification
+        jws
+      rescue MultiJson::DecodeError
+        raise InvalidFormat.new("Invalid JSON Format")
+      end
     end
   end
 end
