@@ -146,7 +146,7 @@ module JSON
     end
 
     class << self
-      def decode(input, public_key_or_secret)
+      def decode_compact_serialized(input, public_key_or_secret)
         unless input.count('.') + 1 == NUM_OF_SEGMENTS
           raise InvalidFormat.new("Invalid JWS Format. JWS should include #{NUM_OF_SEGMENTS} segments.")
         end
@@ -162,8 +162,25 @@ module JSON
         jws.signature_base_string = input.split('.')[0, JWS::NUM_OF_SEGMENTS - 1].join('.')
         jws.verify! public_key_or_secret unless public_key_or_secret == :skip_verification
         jws
-      rescue MultiJson::DecodeError
-        raise InvalidFormat.new("Invalid JSON Format")
+      end
+
+      def decode_json_serialized(input, public_key_or_secret)
+        input = input.with_indifferent_access
+        header, payload, signature = if input[:signatures].present?
+          [
+            input[:signatures].first[:protected],
+            input[:payload],
+            input[:signatures].first[:signature]
+          ].collect do |segment|
+            segment
+          end
+        else
+          [:protected, :payload, :signature].collect do |key|
+            input[key]
+          end
+        end
+        jwt_string = [header, payload, signature].join('.')
+        decode_compact_serialized jwt_string, public_key_or_secret
       end
     end
   end

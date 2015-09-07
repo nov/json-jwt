@@ -259,7 +259,7 @@ module JSON
     end
 
     class << self
-      def decode(input, private_key_or_secret)
+      def decode_compact_serialized(input, private_key_or_secret)
         unless input.count('.') + 1 == NUM_OF_SEGMENTS
           raise InvalidFormat.new("Invalid JWE Format. JWE should include #{NUM_OF_SEGMENTS} segments.")
         end
@@ -271,8 +271,10 @@ module JSON
         jwe.header = MultiJson.load(_header_json_).with_indifferent_access
         jwe.decrypt! private_key_or_secret unless private_key_or_secret == :skip_decryption
         jwe
-      rescue MultiJson::DecodeError
-        raise InvalidFormat.new("Invalid JSON Format")
+      end
+
+      def decode_json_serialized(input, key_or_secret)
+        raise NotImplementedError.new('JWE JSON Serialization not supported')
       end
     end
   end

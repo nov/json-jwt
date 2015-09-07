@@ -103,40 +103,30 @@ module JSON
         else
           decode_compact_serialized input, key_or_secret
         end
-      end
-
-      private
-
-      def decode_compact_serialized(jwt_string, key_or_secret)
-        case jwt_string.count('.') + 1
-        when JWS::NUM_OF_SEGMENTS
-          JWS.decode jwt_string, key_or_secret
-        when JWE::NUM_OF_SEGMENTS
-          JWE.decode jwt_string, key_or_secret
-        else
-          raise InvalidFormat.new("Invalid JWT Format. JWT should include #{JWS::NUM_OF_SEGMENTS} or #{JWE::NUM_OF_SEGMENTS} segments.")
-        end
       rescue MultiJson::DecodeError
         raise InvalidFormat.new("Invalid JSON Format")
       end
 
+      def decode_compact_serialized(jwt_string, key_or_secret)
+        case jwt_string.count('.') + 1
+        when JWS::NUM_OF_SEGMENTS
+          JWS.decode_compact_serialized jwt_string, key_or_secret
+        when JWE::NUM_OF_SEGMENTS
+          JWE.decode_compact_serialized jwt_string, key_or_secret
+        else
+          raise InvalidFormat.new("Invalid JWT Format. JWT should include #{JWS::NUM_OF_SEGMENTS} or #{JWE::NUM_OF_SEGMENTS} segments.")
+        end
+      end
+
       def decode_json_serialized(input, key_or_secret)
         input = input.with_indifferent_access
-        header, payload, signature = if input[:signatures].present?
-          [
-            input[:signatures].first[:protected],
-            input[:payload],
-            input[:signatures].first[:signature]
-          ].collect do |segment|
-            segment
-          end
+        if (input[:signatures] || input[:signature]).present?
+          JWS.decode_json_serialized input, key_or_secret
+        elsif input[:ciphertext].present?
+          JWE.decode_json_serialized input, key_or_secret
         else
-          [:protected, :payload, :signature].collect do |key|
-            input[key]
-          end
+          raise InvalidFormat.new("Unexpected JOSE JSON Serialization Format.")
         end
-        jwt_string = [header, payload, signature].join('.')
-        decode_compact_serialized jwt_string, key_or_secret
       end
     end
   end
