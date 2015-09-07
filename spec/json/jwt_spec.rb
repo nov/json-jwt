@@ -130,10 +130,20 @@ describe JSON::JWT do
 
     context 'when signed' do
       context 'when no secret/key given' do
-        it 'should do verification' do
+        it 'should skip verification' do
           expect do
-            JSON::JWT.decode jws.to_s
-          end.to raise_error JSON::JWT::VerificationFailed
+            jwt = JSON::JWT.decode jws.to_s
+            jwt.header.should == {'alg' => 'HS256', 'typ' => 'JWT'}
+          end.not_to raise_error
+        end
+      end
+
+      context 'when :skip_verification given' do
+        it 'should skip verification' do
+          expect do
+            jwt = JSON::JWT.decode jws.to_s, :skip_verification
+            jwt.header.should == {'alg' => 'HS256', 'typ' => 'JWT'}
+          end.not_to raise_error
         end
       end
 
@@ -149,7 +159,7 @@ describe JSON::JWT do
         context 'from alg=HS256' do
           context 'to alg=none' do
             let(:malformed_jwt) do
-              jwt = JSON::JWT.decode jws.to_s, :skip_verification
+              jwt = JSON::JWT.decode jws.to_s
               jwt.alg = :none
               jwt.signature = ''
               jwt
@@ -170,7 +180,7 @@ describe JSON::JWT do
 
           context 'to alg=none' do
             let(:malformed_jwt) do
-              jwt = JSON::JWT.decode jws.to_s, :skip_verification
+              jwt = JSON::JWT.decode jws.to_s
               jwt.alg = :none
               jwt.signature = ''
               jwt
@@ -184,26 +194,27 @@ describe JSON::JWT do
           end
 
           context 'to alg=HS256' do
-            let(:malformed_jwt) do
-              jwt = JSON::JWT.decode jws.to_s, :skip_verification
-              jwt.sign public_key.to_s, :HS256
+            let(:malformed_jwt_string) do
+              header, payload, signature = jws.to_s.split('.')
+              malformed_header = {alg: :HS256}.to_json
+              malformed_signature = OpenSSL::HMAC.digest(
+                OpenSSL::Digest.new('SHA256'),
+                public_key.to_s,
+                [malformed_header, payload].join('.')
+              )
+              [
+                UrlSafeBase64.encode64(malformed_header),
+                payload,
+                UrlSafeBase64.encode64(malformed_signature)
+              ].join('.')
             end
 
             it 'should fail verification' do
               expect do
-                JSON::JWT.decode malformed_jwt.to_s, public_key
+                JSON::JWT.decode malformed_jwt_string, public_key
               end.to raise_error JSON::JWS::UnexpectedAlgorithm
             end
           end
-        end
-      end
-
-      context 'when :skip_verification given as secret/key' do
-        it 'should skip verification' do
-          expect do
-            jwt = JSON::JWT.decode jws.to_s, :skip_verification
-            jwt.header.should == {'alg' => 'HS256', 'typ' => 'JWT'}
-          end.not_to raise_error
         end
       end
 
@@ -216,7 +227,7 @@ describe JSON::JWT do
           end
 
           context 'when verification skipped' do
-            it { JSON::JWT.decode(serialized, :skip_verification).should == signed }
+            it { JSON::JWT.decode(serialized).should == signed }
           end
 
           context 'when wrong secret given' do
@@ -256,19 +267,37 @@ describe JSON::JWT do
 
     context 'when encrypted' do
       let(:input) { jwt.encrypt(public_key).to_s }
-      let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
 
-      it 'should decryptable' do
-        JSON::JWT.decode(input, private_key).should be_instance_of JSON::JWT
+      context 'when no secret/key given' do
+        it 'should skip decryption' do
+          expect do
+            jwe = JSON::JWT.decode input
+            jwe.should be_instance_of JSON::JWE
+            jwe.header.should == {'typ' => 'JWT', 'alg' => 'RSA1_5', 'enc' => 'A128CBC-HS256'}
+          end.not_to raise_error
+        end
       end
 
-      context 'when :skip_decryption given as secret/key' do
-        it 'should skip verification' do
+      context 'when :skip_decryption given' do
+        it 'should skip decryption' do
           expect do
             jwe = JSON::JWT.decode input, :skip_decryption
             jwe.should be_instance_of JSON::JWE
-            jwe.header.should == {'alg' => 'RSA1_5', 'enc' => 'A128CBC-HS256'}
           end.not_to raise_error
+        end
+      end
+
+      context 'when valid key given' do
+        it 'should decryptable' do
+          JSON::JWT.decode(input, private_key).should be_instance_of JSON::JWE
+        end
+      end
+
+      context 'when invalid key given' do
+        it 'should decryptable' do
+          expect do
+            JSON::JWT.decode(input, OpenSSL::PKey::RSA.generate(2048))
+          end.to raise_error OpenSSL::PKey::RSAError
         end
       end
     end
@@ -293,7 +322,7 @@ describe JSON::JWT do
       context 'when too many dots' do
         it do
           expect do
-            JSON::JWT.decode 'header.payload.signature.something.wrong'
+            JSON::JWT.decode 'header.payload.signature.something-wrong'
           end.to raise_error JSON::JWT::InvalidFormat
         end
       end

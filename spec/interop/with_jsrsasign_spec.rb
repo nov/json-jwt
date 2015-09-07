@@ -37,7 +37,7 @@ describe 'interop' do
         }
       end
 
-      describe 'verify' do
+      describe 'verify!' do
         it 'should succeed' do
           expect do
             JSON::JWT.decode(jws_string, public_key)
