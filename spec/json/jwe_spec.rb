@@ -54,11 +54,9 @@ describe JSON::JWE do
       end
     end
 
-    context 'when Hash given' do
-      let(:input) do
-        {foo: :bar}
-      end
-      let(:jwe) { JSON::JWE.new input }
+    context 'when plaintext given' do
+      let(:plain_text) { 'Hello World' }
+      let(:jwe) { JSON::JWE.new plain_text }
 
       context 'when alg=RSA1_5' do
         let(:key) { public_key }
@@ -102,8 +100,9 @@ describe JSON::JWE do
     end
 
     context 'when jwt given' do
-      let(:input) { JSON::JWT.new(foo: :bar) }
-      let(:jwe) { JSON::JWE.new input }
+      let(:plain_text) { jwt.to_s }
+      let(:jwt) { JSON::JWT.new(foo: :bar) }
+      let(:jwe) { JSON::JWE.new jwt }
 
       context 'when alg=RSA-OAEP' do
         let(:key) { public_key }
