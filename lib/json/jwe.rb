@@ -152,7 +152,7 @@ module JSON
       cipher.key = encryption_key
       self.iv = cipher.random_iv
       self.auth_data = UrlSafeBase64.encode64 header.to_json
-      cipher.auth_data = self.auth_data if gcm?
+      cipher.auth_data = auth_data if gcm?
       self
     end
 
@@ -228,9 +228,7 @@ module JSON
       end
       cipher.key = encryption_key
       cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
-      if gcm?
-        cipher.auth_tag = authentication_tag
-      end
+      cipher.auth_tag = authentication_tag if gcm?
     end
 
     def verify_cbc_authentication_tag!
