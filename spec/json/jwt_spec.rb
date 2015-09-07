@@ -92,7 +92,7 @@ describe JSON::JWT do
 
     context 'when signed' do
       it 'should delegate verification to JWS' do
-        expect(jws).to receive(:verify)
+        expect(jws).to receive(:verify!)
         expect(JSON::JWS).to receive(:new).and_return(jws)
         jwt.verify 'shared_secret'
       end
@@ -148,16 +148,19 @@ describe JSON::JWT do
       context 'when alg header malformed' do
         context 'from alg=HS256' do
           context 'to alg=none' do
-            let(:malformed_jwt) do
-              jwt = JSON::JWT.decode jws.to_s, :skip_verification
-              jwt.alg = :none
-              jwt.signature = ''
-              jwt
+            let(:malformed_jwt_string) do
+              header, payload, signature = jws.to_s.split('.')
+              malformed_header = {alg: :none}.to_json
+              [
+                UrlSafeBase64.encode64(malformed_header),
+                payload,
+                ''
+              ].join('.')
             end
 
             it 'should do verification' do
               expect do
-                JSON::JWT.decode malformed_jwt.to_s, 'secret'
+                JSON::JWT.decode malformed_jwt_string, 'secret'
               end.to raise_error JSON::JWT::VerificationFailed
             end
           end
@@ -169,29 +172,42 @@ describe JSON::JWT do
           end
 
           context 'to alg=none' do
-            let(:malformed_jwt) do
-              jwt = JSON::JWT.decode jws.to_s, :skip_verification
-              jwt.alg = :none
-              jwt.signature = ''
-              jwt
+            let(:malformed_jwt_string) do
+              header, payload, signature = jws.to_s.split('.')
+              malformed_header = {alg: :none}.to_json
+              [
+                UrlSafeBase64.encode64(malformed_header),
+                payload,
+                ''
+              ].join('.')
             end
 
             it 'should fail verification' do
               expect do
-                JSON::JWT.decode malformed_jwt.to_s, public_key
+                JSON::JWT.decode malformed_jwt_string, public_key
               end.to raise_error JSON::JWT::UnexpectedAlgorithm
             end
           end
 
           context 'to alg=HS256' do
-            let(:malformed_jwt) do
-              jwt = JSON::JWT.decode jws.to_s, :skip_verification
-              jwt.sign public_key.to_s, :HS256
+            let(:malformed_jwt_string) do
+              header, payload, signature = jws.to_s.split('.')
+              malformed_header = {alg: :HS256}.to_json
+              malformed_signature = OpenSSL::HMAC.digest(
+                OpenSSL::Digest.new('SHA256'),
+                public_key.to_s,
+                [malformed_header, payload].join('.')
+              )
+              [
+                UrlSafeBase64.encode64(malformed_header),
+                payload,
+                UrlSafeBase64.encode64(malformed_signature)
+              ].join('.')
             end
 
             it 'should fail verification' do
               expect do
-                JSON::JWT.decode malformed_jwt.to_s, public_key
+                JSON::JWT.decode malformed_jwt_string, public_key
               end.to raise_error JSON::JWS::UnexpectedAlgorithm
             end
           end
@@ -259,7 +275,7 @@ describe JSON::JWT do
       let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
 
       it 'should decryptable' do
-        JSON::JWT.decode(input, private_key).should be_instance_of JSON::JWT
+        JSON::JWT.decode(input, private_key).should be_instance_of JSON::JWE
       end
 
       context 'when :skip_decryption given as secret/key' do
