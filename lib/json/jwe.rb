@@ -10,42 +10,62 @@ module JSON
     NUM_OF_SEGMENTS = 5
 
     attr_accessor(
-      :public_key_or_secret, :private_key_or_secret, :cipher_text, :authentication_tag, :iv,
-      :content_encryption_key, :jwe_encrypted_key, :encryption_key, :mac_key, :auth_data
+      :public_key_or_secret, :private_key_or_secret, :mode,
+      :input, :plain_text, :cipher_text, :authentication_tag, :iv,
+      :content_encryption_key, :jwe_encrypted_key, :encryption_key, :mac_key
     )
 
     register_header_keys :enc, :epk, :zip, :apu, :apv
     alias_method :encryption_method, :enc
 
+    def initialize(input)
+      self.input = input
+    end
+
+    def content_type
+      'application/jose'
+    end
+
     def encrypt!(public_key_or_secret)
+      self.mode = :encryption
+      self.plain_text = input
       self.public_key_or_secret = public_key_or_secret
       cipher.encrypt
       generate_cipher_keys!
-      self.cipher_text = cipher.update(to_json) + cipher.final
+      self.cipher_text = cipher.update(plain_text) + cipher.final
       self
     end
 
     def decrypt!(private_key_or_secret)
+      self.mode = :decryption
       self.private_key_or_secret = private_key_or_secret
+      decode_segments!
       cipher.decrypt
       restore_cipher_keys!
-      update MultiJson.load(
-        cipher.update(cipher_text) + cipher.final
-      ).with_indifferent_access
+      self.plain_text = cipher.update(cipher_text) + cipher.final
       verify_cbc_authentication_tag! if cbc?
       self
     end
 
+    def input=(_input_)
+      @input = _input_.to_s
+      update _input_ if _input_.is_a? JSON::JWT
+    end
+
     def to_s
-      [
-        header.to_json,
-        jwe_encrypted_key,
-        iv,
-        cipher_text,
-        authentication_tag
-      ].collect do |segment|
-        UrlSafeBase64.encode64 segment.to_s
-      end.join('.')
+      if mode == :encryption
+        [
+          header.to_json,
+          jwe_encrypted_key,
+          iv,
+          cipher_text,
+          authentication_tag
+        ].collect do |segment|
+          UrlSafeBase64.encode64 segment.to_s
+        end.join('.')
+      else
+        plain_text
+      end
     end
 
     private
@@ -151,8 +171,9 @@ module JSON
       end
       cipher.key = encryption_key
       self.iv = cipher.random_iv
-      self.auth_data = UrlSafeBase64.encode64 header.to_json
-      cipher.auth_data = self.auth_data if gcm?
+      if gcm?
+        cipher.auth_data = UrlSafeBase64.encode64 header.to_json
+      end
       self
     end
 
@@ -181,6 +202,7 @@ module JSON
       when gcm?
         cipher.auth_tag
       when cbc?
+        auth_data = UrlSafeBase64.encode64 header.to_json
         secured_input = [
           auth_data,
           iv,
@@ -194,6 +216,16 @@ module JSON
     end
 
     # decryption
+
+    def decode_segments!
+      unless input.count('.') + 1 == NUM_OF_SEGMENTS
+        raise InvalidFormat.new("Invalid JWE Format. JWE should include #{NUM_OF_SEGMENTS} segments.")
+      end
+      _header_json_, self.jwe_encrypted_key, self.iv, self.cipher_text, self.authentication_tag = input.split('.').collect do |segment|
+        UrlSafeBase64.decode64 segment
+      end
+      self
+    end
 
     def decrypt_content_encryption_key
       case algorithm.try(:to_sym)
@@ -230,10 +262,12 @@ module JSON
       cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
       if gcm?
         cipher.auth_tag = authentication_tag
+        cipher.auth_data = input.split('.').first
       end
     end
 
     def verify_cbc_authentication_tag!
+      auth_data = input.split('.').first
       secured_input = [
         auth_data,
         iv,
@@ -245,19 +279,6 @@ module JSON
       )[0, sha_size / 2 / 8]
       unless secure_compare(authentication_tag, expected_authentication_tag)
         raise DecryptionFailed.new('Invalid authentication tag')
-      end
-    end
-
-    class << self
-      def decode(input, private_key_or_secret = nil)
-        jwe = new
-        _header_json_, jwe.jwe_encrypted_key, jwe.iv, jwe.cipher_text, jwe.authentication_tag = input.split('.').collect do |segment|
-          UrlSafeBase64.decode64 segment
-        end
-        jwe.auth_data = input.split('.').first
-        jwe.header = MultiJson.load(_header_json_).with_indifferent_access
-        jwe.decrypt! private_key_or_secret if private_key_or_secret && private_key_or_secret != :skip_decryption
-        jwe
       end
     end
   end

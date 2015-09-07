@@ -5,7 +5,7 @@ describe JSON::JWE do
   let(:private_key_path) { der_file_path 'rsa/private_key' }
 
   describe '#content_type' do
-    let(:jwe) { JSON::JWE.new(foo: :bar) }
+    let(:jwe) { JSON::JWE.new 'hello' }
     it do
       jwe.content_type.should == 'application/jose'
     end
@@ -253,7 +253,7 @@ describe JSON::JWE do
     end
 
     context 'when unknonw/unsupported algorithm given' do
-      let(:input) { JSON::JWT.new(foo: :bar) }
+      let(:input) { 'header.key.iv.cipher_text.auth_tag' }
       let(:key) { public_key }
       let(:alg) { :RSA1_5 }
       let(:enc) { :'A128CBC-HS256' }
@@ -277,7 +277,7 @@ describe JSON::JWE do
     end
 
     context 'when invalid format of input given' do
-      let(:input) { JSON::JWT.new(foo: :bar) }
+      let(:input) { 'header.payload.signature' }
       let(:alg) { :RSA1_5 }
       let(:enc) { :'A128CBC-HS256' }
       it do
