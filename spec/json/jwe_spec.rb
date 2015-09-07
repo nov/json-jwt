@@ -120,21 +120,23 @@ describe JSON::JWE do
   end
 
   describe 'decrypt!' do
-    let(:input) { JSON::JWT.new(foo: 'bar') }
-    let(:jwe_string) do
-      _jwe_ = JSON::JWE.new input
+    let(:plain_text) { 'Hello World' }
+    let(:input) do
+      _jwe_ = JSON::JWE.new plain_text
       _jwe_.alg, _jwe_.enc = alg, enc
       _jwe_.encrypt! key
       _jwe_.to_s
     end
     let(:jwe) do
-      JSON::JWE.decode jwe_string, :skip_decryption
+      _jwe_ = JSON::JWE.new input
+      _jwe_.alg, _jwe_.enc = alg, enc
+      _jwe_
     end
 
     shared_examples_for :decryptable do
       it do
         jwe.decrypt! key
-        jwe.should == input
+        jwe.to_s.should == plain_text
       end
     end
 
@@ -147,11 +149,11 @@ describe JSON::JWE do
     end
 
     shared_examples_for :verify_cbc_authentication_tag do
-      let(:jwe_string) do
-        _jwe_ = JSON::JWE.new input
+      let(:input) do
+        _jwe_ = JSON::JWE.new plain_text
         _jwe_.alg, _jwe_.enc = alg, enc
         _jwe_.encrypt! key
-        _jwe_.to_s + 'malformed'
+        _jwe_.to_s + 'tampered'
       end
 
       it do
@@ -272,6 +274,17 @@ describe JSON::JWE do
           let(:alg) { alg }
           it_behaves_like :unsupported_algorithm_for_decryption
         end
+      end
+    end
+
+    context 'when invalid format of input given' do
+      let(:input) { JSON::JWT.new(foo: :bar) }
+      let(:alg) { :RSA1_5 }
+      let(:enc) { :'A128CBC-HS256' }
+      it do
+        expect do
+          jwe.decrypt! public_key
+        end.to raise_error JSON::JWE::InvalidFormat
       end
     end
   end
