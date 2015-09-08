@@ -179,8 +179,8 @@ module JSON
             input[key]
           end
         end
-        jwt_string = [header, payload, signature].join('.')
-        decode_compact_serialized jwt_string, public_key_or_secret
+        compact_serialized = [header, payload, signature].join('.')
+        decode_compact_serialized compact_serialized, public_key_or_secret
       end
     end
   end

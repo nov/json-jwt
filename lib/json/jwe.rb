@@ -55,6 +55,31 @@ module JSON
       end.join('.')
     end
 
+    def as_json(options = {})
+      case options[:syntax]
+      when :general
+        {
+          protected:  UrlSafeBase64.encode64(header.to_json),
+          recipients: [{
+            encrypted_key: UrlSafeBase64.encode64(jwe_encrypted_key)
+          }],
+          iv:         UrlSafeBase64.encode64(iv),
+          ciphertext: UrlSafeBase64.encode64(cipher_text),
+          tag:        UrlSafeBase64.encode64(authentication_tag)
+        }
+      when :flattened
+        {
+          protected:     UrlSafeBase64.encode64(header.to_json),
+          encrypted_key: UrlSafeBase64.encode64(jwe_encrypted_key),
+          iv:            UrlSafeBase64.encode64(iv),
+          ciphertext:    UrlSafeBase64.encode64(cipher_text),
+          tag:           UrlSafeBase64.encode64(authentication_tag)
+        }
+      else
+        super
+      end
+    end
+
     private
 
     # common
@@ -273,8 +298,21 @@ module JSON
         jwe
       end
 
-      def decode_json_serialized(input, key_or_secret)
-        raise NotImplementedError.new('JWE JSON Serialization not supported')
+      def decode_json_serialized(input, private_key_or_secret)
+        input = input.with_indifferent_access
+        jwe_encrypted_key = if input[:recipients].present?
+          input[:recipients].first[:encrypted_key]
+        else
+          input[:encrypted_key]
+        end
+        compact_serialized = [
+          input[:protected],
+          jwe_encrypted_key,
+          input[:iv],
+          input[:ciphertext],
+          input[:tag]
+        ].join('.')
+        decode_compact_serialized compact_serialized, private_key_or_secret
       end
     end
   end
