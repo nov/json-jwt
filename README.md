@@ -14,6 +14,7 @@ gem install json-jwt
 
 * View Source on GitHub (https://github.com/nov/json-jwt)
 * Report Issues on GitHub (https://github.com/nov/json-jwt/issues)
+* Documentation on GitHub (https://github.com/nov/json-jwt/wiki)
 
 ## Examples
 
