@@ -3,46 +3,27 @@ require 'url_safe_base64'
 require 'multi_json'
 require 'active_support'
 require 'active_support/core_ext'
+require 'json/jose'
 
 module JSON
   class JWT < ActiveSupport::HashWithIndifferentAccess
-    attr_accessor :header, :signature
+    attr_accessor :signature
 
     class Exception < StandardError; end
     class InvalidFormat < Exception; end
     class VerificationFailed < Exception; end
     class UnexpectedAlgorithm < VerificationFailed; end
 
-    class << self
-      def register_header_keys(*keys)
-        keys.each do |header_key|
-          define_method header_key do
-            self.header[header_key]
-          end
-          define_method "#{header_key}=" do |value|
-            self.header[header_key] = value
-          end
-        end
-      end
-    end
-    register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
-    alias_method :algorithm, :alg
+    include JOSE
 
     def initialize(claims = {})
+      @content_type = 'application/jwt'
       self.typ = :JWT
       self.alg = :none
       [:exp, :nbf, :iat].each do |key|
         claims[key] = claims[key].to_i if claims[key]
       end
       update claims
-    end
-
-    def content_type
-      'application/jwt'
-    end
-
-    def header
-      @header ||= {}
     end
 
     def sign(private_key_or_secret, algorithm = :HS256)
@@ -97,16 +78,6 @@ module JSON
     end
 
     class << self
-      def decode(input, key_or_secret = nil)
-        if input.is_a? Hash
-          decode_json_serialized input, key_or_secret
-        else
-          decode_compact_serialized input, key_or_secret
-        end
-      rescue MultiJson::DecodeError
-        raise InvalidFormat.new("Invalid JSON Format")
-      end
-
       def decode_compact_serialized(jwt_string, key_or_secret)
         case jwt_string.count('.') + 1
         when JWS::NUM_OF_SEGMENTS
@@ -132,7 +103,6 @@ module JSON
   end
 end
 
-require 'json/jose'
 require 'json/jws'
 require 'json/jwe'
 require 'json/jwk'

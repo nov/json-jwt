@@ -1,5 +1,5 @@
 module JSON
-  class JWS < JOSE
+  class JWS < JWT
     class InvalidFormat < JWT::InvalidFormat; end
     class VerificationFailed < JWT::VerificationFailed; end
     class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end

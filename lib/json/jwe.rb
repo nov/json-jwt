@@ -2,12 +2,14 @@ require 'securerandom'
 require 'bindata'
 
 module JSON
-  class JWE < JOSE
+  class JWE
     class InvalidFormat < JWT::InvalidFormat; end
     class DecryptionFailed < JWT::VerificationFailed; end
     class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end
 
     NUM_OF_SEGMENTS = 5
+
+    include JOSE
 
     attr_accessor(
       :public_key_or_secret, :private_key_or_secret,
@@ -20,10 +22,6 @@ module JSON
 
     def initialize(input = nil)
       self.plain_text = input.to_s
-    end
-
-    def content_type
-      'application/jose'
     end
 
     def encrypt!(public_key_or_secret)
@@ -67,7 +65,7 @@ module JSON
           ciphertext: UrlSafeBase64.encode64(cipher_text),
           tag:        UrlSafeBase64.encode64(authentication_tag)
         }
-      when :flattened
+      else
         {
           protected:     UrlSafeBase64.encode64(header.to_json),
           encrypted_key: UrlSafeBase64.encode64(jwe_encrypted_key),
@@ -75,8 +73,6 @@ module JSON
           ciphertext:    UrlSafeBase64.encode64(cipher_text),
           tag:           UrlSafeBase64.encode64(authentication_tag)
         }
-      else
-        super
       end
     end
 
