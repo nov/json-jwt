@@ -49,7 +49,7 @@ input = "jwt_header.jwt_claims.jwt_signature"
 JSON::JWT.decode(input, public_key)
 ```
 
-For more details, read [Documentation](https://github.com/nov/json-jwt/wiki)
+For more details, read [Documentation Wiki](https://github.com/nov/json-jwt/wiki).
 
 ## Note on Patches/Pull Requests
 
