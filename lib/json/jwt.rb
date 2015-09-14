@@ -32,13 +32,6 @@ module JSON
       jws.sign! private_key_or_secret
     end
 
-    # NOTE: keeping for backward compatibility
-    def verify(signature_base_string, public_key_or_secret = nil)
-      jws = JWS.new self
-      jws.signature_base_string = signature_base_string
-      jws.verify! public_key_or_secret
-    end
-
     def encrypt(public_key_or_secret, algorithm = :RSA1_5, encryption_method = :'A128CBC-HS256')
       jwe = JWE.new self
       jwe.alg = algorithm

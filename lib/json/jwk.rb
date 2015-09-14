@@ -127,14 +127,5 @@ module JSON
       )
       key
     end
-
-    class << self
-      def decode(jwk)
-        # NOTE:
-        #  returning OpenSSL::PKey::RSA/EC instance for backward compatibility.
-        #  use `new` if you want JSON::JWK instance.
-        new(jwk).to_key
-      end
-    end
   end
 end

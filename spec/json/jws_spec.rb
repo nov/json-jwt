@@ -154,7 +154,7 @@ describe JSON::JWS do
     end
   end
 
-  describe '#verify' do
+  describe '#verify!' do
     shared_examples_for :success_signature_verification do
       it do
         expect { decoded }.not_to raise_error
@@ -259,7 +259,7 @@ describe JSON::JWS do
       let(:alg) { :unknown }
       it do
         expect do
-          jws.verify jws.send(:signature_base_string), 'key'
+          jws.verify! 'key'
         end.to raise_error JSON::JWS::UnexpectedAlgorithm
       end
     end

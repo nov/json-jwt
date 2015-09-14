@@ -49,56 +49,6 @@ describe JSON::JWT do
     end
   end
 
-  describe '#verify' do
-    context 'when not signed nor encrypted' do
-      let(:jwt) do
-        header_base64, claims_base64, signature = no_signed.split('.', 3).collect do |segment|
-          UrlSafeBase64.decode64 segment.to_s
-        end
-        header, claims = [header_base64, claims_base64].collect do |json|
-          MultiJson.load(json).with_indifferent_access
-        end
-        jwt = JSON::JWT.new claims
-        jwt.header = header
-        jwt.signature = signature
-        jwt
-      end
-      let(:signature_base_string) { no_signed.split('.', 3)[0,2].join('.') }
-
-      context 'when no signature nor public_key_or_secret given' do
-        it do
-          jwt.verify(signature_base_string).should == true
-        end
-      end
-
-      context 'when public_key_or_secret given' do
-        it do
-          expect do
-            jwt.verify signature_base_string, 'secret'
-          end.to raise_error JSON::JWT::UnexpectedAlgorithm
-        end
-      end
-
-      context 'when signature given' do
-        before { jwt.signature = 'signature' }
-
-        it do
-          expect do
-            jwt.verify signature_base_string
-          end.to raise_error JSON::JWT::VerificationFailed
-        end
-      end
-    end
-
-    context 'when signed' do
-      it 'should delegate verification to JWS' do
-        expect(jws).to receive(:verify!)
-        expect(JSON::JWS).to receive(:new).and_return(jws)
-        jwt.verify 'shared_secret'
-      end
-    end
-  end
-
   describe '#encrypt' do
     let(:shared_key) { SecureRandom.hex 16 } # default shared key is too short
 
