@@ -21,3 +21,6 @@ Gemfile.lock
 
 ## PROJECT::SPECIFIC
 .class
+
+## BUNDLER
+.bundle
