@@ -6,7 +6,7 @@ module NimbusSpecHelper
       File.join(
         File.dirname(__FILE__),
         'json-jwt-nimbus',
-        'nimbus_jwe'
+        'nimbus_jwe.rb'
       )
     )
     if File.exist? nimbus_path
