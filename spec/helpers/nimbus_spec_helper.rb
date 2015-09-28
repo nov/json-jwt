@@ -5,11 +5,12 @@ module NimbusSpecHelper
     nimbus_path = File.expand_path(
       File.join(
         File.dirname(__FILE__),
-        'json-jwt-nimbus'
+        'json-jwt-nimbus',
+        'nimbus_jwe'
       )
     )
     if File.exist? nimbus_path
-      require File.join(nimbus_path, 'nimbus_jwe')
+      require nimbus_path
     end
   end
 
