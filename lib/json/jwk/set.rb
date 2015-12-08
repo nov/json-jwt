@@ -4,7 +4,7 @@ module JSON
       class KidNotFound < JWT::Exception; end
 
       def initialize(*jwks)
-        jwks = if jwks.first.is_a?(Hash) && (keys = jwks.first.with_indifferent_access[:keys])
+        jwks = if jwks.first.is_a?(Hash) && (keys = Hashery::KeyHash[jwks.first][:keys])
           keys
         else
           jwks

@@ -1,21 +1,22 @@
 module JSON
-  class JWK < ActiveSupport::HashWithIndifferentAccess
+  class JWK < Hashery::KeyHash
     class UnknownAlgorithm < JWT::Exception; end
 
     def initialize(params = {}, ex_params = {})
+      super()
       case params
       when OpenSSL::PKey::RSA, OpenSSL::PKey::EC
-        super params.to_jwk(ex_params)
+        merge! params.to_jwk(ex_params)
       when OpenSSL::PKey::PKey
         raise UnknownAlgorithm.new('Unknown Key Type')
-      when String
-        super(
-          k: params,
+      when String, Symbol
+        merge!(
+          k: params.to_s,
           kty: :oct
         )
         merge! ex_params
       else
-        super params
+        merge! params
         merge! ex_params
       end
       self[:kid] ||= thumbprint rescue nil #ignore
@@ -50,18 +51,22 @@ module JSON
       end
     end
 
+    def as_json(options = {})
+      to_h
+    end
+
     private
 
     def rsa?
-      self[:kty].try(:to_sym) == :RSA
+      self[:kty].to_s == 'RSA'
     end
 
     def ec?
-      self[:kty].try(:to_sym) == :EC
+      self[:kty].to_s == 'EC'
     end
 
     def oct?
-      self[:kty].try(:to_sym) == :oct
+      self[:kty].to_s == 'oct'
     end
 
     def normalize
@@ -105,12 +110,12 @@ module JSON
     end
 
     def to_ec_key
-      curve_name = case self[:crv].try(:to_sym)
-      when :'P-256'
+      curve_name = case self[:crv].to_s
+      when 'P-256'
         'prime256v1'
-      when :'P-384'
+      when 'P-384'
         'secp384r1'
-      when :'P-521'
+      when 'P-521'
         'secp521r1'
       else
         raise UnknownAlgorithm.new('Unknown EC Curve')

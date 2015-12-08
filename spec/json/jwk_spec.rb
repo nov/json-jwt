@@ -17,7 +17,7 @@ describe JSON::JWK do
       it { should be_instance_of JSON::JWK }
       describe 'kid' do
         subject { jwk[:kid] }
-        it { should be_blank }
+        it { should be_nil }
       end
     end
 
