@@ -1,5 +1,6 @@
 before_install:
   - gem install bundler
+  - git submodule update --init --recursive
 
 rvm:
   - 1.9.3
@@ -7,6 +8,3 @@ rvm:
   - 2.1
   - 2.2
   - 2.3
-
-before_install:
-  - git submodule update --init --recursive
