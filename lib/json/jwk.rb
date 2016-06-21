@@ -18,7 +18,6 @@ module JSON
         super params
         merge! ex_params
       end
-      self[:kid] ||= thumbprint
     end
 
     def content_type
