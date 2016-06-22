@@ -27,12 +27,16 @@ module JSON
     end
 
     def sign(private_key_or_secret, algorithm = :HS256)
+      # NOTE: needs to set "kid" before generating JWS signature base string
+      self.kid ||= private_key_or_secret[:kid] if private_key_or_secret.is_a? JSON::JWK
       jws = JWS.new self
       jws.alg = algorithm
       jws.sign! private_key_or_secret
     end
 
     def encrypt(public_key_or_secret, algorithm = :RSA1_5, encryption_method = :'A128CBC-HS256')
+      # NOTE: needs to set "kid" before generating JWE plain text
+      self.kid ||= public_key_or_secret[:kid] if public_key_or_secret.is_a? JSON::JWK
       jwe = JWE.new self
       jwe.alg = algorithm
       jwe.enc = encryption_method
