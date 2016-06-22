@@ -106,19 +106,6 @@ module JSON
       raise UnexpectedAlgorithm.new(e.message)
     end
 
-    def with_jwk_support(key)
-      case key
-      when JSON::JWK
-        key.to_key
-      when JSON::JWK::Set
-        key.detect do |jwk|
-          jwk[:kid] && jwk[:kid] == kid
-        end.try(:to_key) or raise JWK::Set::KidNotFound
-      else
-        key
-      end
-    end
-
     def verify_ecdsa_group!(key)
       group_name = case digest.digest_length * 8
       when 256

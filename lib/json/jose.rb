@@ -20,6 +20,19 @@ module JSON
       end
     end
 
+    def with_jwk_support(key)
+      case key
+      when JSON::JWK
+        key.to_key
+      when JSON::JWK::Set
+        key.detect do |jwk|
+          jwk[:kid] && jwk[:kid] == kid
+        end.try(:to_key) or raise JWK::Set::KidNotFound
+      else
+        key
+      end
+    end
+
     module ClassMethods
       def register_header_keys(*keys)
         keys.each do |header_key|

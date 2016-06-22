@@ -25,7 +25,7 @@ module JSON
     end
 
     def encrypt!(public_key_or_secret)
-      self.public_key_or_secret = public_key_or_secret
+      self.public_key_or_secret = with_jwk_support public_key_or_secret
       cipher.encrypt
       generate_cipher_keys!
       self.cipher_text = cipher.update(plain_text) + cipher.final
@@ -33,7 +33,7 @@ module JSON
     end
 
     def decrypt!(private_key_or_secret)
-      self.private_key_or_secret = private_key_or_secret
+      self.private_key_or_secret = with_jwk_support private_key_or_secret
       cipher.decrypt
       restore_cipher_keys!
       self.plain_text = cipher.update(cipher_text) + cipher.final
