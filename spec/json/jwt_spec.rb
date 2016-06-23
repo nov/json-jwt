@@ -48,6 +48,20 @@ describe JSON::JWT do
       end
     end
 
+    context 'when no algirithm specified' do
+      subject { jwt.sign(key) }
+
+      context 'when key is String' do
+        let(:key) { shared_secret }
+        its(:alg) { should == :HS256 }
+      end
+
+      context 'otherwise' do
+        let(:key) { private_key }
+        its(:alg) { should == :RS256 }
+      end
+    end
+
     context 'when non-JWK key is given' do
       let(:key) { private_key }
       it 'should not set kid header automatically' do
