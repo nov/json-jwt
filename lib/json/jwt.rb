@@ -26,14 +26,23 @@ module JSON
       update claims
     end
 
-    def sign(private_key_or_secret, algorithm = :HS256)
-      jws = JWS.new self
+    def sign(private_key_or_secret, algorithm = :autodetect)
+      if algorithm == :autodetect
+        # NOTE:
+        #  I'd like to make :RS256 default.
+        #  However, by histrical reasons, :HS256 was default.
+        #  This code is needed to keep legacy behavior.
+        algorithm = private_key_or_secret.is_a?(String) ? :HS256 : :RS256
+      end
+      jws = JWS.new self.dup
+      jws.kid ||= private_key_or_secret[:kid] if private_key_or_secret.is_a? JSON::JWK
       jws.alg = algorithm
       jws.sign! private_key_or_secret
     end
 
     def encrypt(public_key_or_secret, algorithm = :RSA1_5, encryption_method = :'A128CBC-HS256')
       jwe = JWE.new self
+      jwe.kid ||= public_key_or_secret[:kid] if public_key_or_secret.is_a? JSON::JWK
       jwe.alg = algorithm
       jwe.enc = encryption_method
       jwe.encrypt! public_key_or_secret

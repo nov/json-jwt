@@ -2,21 +2,38 @@ require 'spec_helper'
 
 describe JSON::JWK do
   describe '#initialize' do
-    subject { JSON::JWK.new key }
+    let(:jwk) { JSON::JWK.new key }
+    subject { jwk }
+
+    shared_examples_for :jwk_with_kid do
+      it { should be_instance_of JSON::JWK }
+      describe 'kid' do
+        subject { jwk[:kid] }
+        it { should == jwk.thumbprint }
+      end
+    end
+
+    shared_examples_for :jwk_without_kid do
+      it { should be_instance_of JSON::JWK }
+      describe 'kid' do
+        subject { jwk[:kid] }
+        it { should be_blank }
+      end
+    end
 
     context 'with OpenSSL::PKey::RSA' do
       let(:key) { public_key }
-      it { should be_instance_of JSON::JWK }
+      it_behaves_like :jwk_with_kid
     end
 
     context 'with OpenSSL::PKey::EC' do
       let(:key) { public_key :ecdsa }
-      it { should be_instance_of JSON::JWK }
+      it_behaves_like :jwk_with_kid
     end
 
     context 'with String' do
       let(:key) { 'secret' }
-      it { should be_instance_of JSON::JWK }
+      it_behaves_like :jwk_with_kid
     end
 
     context 'with JSON::JWK' do
@@ -26,7 +43,7 @@ describe JSON::JWK do
           kty: :oct
         )
       end
-      it { should be_instance_of JSON::JWK }
+      it_behaves_like :jwk_with_kid
     end
 
     context 'with Hash' do
@@ -36,7 +53,12 @@ describe JSON::JWK do
           kty: :oct
         }
       end
-      it { should be_instance_of JSON::JWK }
+      it_behaves_like :jwk_with_kid
+    end
+
+    context 'with nothing' do
+      let(:jwk) { JSON::JWK.new }
+      it_behaves_like :jwk_without_kid
     end
   end
 
