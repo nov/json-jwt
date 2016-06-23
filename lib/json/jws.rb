@@ -9,6 +9,7 @@ module JSON
     attr_accessor :signature_base_string
 
     def initialize(jwt)
+      @key_proc = proc {|key| key.to_s }
       update jwt
     end
 
@@ -18,7 +19,7 @@ module JSON
     end
 
     def verify!(public_key_or_secret)
-      if alg.try(:to_sym) == :none
+      if alg.to_s == 'none'
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
       else
@@ -43,15 +44,15 @@ module JSON
     end
 
     def hmac?
-      [:HS256, :HS384, :HS512].include? algorithm.try(:to_sym)
+      ['HS256', 'HS384', 'HS512'].include? algorithm.to_s
     end
 
     def rsa?
-      [:RS256, :RS384, :RS512].include? algorithm.try(:to_sym)
+      ['RS256', 'RS384', 'RS512'].include? algorithm.to_s
     end
 
     def ecdsa?
-      [:ES256, :ES384, :ES512].include? algorithm.try(:to_sym)
+      ['ES256', 'ES384', 'ES512'].include? algorithm.to_s
     end
 
     def signature_base_string
@@ -140,7 +141,7 @@ module JSON
           UrlSafeBase64.decode64 segment.to_s
         end
         header, claims = [header, claims].collect do |json|
-          MultiJson.load(json).with_indifferent_access
+          Hashery::KeyHash[MultiJson.load(json)]
         end
         jws = new claims
         jws.header = header
@@ -151,8 +152,8 @@ module JSON
       end
 
       def decode_json_serialized(input, public_key_or_secret)
-        input = input.with_indifferent_access
-        header, payload, signature = if input[:signatures].present?
+        input = Hashery::KeyHash[input]
+        header, payload, signature = if input[:signatures] && !input[:signatures].empty?
           [
             input[:signatures].first[:protected],
             input[:payload],

@@ -2,21 +2,23 @@ require 'securecompare'
 
 module JSON
   module JOSE
-    extend ActiveSupport::Concern
+    def self.included(base)
+      base.class_eval do
+        extend ClassMethods
+        include SecureCompare
 
-    included do
-      extend ClassMethods
-      include SecureCompare
-      register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
-      alias_method :algorithm, :alg
+        register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
+        alias_method :algorithm, :alg
 
-      attr_accessor :header
-      def header
-        @header ||= {}
-      end
+        attr_accessor :header
 
-      def content_type
-        @content_type ||= 'application/jose'
+        def header
+          @header ||= {}
+        end
+
+        def content_type
+          @content_type ||= 'application/jose'
+        end
       end
     end
 
@@ -25,9 +27,14 @@ module JSON
       when JSON::JWK
         key.to_key
       when JSON::JWK::Set
-        key.detect do |jwk|
+        jwk = key.detect do |jwk|
           jwk[:kid] && jwk[:kid] == kid
-        end.try(:to_key) or raise JWK::Set::KidNotFound
+        end
+        if jwk
+          jwk.to_key
+        else
+          raise JWK::Set::KidNotFound
+        end
       else
         key
       end

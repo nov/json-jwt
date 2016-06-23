@@ -85,15 +85,15 @@ module JSON
     end
 
     def gcm?
-      [:A128GCM, :A256GCM].include? encryption_method.try(:to_sym)
+      ['A128GCM', 'A256GCM'].include? encryption_method.to_s
     end
 
     def cbc?
-      [:'A128CBC-HS256', :'A256CBC-HS512'].include? encryption_method.try(:to_sym)
+      ['A128CBC-HS256', 'A256CBC-HS512'].include? encryption_method.to_s
     end
 
     def dir?
-      :dir == algorithm.try(:to_sym)
+      algorithm.to_s == 'dir'
     end
 
     def cipher
@@ -105,14 +105,14 @@ module JSON
     end
 
     def cipher_name
-      case encryption_method.try(:to_sym)
-      when :A128GCM
+      case encryption_method.to_s
+      when 'A128GCM'
         'aes-128-gcm'
-      when :A256GCM
+      when 'A256GCM'
         'aes-256-gcm'
-      when :'A128CBC-HS256'
+      when 'A128CBC-HS256'
         'aes-128-cbc'
-      when :'A256CBC-HS512'
+      when 'A256CBC-HS512'
         'aes-256-cbc'
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
@@ -120,10 +120,10 @@ module JSON
     end
 
     def sha_size
-      case encryption_method.try(:to_sym)
-      when :'A128CBC-HS256'
+      case encryption_method.to_s
+      when 'A128CBC-HS256'
         256
-      when :'A256CBC-HS512'
+      when 'A256CBC-HS512'
         512
       else
         raise UnexpectedAlgorithm.new('Unknown Hash Size')
@@ -148,22 +148,22 @@ module JSON
     # encryption
 
     def jwe_encrypted_key
-      @jwe_encrypted_key ||= case algorithm.try(:to_sym)
-      when :RSA1_5
+      @jwe_encrypted_key ||= case algorithm.to_s
+      when 'RSA1_5'
         public_key_or_secret.public_encrypt content_encryption_key
-      when :'RSA-OAEP'
+      when 'RSA-OAEP'
         public_key_or_secret.public_encrypt content_encryption_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-      when :A128KW
+      when 'A128KW'
         raise NotImplementedError.new('A128KW not supported yet')
-      when :A256KW
+      when 'A256KW'
         raise NotImplementedError.new('A256KW not supported yet')
-      when :dir
+      when 'dir'
         ''
-      when :'ECDH-ES'
+      when 'ECDH-ES'
         raise NotImplementedError.new('ECDH-ES not supported yet')
-      when :'ECDH-ES+A128KW'
+      when 'ECDH-ES+A128KW'
         raise NotImplementedError.new('ECDH-ES+A128KW not supported yet')
-      when :'ECDH-ES+A256KW'
+      when 'ECDH-ES+A256KW'
         raise NotImplementedError.new('ECDH-ES+A256KW not supported yet')
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
@@ -226,22 +226,22 @@ module JSON
     # decryption
 
     def decrypt_content_encryption_key
-      case algorithm.try(:to_sym)
-      when :RSA1_5
+      case algorithm.to_s
+      when 'RSA1_5'
         private_key_or_secret.private_decrypt jwe_encrypted_key
-      when :'RSA-OAEP'
+      when 'RSA-OAEP'
         private_key_or_secret.private_decrypt jwe_encrypted_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-      when :A128KW
+      when 'A128KW'
         raise NotImplementedError.new('A128KW not supported yet')
-      when :A256KW
+      when 'A256KW'
         raise NotImplementedError.new('A256KW not supported yet')
-      when :dir
+      when 'dir'
         private_key_or_secret
-      when :'ECDH-ES'
+      when 'ECDH-ES'
         raise NotImplementedError.new('ECDH-ES not supported yet')
-      when :'ECDH-ES+A128KW'
+      when 'ECDH-ES+A128KW'
         raise NotImplementedError.new('ECDH-ES+A128KW not supported yet')
-      when :'ECDH-ES+A256KW'
+      when 'ECDH-ES+A256KW'
         raise NotImplementedError.new('ECDH-ES+A256KW not supported yet')
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
@@ -289,14 +289,14 @@ module JSON
           UrlSafeBase64.decode64 segment
         end
         jwe.auth_data = input.split('.').first
-        jwe.header = MultiJson.load(_header_json_).with_indifferent_access
+        jwe.header = Hashery::KeyHash[MultiJson.load(_header_json_)]
         jwe.decrypt! private_key_or_secret unless private_key_or_secret == :skip_decryption
         jwe
       end
 
       def decode_json_serialized(input, private_key_or_secret)
-        input = input.with_indifferent_access
-        jwe_encrypted_key = if input[:recipients].present?
+        input = Hashery::KeyHash[input]
+        jwe_encrypted_key = if input[:recipients] && !input[:recipients].strip.empty?
           input[:recipients].first[:encrypted_key]
         else
           input[:encrypted_key]

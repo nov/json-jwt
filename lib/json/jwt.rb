@@ -1,12 +1,12 @@
 require 'openssl'
 require 'url_safe_base64'
 require 'multi_json'
-require 'active_support'
-require 'active_support/core_ext'
 require 'json/jose'
+require 'hashery/key_hash'
 
 module JSON
-  class JWT < ActiveSupport::HashWithIndifferentAccess
+  class JWT < Hashery::KeyHash
+
     attr_accessor :signature
 
     class Exception < StandardError; end
@@ -17,6 +17,7 @@ module JSON
     include JOSE
 
     def initialize(claims = {})
+      super()
       @content_type = 'application/jwt'
       self.typ = :JWT
       self.alg = :none
@@ -30,11 +31,11 @@ module JSON
       if algorithm == :autodetect
         # NOTE:
         #  I'd like to make :RS256 default.
-        #  However, by histrical reasons, :HS256 was default.
+        #  However, by historical reasons, :HS256 was default.
         #  This code is needed to keep legacy behavior.
         algorithm = private_key_or_secret.is_a?(String) ? :HS256 : :RS256
       end
-      jws = JWS.new self.dup
+      jws = JWS.new self.class.new(self)
       jws.kid ||= private_key_or_secret[:kid] if private_key_or_secret.is_a? JSON::JWK
       jws.alg = algorithm
       jws.sign! private_key_or_secret
@@ -75,8 +76,12 @@ module JSON
           signature: UrlSafeBase64.encode64(signature.to_s)
         }
       else
-        super
+        to_h
       end
+    end
+
+    def to_json(options={})
+      as_json(options).to_json(options)
     end
 
     class << self
@@ -92,10 +97,11 @@ module JSON
       end
 
       def decode_json_serialized(input, key_or_secret)
-        input = input.with_indifferent_access
-        if (input[:signatures] || input[:signature]).present?
+        input = Hashery::KeyHash[input]
+        signature = input[:signatures] || input[:signature]
+        if signature && !signature.empty?
           JWS.decode_json_serialized input, key_or_secret
-        elsif input[:ciphertext].present?
+        elsif !input[:ciphertext].to_s.strip.empty?
           JWE.decode_json_serialized input, key_or_secret
         else
           raise InvalidFormat.new("Unexpected JOSE JSON Serialization Format.")

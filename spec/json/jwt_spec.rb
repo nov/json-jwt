@@ -9,11 +9,11 @@ describe JSON::JWT do
     jws
   end
   let(:claims) do
-    {
+    Hashery::KeyHash[
       iss: 'joe',
       exp: 1300819380,
       'http://example.com/is_root' => true
-    }.with_indifferent_access
+    ]
   end
   let(:no_signed) do
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
@@ -66,7 +66,7 @@ describe JSON::JWT do
       let(:key) { private_key }
       it 'should not set kid header automatically' do
         jws = jwt.sign(key, :RS256)
-        jws.kid.should be_blank
+        jws.kid.should be_nil
       end
     end
 
@@ -74,7 +74,7 @@ describe JSON::JWT do
       let(:key) { JSON::JWK.new private_key }
       it 'should set kid header automatically' do
         jws = jwt.sign(key, :RS256)
-        jwt.kid.should be_blank
+        jwt.kid.should be_nil
         jws.kid.should == key[:kid]
       end
     end
@@ -103,7 +103,7 @@ describe JSON::JWT do
       let(:key) { shared_key }
       it 'should not set kid header automatically' do
         jwe = jwt.encrypt(key, :dir)
-        jwe.kid.should be_blank
+        jwe.kid.should be_nil
       end
     end
 
@@ -111,7 +111,7 @@ describe JSON::JWT do
       let(:key) { JSON::JWK.new shared_key }
       it 'should set kid header automatically' do
         jwe = jwt.encrypt(key, :dir)
-        jwt.kid.should be_blank
+        jwt.kid.should be_nil
         jwe.kid.should == key[:kid]
       end
     end
