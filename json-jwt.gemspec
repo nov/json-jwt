@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.add_runtime_dependency "multi_json", ">= 1.3"
   gem.add_runtime_dependency "url_safe_base64"
-  gem.add_runtime_dependency "activesupport"
+  gem.add_runtime_dependency "activesupport", '~> 4.2.6'
   gem.add_runtime_dependency "bindata"
   gem.add_runtime_dependency "securecompare"
   gem.add_development_dependency "rake", ">= 0.8"
