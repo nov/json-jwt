@@ -30,7 +30,7 @@ module JSON
     def update(hash_or_jwt)
       super
       if hash_or_jwt.is_a? JSON::JWT
-        self.header = hash_or_jwt.header
+        self.header.update hash_or_jwt.header
         self.signature = hash_or_jwt.signature
       end
       self

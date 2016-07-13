@@ -265,7 +265,7 @@ describe JSON::JWS do
     end
   end
 
-  describe 'to_json' do
+  describe '#to_json' do
     let(:alg) { :RS256 }
     let(:private_key_or_secret) { private_key }
 

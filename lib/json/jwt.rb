@@ -34,7 +34,7 @@ module JSON
         #  This code is needed to keep legacy behavior.
         algorithm = private_key_or_secret.is_a?(String) ? :HS256 : :RS256
       end
-      jws = JWS.new self.dup
+      jws = JWS.new self
       jws.kid ||= private_key_or_secret[:kid] if private_key_or_secret.is_a? JSON::JWK
       jws.alg = algorithm
       jws.sign! private_key_or_secret

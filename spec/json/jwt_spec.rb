@@ -78,6 +78,41 @@ describe JSON::JWT do
         jws.kid.should == key[:kid]
       end
     end
+
+    describe 'object copy behaviour' do
+      before do
+        @jwt = JSON::JWT.new(obj: {foo: :bar})
+        @jws = @jwt.sign('secret')
+      end
+
+      context 'when original JWT is modified' do
+        before do
+          @jwt.header[:x] = :x
+          @jwt[:obj][:x] = :x
+        end
+
+        describe 'copied JWS' do
+          it 'should be affected as shallow copy, but not as a simple reference' do
+            @jws.header.should_not include :x
+            @jws[:obj].should include :x
+          end
+        end
+      end
+
+      context 'when copied JWS is modified' do
+        before do
+          @jws.header[:x] = :x
+          @jws[:obj][:x] = :x
+        end
+
+        describe 'original JWT' do
+          it 'should be affected as shallow copy, but not as a simple reference' do
+            @jwt.header.should_not include :x
+            @jwt[:obj].should include :x
+          end
+        end
+      end
+    end
   end
 
   describe '#encrypt' do
