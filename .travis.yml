@@ -1,10 +1,7 @@
 before_install:
   - gem install bundler
-  - gem install activesupport
   - git submodule update --init --recursive
 
 rvm:
-  - 2.0
-  - 2.1
-  - 2.2
-  - 2.3.0
+  - 2.2.5
+  - 2.3.1
