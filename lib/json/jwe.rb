@@ -27,7 +27,12 @@ module JSON
     def encrypt!(public_key_or_secret)
       self.public_key_or_secret = with_jwk_support public_key_or_secret
       cipher.encrypt
-      generate_cipher_keys!
+      self.content_encryption_key = generate_content_encryption_key
+      self.mac_key, self.encryption_key = derive_encryption_and_mac_keys
+      cipher.key = encryption_key
+      self.iv = cipher.random_iv
+      self.auth_data = UrlSafeBase64.encode64 header.to_json
+      cipher.auth_data = self.auth_data if gcm?
       self.cipher_text = cipher.update(plain_text) + cipher.final
       self
     end
@@ -35,7 +40,14 @@ module JSON
     def decrypt!(private_key_or_secret)
       self.private_key_or_secret = with_jwk_support private_key_or_secret
       cipher.decrypt
-      restore_cipher_keys!
+      self.content_encryption_key = decrypt_content_encryption_key
+      self.mac_key, self.encryption_key = derive_encryption_and_mac_keys
+      cipher.key = encryption_key
+      cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
+      if gcm?
+        cipher.auth_tag = authentication_tag
+        cipher.auth_data = auth_data
+      end
       self.plain_text = cipher.update(cipher_text) + cipher.final
       verify_cbc_authentication_tag! if cbc?
       self
@@ -134,17 +146,15 @@ module JSON
       OpenSSL::Digest.new "SHA#{sha_size}"
     end
 
-    def derive_encryption_and_mac_keys_cbc!
-      self.mac_key, self.encryption_key = content_encryption_key.unpack(
-        "a#{content_encryption_key.length / 2}" * 2
-      )
-      self
-    end
-
-    def derive_encryption_and_mac_keys_gcm!
-      self.encryption_key = content_encryption_key
-      self.mac_key = :wont_be_used
-      self
+    def derive_encryption_and_mac_keys
+      case
+      when gcm?
+        [:wont_be_used, content_encryption_key]
+      when cbc?
+        content_encryption_key.unpack(
+          "a#{content_encryption_key.length / 2}" * 2
+        )
+      end
     end
 
     # encryption
@@ -172,40 +182,15 @@ module JSON
       end
     end
 
-    def generate_cipher_keys!
+    def generate_content_encryption_key
       case
+      when dir?
+        public_key_or_secret
       when gcm?
-        generate_gcm_keys!
-      when cbc?
-        generate_cbc_keys!
-      end
-      cipher.key = encryption_key
-      self.iv = cipher.random_iv
-      self.auth_data = UrlSafeBase64.encode64 header.to_json
-      if gcm?
-        cipher.auth_data = self.auth_data
-      end
-      self
-    end
-
-    def generate_gcm_keys!
-      self.content_encryption_key ||= if dir?
-        public_key_or_secret
-      else
         cipher.random_key
-      end
-      derive_encryption_and_mac_keys_gcm!
-      self
-    end
-
-    def generate_cbc_keys!
-      self.content_encryption_key ||= if dir?
-        public_key_or_secret
-      else
+      when cbc?
         SecureRandom.random_bytes sha_size / 8
       end
-      derive_encryption_and_mac_keys_cbc!
-      self
     end
 
     def authentication_tag
@@ -247,22 +232,6 @@ module JSON
         raise NotImplementedError.new('ECDH-ES+A256KW not supported yet')
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
-      end
-    end
-
-    def restore_cipher_keys!
-      self.content_encryption_key = decrypt_content_encryption_key
-      case
-      when gcm?
-        derive_encryption_and_mac_keys_gcm!
-      when cbc?
-        derive_encryption_and_mac_keys_cbc!
-      end
-      cipher.key = encryption_key
-      cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
-      if gcm?
-        cipher.auth_tag = authentication_tag
-        cipher.auth_data = auth_data
       end
     end
 
