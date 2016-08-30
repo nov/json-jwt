@@ -30,7 +30,7 @@ module JSON
       self.content_encryption_key = generate_content_encryption_key
       self.mac_key, self.encryption_key = derive_encryption_and_mac_keys
       cipher.key = encryption_key
-      self.iv = cipher.random_iv
+      self.iv = cipher.random_iv # NOTE: 'iv' has to be set after 'key' for GCM
       self.auth_data = UrlSafeBase64.encode64 header.to_json
       cipher.auth_data = auth_data if gcm?
       self.cipher_text = cipher.update(plain_text) + cipher.final
