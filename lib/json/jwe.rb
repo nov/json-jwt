@@ -32,7 +32,7 @@ module JSON
       cipher.key = encryption_key
       self.iv = cipher.random_iv
       self.auth_data = UrlSafeBase64.encode64 header.to_json
-      cipher.auth_data = self.auth_data if gcm?
+      cipher.auth_data = auth_data if gcm?
       self.cipher_text = cipher.update(plain_text) + cipher.final
       self
     end
