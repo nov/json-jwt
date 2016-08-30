@@ -233,6 +233,8 @@ module JSON
       else
         raise UnexpectedAlgorithm.new('Unknown Encryption Algorithm')
       end
+    rescue OpenSSL::PKey::PKeyError
+      generate_content_encryption_key
     end
 
     def verify_cbc_authentication_tag!
