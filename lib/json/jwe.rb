@@ -98,7 +98,7 @@ module JSON
 
     def cipher
       @cipher ||= if gcm? && !gcm_supported?
-        raise UnexpectedAlgorithm.new('AEC GCM requires Ruby 2.0+ and OpenSSL 1.0.1c+') if gcm? && !gcm_supported?
+        raise UnexpectedAlgorithm.new('AEC GCM requires Ruby 2.0+ and OpenSSL 1.0.1c+')
       else
         OpenSSL::Cipher.new cipher_name
       end
@@ -135,7 +135,9 @@ module JSON
     end
 
     def derive_encryption_and_mac_keys_cbc!
-      self.mac_key, self.encryption_key = content_encryption_key.unpack("a#{content_encryption_key.length / 2}" * 2)
+      self.mac_key, self.encryption_key = content_encryption_key.unpack(
+        "a#{content_encryption_key.length / 2}" * 2
+      )
       self
     end
 
