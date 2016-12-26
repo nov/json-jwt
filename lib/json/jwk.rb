@@ -90,7 +90,7 @@ module JSON
     end
 
     def to_rsa_key
-      e, n, d, p, q = [:e, :n, :d, :p, :q].collect do |key|
+      e, n, d, p, q, dp, dq, qi = [:e, :n, :d, :p, :q, :dp, :dq, :qi].collect do |key|
         if self[key]
           OpenSSL::BN.new UrlSafeBase64.decode64(self[key]), 2
         end
@@ -101,6 +101,9 @@ module JSON
       key.d = d if d
       key.p = p if p
       key.q = q if q
+      key.dmp1 = dp if dp
+      key.dmq1 = dq if dq
+      key.iqmp = qi if qi
       key
     end
 

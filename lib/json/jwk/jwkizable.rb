@@ -12,7 +12,10 @@ module JSON
             params.merge!(
               d: UrlSafeBase64.encode64(d.to_s(2)),
               p: UrlSafeBase64.encode64(p.to_s(2)),
-              q: UrlSafeBase64.encode64(q.to_s(2))
+              q: UrlSafeBase64.encode64(q.to_s(2)),
+              dp: UrlSafeBase64.encode64(dmp1.to_s(2)),
+              dq: UrlSafeBase64.encode64(dmq1.to_s(2)),
+              qi: UrlSafeBase64.encode64(iqmp.to_s(2)),
             )
           end
           JWK.new params
