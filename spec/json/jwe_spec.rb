@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe JSON::JWE do
-  let(:shared_key) { SecureRandom.hex 32 } # default shared key is too short
   let(:private_key_path) { der_file_path 'rsa/private_key' }
 
   describe '#content_type' do
@@ -248,10 +247,11 @@ describe JSON::JWE do
 
     context 'when alg=dir' do
       let(:alg) { :dir }
-      let(:key) { shared_key }
+      let(:key) { SecureRandom.random_bytes key_size }
 
       context 'when enc=A128GCM' do
         let(:enc) { :A128GCM }
+        let(:key_size) { 16 }
         if gcm_supported?
           it_behaves_like :decryptable
         else
@@ -261,6 +261,7 @@ describe JSON::JWE do
 
       context 'when enc=A256GCM' do
         let(:enc) { :A256GCM }
+        let(:key_size) { 32 }
         if gcm_supported?
           it_behaves_like :decryptable
         else
@@ -270,12 +271,14 @@ describe JSON::JWE do
 
       context 'when enc=A128CBC-HS256' do
         let(:enc) { :'A128CBC-HS256' }
+        let(:key_size) { 32 }
         it_behaves_like :decryptable
         it_behaves_like :verify_cbc_authentication_tag
       end
 
       context 'when enc=A256CBC-HS512' do
         let(:enc) { :'A256CBC-HS512' }
+        let(:key_size) { 64 }
         it_behaves_like :decryptable
         it_behaves_like :verify_cbc_authentication_tag
       end
