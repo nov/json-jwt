@@ -18,7 +18,7 @@ module JSON
         super params
         merge! ex_params
       end
-      self[:kid] ||= thumbprint rescue nil #ignore
+      calculate_default_kid if self[:kid].blank?
     end
 
     def content_type
@@ -62,6 +62,12 @@ module JSON
 
     def oct?
       self[:kty].try(:to_sym) == :oct
+    end
+
+    def calculate_default_kid
+      self[:kid] = thumbprint
+    rescue
+      # ignore
     end
 
     def normalize

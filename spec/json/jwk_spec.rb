@@ -21,6 +21,12 @@ describe JSON::JWK do
       end
     end
 
+    context 'when no imput' do
+      it do
+        JSON::JWK.new.should be_blank
+      end
+    end
+
     context 'with OpenSSL::PKey::RSA' do
       let(:key) { public_key }
       it_behaves_like :jwk_with_kid
