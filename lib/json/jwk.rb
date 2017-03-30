@@ -102,14 +102,9 @@ module JSON
         end
       end
       key = OpenSSL::PKey::RSA.new
-      key.e = e
-      key.n = n
-      key.d = d if d
-      key.p = p if p
-      key.q = q if q
-      key.dmp1 = dp if dp
-      key.dmq1 = dq if dq
-      key.iqmp = qi if qi
+      key.set_key(n, e, d)
+      key.set_factors(p, q) if p && q
+      key.set_crt_params(dp, dq, qi) if dp && dq && qi
       key
     end
 
