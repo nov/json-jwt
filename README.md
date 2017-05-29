@@ -51,6 +51,10 @@ JSON::JWT.decode(input, public_key)
 
 For more details, read [Documentation Wiki](https://github.com/nov/json-jwt/wiki).
 
+## Versioning
+
+This project uses [Semantic Versioning](http://semver.org/), meaning that breaking changes to the public API will only be introduced in major versions, given a version number `MAJOR.MINOR.PATCH`.
+
 ## Note on Patches/Pull Requests
 
 * Fork the project.
