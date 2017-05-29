@@ -7,7 +7,7 @@ module JSON
     included do
       extend ClassMethods
       include SecureCompare
-      register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
+      register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :"x5t#S256", :x5c, :kid, :typ, :cty, :crit
       alias_method :algorithm, :alg
 
       attr_accessor :header
