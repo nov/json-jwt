@@ -51,7 +51,7 @@ module JSON
         else
           decode_compact_serialized input, key_or_secret
         end
-      rescue MultiJson::DecodeError
+      rescue JSON::ParserError
         raise JWT::InvalidFormat.new("Invalid JSON Format")
       end
     end
