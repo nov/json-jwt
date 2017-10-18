@@ -15,7 +15,9 @@ RSpec.configure do |config|
 end
 
 def gcm_supported?
-  RUBY_VERSION >= '2.0.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1'
+  ['aes-128-gcm', 'aes-128-gcm'].all? do |alg|
+    OpenSSL::Cipher.ciphers.include? alg
+  end
 end
 
 require 'helpers/sign_key_fixture_helper'
