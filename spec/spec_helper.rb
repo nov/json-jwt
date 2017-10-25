@@ -22,3 +22,5 @@ end
 
 require 'helpers/sign_key_fixture_helper'
 require 'helpers/nimbus_spec_helper'
+
+puts "Running with OpenSSL::OPENSSL_VERSION=#{OpenSSL::OPENSSL_VERSION}"

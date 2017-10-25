@@ -8,5 +8,14 @@ rvm:
   - 2.3.3
   - 2.4.1
 
+env:
+  - OPENSSL_VERSION=openssl-1.0.2
+  - OPENSSL_VERSION=openssl-1.0.1
+  - OPENSSL_VERSION=openssl-1.0.2
+  - OPENSSL_VERSION=openssl-1.1.0
+  - OPENSSL_VERSION=libressl-2.4
+  - OPENSSL_VERSION=libressl-2.5
+  - OPENSSL_VERSION=libressl-2.6
+
 jdk:
   - oraclejdk8
