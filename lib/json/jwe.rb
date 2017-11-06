@@ -92,10 +92,6 @@ module JSON
 
     # common
 
-    def gcm_supported?
-      RUBY_VERSION >= '2.0.0' && OpenSSL::OPENSSL_VERSION >= 'OpenSSL 1.0.1'
-    end
-
     def gcm?
       [:A128GCM, :A256GCM].include? encryption_method.try(:to_sym)
     end
@@ -109,11 +105,8 @@ module JSON
     end
 
     def cipher
-      @cipher ||= if gcm? && !gcm_supported?
-        raise UnexpectedAlgorithm.new('AEC GCM requires Ruby 2.0+ and OpenSSL 1.0.1c+')
-      else
-        OpenSSL::Cipher.new cipher_name
-      end
+      raise "#{cipher_name} isn't supported" unless OpenSSL::Cipher.ciphers.include?(cipher_name)
+      @cipher ||= OpenSSL::Cipher.new cipher_name
     end
 
     def cipher_name
