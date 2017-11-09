@@ -132,14 +132,14 @@ module JSON
       end
       x, y, d = [:x, :y, :d].collect do |key|
         if self[key]
-          OpenSSL::BN.new UrlSafeBase64.decode64(self[key]), 2
+          UrlSafeBase64.decode64(self[key])
         end
       end
       key = OpenSSL::PKey::EC.new curve_name
-      key.private_key = d if d
+      key.private_key = OpenSSL::BN.new(d, 2) if d
       key.public_key = OpenSSL::PKey::EC::Point.new(
         OpenSSL::PKey::EC::Group.new(curve_name),
-        OpenSSL::BN.new(['04' + x.to_s(16) + y.to_s(16)].pack('H*'), 2)
+        OpenSSL::BN.new(['04' + x.unpack('H*').first + y.unpack('H*').first].pack('H*'), 2)
       )
       key
     end

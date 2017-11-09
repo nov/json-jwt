@@ -27,10 +27,10 @@ module JSON
           params = {
             kty: :EC,
             crv: curve_name,
-            x: UrlSafeBase64.encode64(coordinates[:x].to_s(2)),
-            y: UrlSafeBase64.encode64(coordinates[:y].to_s(2))
+            x: UrlSafeBase64.encode64([coordinates[:x]].pack('H*')),
+            y: UrlSafeBase64.encode64([coordinates[:y]].pack('H*'))
           }.merge ex_params
-          params[:d] = UrlSafeBase64.encode64(coordinates[:d].to_s(2)) if private_key?
+          params[:d] = UrlSafeBase64.encode64([coordinates[:d]].pack('H*')) if private_key?
           JWK.new params
         end
 
@@ -56,10 +56,10 @@ module JSON
             hex_x = hex[2, data_len / 2]
             hex_y = hex[2 + data_len / 2, data_len / 2]
             @coordinates = {
-              x: OpenSSL::BN.new([hex_x].pack('H*'), 2),
-              y: OpenSSL::BN.new([hex_y].pack('H*'), 2)
+              x: hex_x,
+              y: hex_y
             }
-            @coordinates[:d] = private_key if private_key?
+            @coordinates[:d] = private_key.to_s(16) if private_key?
           end
           @coordinates
         end
