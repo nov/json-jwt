@@ -37,7 +37,9 @@ module JSON
       self
     end
 
-    def decrypt!(private_key_or_secret)
+    def decrypt!(private_key_or_secret, algorithms = nil, encryption_methods = nil)
+      raise UnexpectedAlgorithm.new('Unexpected alg header') unless algorithms.blank? || Array(algorithms).include?(alg)
+      raise UnexpectedAlgorithm.new('Unexpected enc header') unless encryption_methods.blank? || Array(encryption_methods).include?(enc)
       self.private_key_or_secret = with_jwk_support private_key_or_secret
       cipher.decrypt
       self.content_encryption_key = decrypt_content_encryption_key
@@ -247,7 +249,7 @@ module JSON
     end
 
     class << self
-      def decode_compact_serialized(input, private_key_or_secret)
+      def decode_compact_serialized(input, private_key_or_secret, algorithms = nil, encryption_methods = nil)
         unless input.count('.') + 1 == NUM_OF_SEGMENTS
           raise InvalidFormat.new("Invalid JWE Format. JWE should include #{NUM_OF_SEGMENTS} segments.")
         end
@@ -257,11 +259,13 @@ module JSON
         end
         jwe.auth_data = input.split('.').first
         jwe.header = JSON.parse(_header_json_).with_indifferent_access
-        jwe.decrypt! private_key_or_secret unless private_key_or_secret == :skip_decryption
+        unless private_key_or_secret == :skip_decryption
+          jwe.decrypt! private_key_or_secret, algorithms, encryption_methods
+        end
         jwe
       end
 
-      def decode_json_serialized(input, private_key_or_secret)
+      def decode_json_serialized(input, private_key_or_secret, algorithms = nil, encryption_methods = nil)
         input = input.with_indifferent_access
         jwe_encrypted_key = if input[:recipients].present?
           input[:recipients].first[:encrypted_key]
@@ -275,7 +279,7 @@ module JSON
           input[:ciphertext],
           input[:tag]
         ].join('.')
-        decode_compact_serialized compact_serialized, private_key_or_secret
+        decode_compact_serialized compact_serialized, private_key_or_secret, algorithms, encryption_methods
       end
     end
   end

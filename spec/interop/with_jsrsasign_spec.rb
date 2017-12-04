@@ -40,7 +40,7 @@ describe 'interop' do
       describe 'verify' do
         it 'should succeed' do
           expect do
-            JSON::JWT.decode(jws_string, public_key)
+            JSON::JWT.decode(jws_string, public_key, :ES256)
           end.not_to raise_error
         end
       end

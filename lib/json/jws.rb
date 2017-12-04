@@ -17,13 +17,15 @@ module JSON
       self
     end
 
-    def verify!(public_key_or_secret)
+    def verify!(public_key_or_secret, algorithms = nil)
       if alg.try(:to_sym) == :none
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
-      else
+      elsif algorithms.blank? || Array(algorithms).include?(alg.try(:to_sym))
         public_key_or_secret && valid?(public_key_or_secret) or
         raise VerificationFailed
+      else
+        raise UnexpectedAlgorithm.new('Unexpected alg header')
       end
     end
 
@@ -150,7 +152,7 @@ module JSON
     end
 
     class << self
-      def decode_compact_serialized(input, public_key_or_secret)
+      def decode_compact_serialized(input, public_key_or_secret, algorithms)
         unless input.count('.') + 1 == NUM_OF_SEGMENTS
           raise InvalidFormat.new("Invalid JWS Format. JWS should include #{NUM_OF_SEGMENTS} segments.")
         end
@@ -164,11 +166,11 @@ module JSON
         jws.header = header
         jws.signature = signature
         jws.signature_base_string = input.split('.')[0, JWS::NUM_OF_SEGMENTS - 1].join('.')
-        jws.verify! public_key_or_secret unless public_key_or_secret == :skip_verification
+        jws.verify! public_key_or_secret, algorithms unless public_key_or_secret == :skip_verification
         jws
       end
 
-      def decode_json_serialized(input, public_key_or_secret)
+      def decode_json_serialized(input, public_key_or_secret, algorithms)
         input = input.with_indifferent_access
         header, payload, signature = if input[:signatures].present?
           [
@@ -184,7 +186,7 @@ module JSON
           end
         end
         compact_serialized = [header, payload, signature].join('.')
-        decode_compact_serialized compact_serialized, public_key_or_secret
+        decode_compact_serialized compact_serialized, public_key_or_secret, algorithms
       end
     end
   end
