@@ -50,6 +50,18 @@ module JSON
       [:RS256, :RS384, :RS512].include? algorithm.try(:to_sym)
     end
 
+    def rsa_pss?
+      if [:PS256, :PS384, :PS512].include? algorithm.try(:to_sym)
+        if OpenSSL::VERSION < '2.1.0'
+          raise "#{alg} isn't supported. OpenSSL gem v2.1.0+ is required to use #{alg}."
+        else
+          true
+        end
+      else
+        false
+      end
+    end
+
     def ecdsa?
       [:ES256, :ES384, :ES512].include? algorithm.try(:to_sym)
     end
@@ -72,6 +84,9 @@ module JSON
       when rsa?
         private_key = private_key_or_secret
         private_key.sign digest, signature_base_string
+      when rsa_pss?
+        private_key = private_key_or_secret
+        private_key.sign_pss digest, signature_base_string, salt_length: :digest, mgf1_hash: digest
       when ecdsa?
         private_key = private_key_or_secret
         verify_ecdsa_group! private_key
@@ -92,6 +107,9 @@ module JSON
       when rsa?
         public_key = public_key_or_secret
         public_key.verify digest, signature, signature_base_string
+      when rsa_pss?
+        public_key = public_key_or_secret
+        public_key.verify_pss digest, signature, signature_base_string, salt_length: :digest, mgf1_hash: digest
       when ecdsa?
         public_key = public_key_or_secret
         verify_ecdsa_group! public_key
