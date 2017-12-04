@@ -152,7 +152,7 @@ module JSON
     end
 
     class << self
-      def decode_compact_serialized(input, public_key_or_secret, algorithms)
+      def decode_compact_serialized(input, public_key_or_secret, algorithms = nil)
         unless input.count('.') + 1 == NUM_OF_SEGMENTS
           raise InvalidFormat.new("Invalid JWS Format. JWS should include #{NUM_OF_SEGMENTS} segments.")
         end
@@ -170,7 +170,7 @@ module JSON
         jws
       end
 
-      def decode_json_serialized(input, public_key_or_secret, algorithms)
+      def decode_json_serialized(input, public_key_or_secret, algorithms = nil)
         input = input.with_indifferent_access
         header, payload, signature = if input[:signatures].present?
           [
