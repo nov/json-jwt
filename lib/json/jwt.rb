@@ -79,7 +79,7 @@ module JSON
     end
 
     class << self
-      def decode_compact_serialized(jwt_string, key_or_secret, algorithms, encryption_methods)
+      def decode_compact_serialized(jwt_string, key_or_secret, algorithms = nil, encryption_methods = nil)
         case jwt_string.count('.') + 1
         when JWS::NUM_OF_SEGMENTS
           JWS.decode_compact_serialized jwt_string, key_or_secret, algorithms
@@ -90,7 +90,7 @@ module JSON
         end
       end
 
-      def decode_json_serialized(input, key_or_secret, algorithms, encryption_methods)
+      def decode_json_serialized(input, key_or_secret, algorithms = nil, encryption_methods = nil)
         input = input.with_indifferent_access
         if (input[:signatures] || input[:signature]).present?
           JWS.decode_json_serialized input, key_or_secret, algorithms

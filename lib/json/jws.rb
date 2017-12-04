@@ -17,11 +17,11 @@ module JSON
       self
     end
 
-    def verify!(public_key_or_secret, algorithms)
+    def verify!(public_key_or_secret, algorithms = nil)
       if alg.try(:to_sym) == :none
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
-      elsif algorithms.include?(alg.try(:to_sym))
+      elsif algorithms.blank? || Array(algorithms).include?(alg.try(:to_sym))
         public_key_or_secret && valid?(public_key_or_secret) or
         raise VerificationFailed
       else
