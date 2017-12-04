@@ -140,7 +140,7 @@ module JSON
           UrlSafeBase64.decode64 segment.to_s
         end
         header, claims = [header, claims].collect do |json|
-          JSON.load(json).with_indifferent_access
+          JSON.parse(json).with_indifferent_access
         end
         jws = new claims
         jws.header = header

@@ -256,7 +256,7 @@ module JSON
           UrlSafeBase64.decode64 segment
         end
         jwe.auth_data = input.split('.').first
-        jwe.header = JSON.load(_header_json_).with_indifferent_access
+        jwe.header = JSON.parse(_header_json_).with_indifferent_access
         jwe.decrypt! private_key_or_secret unless private_key_or_secret == :skip_decryption
         jwe
       end
