@@ -86,23 +86,23 @@ module JSON
     end
 
     class << self
-      def decode_compact_serialized(jwt_string, key_or_secret)
+      def decode_compact_serialized(jwt_string, key_or_secret, algorithms = nil, encryption_methods = nil)
         case jwt_string.count('.') + 1
         when JWS::NUM_OF_SEGMENTS
-          JWS.decode_compact_serialized jwt_string, key_or_secret
+          JWS.decode_compact_serialized jwt_string, key_or_secret, algorithms
         when JWE::NUM_OF_SEGMENTS
-          JWE.decode_compact_serialized jwt_string, key_or_secret
+          JWE.decode_compact_serialized jwt_string, key_or_secret, algorithms, encryption_methods
         else
           raise InvalidFormat.new("Invalid JWT Format. JWT should include #{JWS::NUM_OF_SEGMENTS} or #{JWE::NUM_OF_SEGMENTS} segments.")
         end
       end
 
-      def decode_json_serialized(input, key_or_secret)
+      def decode_json_serialized(input, key_or_secret, algorithms = nil, encryption_methods = nil)
         input = input.with_indifferent_access
         if (input[:signatures] || input[:signature]).present?
-          JWS.decode_json_serialized input, key_or_secret
+          JWS.decode_json_serialized input, key_or_secret, algorithms
         elsif input[:ciphertext].present?
-          JWE.decode_json_serialized input, key_or_secret
+          JWE.decode_json_serialized input, key_or_secret, algorithms, encryption_methods
         else
           raise InvalidFormat.new("Unexpected JOSE JSON Serialization Format.")
         end
