@@ -78,6 +78,13 @@ module JSON
       end
     end
 
+    def pretty_generate
+      [
+        JSON.pretty_generate(header),
+        JSON.pretty_generate(self)
+      ]
+    end
+
     class << self
       def decode_compact_serialized(jwt_string, key_or_secret)
         case jwt_string.count('.') + 1
@@ -99,6 +106,10 @@ module JSON
         else
           raise InvalidFormat.new("Unexpected JOSE JSON Serialization Format.")
         end
+      end
+
+      def pretty_generate(jwt_string)
+        decode(jwt_string, :skip_verification).pretty_generate
       end
     end
   end
