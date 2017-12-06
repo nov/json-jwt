@@ -15,7 +15,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'activesupport'
   gem.add_runtime_dependency 'bindata'
   gem.add_runtime_dependency 'securecompare'
-  gem.add_runtime_dependency 'openssl', '2.1.0.beta2'
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'simplecov'
   gem.add_development_dependency 'rspec'
