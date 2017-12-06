@@ -191,7 +191,7 @@ describe JSON::JWT do
               ].join('.')
             end
 
-            it 'should do verification' do
+            it do
               expect do
                 JSON::JWT.decode malformed_jwt_string, 'secret'
               end.to raise_error JSON::JWT::VerificationFailed
@@ -215,7 +215,7 @@ describe JSON::JWT do
               ].join('.')
             end
 
-            it 'should fail verification' do
+            it do
               expect do
                 JSON::JWT.decode malformed_jwt_string, public_key
               end.to raise_error JSON::JWT::UnexpectedAlgorithm
@@ -229,7 +229,7 @@ describe JSON::JWT do
               malformed_signature = OpenSSL::HMAC.digest(
                 OpenSSL::Digest.new('SHA256'),
                 public_key.to_s,
-                [malformed_header, payload].join('.')
+                [UrlSafeBase64.encode64(malformed_header), payload].join('.')
               )
               [
                 UrlSafeBase64.encode64(malformed_header),
@@ -238,10 +238,90 @@ describe JSON::JWT do
               ].join('.')
             end
 
-            it 'should fail verification' do
+            it do
               expect do
                 JSON::JWT.decode malformed_jwt_string, public_key
               end.to raise_error JSON::JWS::UnexpectedAlgorithm
+            end
+          end
+        end
+
+        context 'from alg=PS512' do
+          let(:jws) do
+            jwt.sign private_key, :PS512
+          end
+
+          if pss_supported?
+            context 'to alg=PS256' do
+              let(:malformed_jwt_string) do
+                header, payload, signature = jws.to_s.split('.')
+                malformed_header = {alg: :PS256}.to_json
+                digest = OpenSSL::Digest.new('SHA256')
+                malformed_signature = private_key.sign_pss(
+                  digest,
+                  [UrlSafeBase64.encode64(malformed_header), payload].join('.'),
+                  salt_length: :digest,
+                  mgf1_hash: digest
+                )
+                [
+                  UrlSafeBase64.encode64(malformed_header),
+                  payload,
+                  UrlSafeBase64.encode64(malformed_signature)
+                ].join('.')
+              end
+
+              context 'when verification algorithm is specified' do
+                it do
+                  expect do
+                    JSON::JWT.decode malformed_jwt_string, public_key, :PS512
+                  end.to raise_error JSON::JWS::UnexpectedAlgorithm, 'Unexpected alg header'
+                end
+              end
+
+              context 'otherwise' do
+                it do
+                  expect do
+                    JSON::JWT.decode malformed_jwt_string, public_key
+                  end.not_to raise_error
+                end
+              end
+            end
+
+            context 'to alg=RS516' do
+              let(:malformed_jwt_string) do
+                header, payload, signature = jws.to_s.split('.')
+                malformed_header = {alg: :RS512}.to_json
+                malformed_signature = private_key.sign(
+                  OpenSSL::Digest.new('SHA512'),
+                  [UrlSafeBase64.encode64(malformed_header), payload].join('.')
+                )
+                [
+                  UrlSafeBase64.encode64(malformed_header),
+                  payload,
+                  UrlSafeBase64.encode64(malformed_signature)
+                ].join('.')
+              end
+
+              context 'when verification algorithm is specified' do
+                it do
+                  expect do
+                    JSON::JWT.decode malformed_jwt_string, public_key, :PS512
+                  end.to raise_error JSON::JWS::UnexpectedAlgorithm, 'Unexpected alg header'
+                end
+              end
+
+              context 'otherwise' do
+                it do
+                  expect do
+                    JSON::JWT.decode malformed_jwt_string, public_key
+                  end.not_to raise_error
+                end
+              end
+            end
+          else
+            skip 'RSA PSS not supported'
+            it do
+              expect { jws }.to raise_error 'PS512 isn\'t supported. OpenSSL gem v2.1.0+ is required to use PS512.'
             end
           end
         end
@@ -320,6 +400,32 @@ describe JSON::JWT do
           end.not_to raise_error
         end
       end
+
+      context 'when alg & enc is specified' do
+        context 'when expected' do
+          it do
+            expect do
+              JSON::JWT.decode(input, private_key, 'RSA1_5', 'A128CBC-HS256')
+            end.not_to raise_error
+          end
+        end
+
+        context 'when alg is unexpected' do
+          it do
+            expect do
+              JSON::JWT.decode(input, private_key, 'dir', 'A128CBC-HS256')
+            end.to raise_error JSON::JWE::UnexpectedAlgorithm, 'Unexpected alg header'
+          end
+        end
+
+        context 'when enc is unexpected' do
+          it do
+            expect do
+              JSON::JWT.decode(input, private_key, 'RSA1_5', 'A128GCM')
+            end.to raise_error JSON::JWE::UnexpectedAlgorithm, 'Unexpected enc header'
+          end
+        end
+      end
     end
 
     context 'when JSON parse failed' do
@@ -346,6 +452,28 @@ describe JSON::JWT do
           end.to raise_error JSON::JWT::InvalidFormat
         end
       end
+    end
+  end
+
+  describe '.pretty_generate' do
+    subject { JSON::JWT.pretty_generate jws.to_s }
+    its(:size) { should == 2 }
+    its(:first) do
+      should == <<~HEADER.chop
+        {
+          "typ": "JWT",
+          "alg": "HS256"
+        }
+      HEADER
+    end
+    its(:last) do
+      should == <<~HEADER.chop
+        {
+          "iss": "joe",
+          "exp": 1300819380,
+          "http://example.com/is_root": true
+        }
+      HEADER
     end
   end
 end
