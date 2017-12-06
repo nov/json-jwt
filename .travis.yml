@@ -3,10 +3,8 @@ before_install:
   - git submodule update --init --recursive
 
 rvm:
-  - 2.2.2 # NOTE: 2.2.1 or lower aren't supported by activesupport 5.0, CI isn't needed for such legacy versions.
-  - 2.2.6
-  - 2.3.3
-  - 2.4.1
+  - 2.3.5
+  - 2.4.2
 
 jdk:
   - oraclejdk8
