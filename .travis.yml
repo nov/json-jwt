@@ -3,9 +3,9 @@ before_install:
   - git submodule update --init --recursive
 
 rvm:
-  - 2.3.5
-  - 2.4.2
-  - ruby-head
+  - 2.3.6
+  - 2.4.3
+  - 2.5.0-rc1
 
 jdk:
   - oraclejdk8
