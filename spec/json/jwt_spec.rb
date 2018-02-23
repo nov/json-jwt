@@ -56,9 +56,26 @@ describe JSON::JWT do
         its(:alg) { should == :HS256 }
       end
 
-      context 'otherwise' do
+      context 'when key is RSA key' do
         let(:key) { private_key }
         its(:alg) { should == :RS256 }
+      end
+
+      context 'when key is EC key' do
+        context 'when prime256v1' do
+          let(:key) { private_key(:ecdsa) }
+          its(:alg) { should == :ES256 }
+        end
+
+        context 'when secp384r1' do
+          let(:key) { private_key(:ecdsa, digest_length: 384) }
+          its(:alg) { should == :ES384 }
+        end
+
+        context 'when secp521r1' do
+          let(:key) { private_key(:ecdsa, digest_length: 512) }
+          its(:alg) { should == :ES512 }
+        end
       end
     end
 

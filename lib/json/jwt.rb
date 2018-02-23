@@ -26,22 +26,6 @@ module JSON
     end
 
     def sign(private_key_or_secret, algorithm = :autodetect)
-      if algorithm == :autodetect
-        # NOTE:
-        #  I'd like to make :RS256 default.
-        #  However, by histrical reasons, :HS256 was default.
-        #  This code is needed to keep legacy behavior.
-        algorithm = case private_key_or_secret
-        when String
-          :HS256
-        when OpenSSL::PKey::RSA
-          :RS256
-        when OpenSSL::PKey::EC
-          :ES256
-        else
-          raise UnexpectedAlgorithm.new('Signature algorithm auto-detection failed')
-        end
-      end
       jws = JWS.new self
       jws.kid ||= private_key_or_secret[:kid] if private_key_or_secret.is_a? JSON::JWK
       jws.alg = algorithm

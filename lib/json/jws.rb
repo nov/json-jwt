@@ -13,6 +13,7 @@ module JSON
     end
 
     def sign!(private_key_or_secret)
+      self.alg = autodetected_algorithm_from(private_key_or_secret) if algorithm == :autodetect
       self.signature = sign signature_base_string, private_key_or_secret
       self
     end
@@ -66,6 +67,28 @@ module JSON
 
     def ecdsa?
       [:ES256, :ES384, :ES512].include? algorithm.try(:to_sym)
+    end
+
+    def autodetected_algorithm_from(private_key_or_secret)
+      case private_key_or_secret
+      when String
+        :HS256
+      when OpenSSL::PKey::RSA
+        :RS256
+      when OpenSSL::PKey::EC
+        case private_key_or_secret.group.curve_name
+        when 'prime256v1'
+          :ES256
+        when 'secp384r1'
+          :ES384
+        when 'secp521r1'
+          :ES512
+        else
+          raise UnknownAlgorithm.new('Unknown EC Curve')
+        end
+      else
+        raise UnexpectedAlgorithm.new('Signature algorithm auto-detection failed')
+      end
     end
 
     def signature_base_string
