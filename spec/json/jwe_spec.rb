@@ -73,6 +73,14 @@ describe JSON::JWE do
         it :TODO
       end
 
+      context 'when alg=A128KW' do
+        it :TODO
+      end
+
+      context 'when alg=A256KW' do
+        it :TODO
+      end
+
       context 'when unknonw/unsupported algorithm given' do
         let(:key) { public_key }
         let(:alg) { :RSA1_5 }
@@ -89,7 +97,7 @@ describe JSON::JWE do
           it_behaves_like :unexpected_algorithm_for_encryption
         end
 
-        [:A128KW, :A256KW, :'ECDH-ES', :'ECDH-ES+A128KW', :'ECDH-ES+A256KW'].each do |alg|
+        [:'ECDH-ES', :'ECDH-ES+A128KW', :'ECDH-ES+A256KW'].each do |alg|
           context "when alg=#{alg}" do
             let(:alg) { alg }
             it_behaves_like :unsupported_algorithm_for_encryption
@@ -284,6 +292,14 @@ describe JSON::JWE do
       end
     end
 
+    context 'when alg=A128KW' do
+      it :TODO
+    end
+
+    context 'when alg=A256KW' do
+      it :TODO
+    end
+
     context 'when unknonw/unsupported algorithm given' do
       let(:input) { 'header.key.iv.cipher_text.auth_tag' }
       let(:key) { public_key }
@@ -300,7 +316,7 @@ describe JSON::JWE do
         it_behaves_like :unexpected_algorithm_for_decryption
       end
 
-      [:A128KW, :A256KW, :'ECDH-ES', :'ECDH-ES+A128KW', :'ECDH-ES+A256KW'].each do |alg|
+      [:'ECDH-ES', :'ECDH-ES+A128KW', :'ECDH-ES+A256KW'].each do |alg|
         context "when alg=#{alg}" do
           let(:alg) { alg }
           it_behaves_like :unsupported_algorithm_for_decryption

@@ -1,5 +1,6 @@
 require 'securerandom'
 require 'bindata'
+require 'aes_key_wrap'
 
 module JSON
   class JWE
@@ -160,10 +161,8 @@ module JSON
         public_key_or_secret.public_encrypt content_encryption_key
       when :'RSA-OAEP'
         public_key_or_secret.public_encrypt content_encryption_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-      when :A128KW
-        raise NotImplementedError.new('A128KW not supported yet')
-      when :A256KW
-        raise NotImplementedError.new('A256KW not supported yet')
+      when :A128KW, :A256KW
+        AESKeyWrap.wrap content_encryption_key, public_key_or_secret
       when :dir
         ''
       when :'ECDH-ES'
@@ -214,10 +213,8 @@ module JSON
         private_key_or_secret.private_decrypt jwe_encrypted_key
       when :'RSA-OAEP'
         private_key_or_secret.private_decrypt jwe_encrypted_key, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING
-      when :A128KW
-        raise NotImplementedError.new('A128KW not supported yet')
-      when :A256KW
-        raise NotImplementedError.new('A256KW not supported yet')
+      when :A128KW, :A256KW
+        AESKeyWrap.unwrap jwe_encrypted_key, private_key_or_secret
       when :dir
         private_key_or_secret
       when :'ECDH-ES'
