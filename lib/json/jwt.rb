@@ -1,5 +1,5 @@
 require 'openssl'
-require 'url_safe_base64'
+require 'base64'
 require 'active_support'
 require 'active_support/core_ext'
 require 'json/jose'
@@ -46,7 +46,7 @@ module JSON
         self.to_json,
         signature
       ].collect do |segment|
-        UrlSafeBase64.encode64 segment.to_s
+        Base64.urlsafe_encode64 segment.to_s, padding: false
       end.join('.')
     end
 
@@ -54,17 +54,17 @@ module JSON
       case options[:syntax]
       when :general
         {
-          payload: UrlSafeBase64.encode64(self.to_json),
+          payload: Base64.urlsafe_encode64(self.to_json, padding: false),
           signatures: [{
-            protected: UrlSafeBase64.encode64(header.to_json),
-            signature: UrlSafeBase64.encode64(signature.to_s)
+            protected: Base64.urlsafe_encode64(header.to_json, padding: false),
+            signature: Base64.urlsafe_encode64(signature.to_s, padding: false)
           }]
         }
       when :flattened
         {
-          protected: UrlSafeBase64.encode64(header.to_json),
-          payload:   UrlSafeBase64.encode64(self.to_json),
-          signature: UrlSafeBase64.encode64(signature.to_s)
+          protected: Base64.urlsafe_encode64(header.to_json, padding: false),
+          payload:   Base64.urlsafe_encode64(self.to_json, padding: false),
+          signature: Base64.urlsafe_encode64(signature.to_s, padding: false)
         }
       else
         super

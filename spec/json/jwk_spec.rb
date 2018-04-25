@@ -79,8 +79,8 @@ describe JSON::JWK do
     let(:jwk) { JSON::JWK.new public_key }
     it { jwk.keys.collect(&:to_sym).should include :kty, :e, :n }
     its(:kty) { jwk[:kty].should == :RSA }
-    its(:e) { jwk[:e].should == UrlSafeBase64.encode64(public_key.e.to_s(2)) }
-    its(:n) { jwk[:n].should == UrlSafeBase64.encode64(public_key.n.to_s(2)) }
+    its(:e) { jwk[:e].should == Base64.urlsafe_encode64(public_key.e.to_s(2), padding: false) }
+    its(:n) { jwk[:n].should == Base64.urlsafe_encode64(public_key.n.to_s(2), padding: false) }
 
     context 'when kid/use options given' do
       let(:jwk) { JSON::JWK.new public_key, kid: '12345', use: :sig }

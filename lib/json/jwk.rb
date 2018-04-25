@@ -34,7 +34,7 @@ module JSON
       else
         raise UnknownAlgorithm.new('Unknown Digest Algorithm')
       end
-      UrlSafeBase64.encode64 digest.digest(normalize.to_json)
+      Base64.urlsafe_encode64 digest.digest(normalize.to_json), padding: false
     end
 
     def to_key
@@ -98,7 +98,7 @@ module JSON
     def to_rsa_key
       e, n, d, p, q, dp, dq, qi = [:e, :n, :d, :p, :q, :dp, :dq, :qi].collect do |key|
         if self[key]
-          OpenSSL::BN.new UrlSafeBase64.decode64(self[key]), 2
+          OpenSSL::BN.new Base64.urlsafe_decode64(self[key]), 2
         end
       end
       key = OpenSSL::PKey::RSA.new
@@ -132,7 +132,7 @@ module JSON
       end
       x, y, d = [:x, :y, :d].collect do |key|
         if self[key]
-          UrlSafeBase64.decode64(self[key])
+          Base64.urlsafe_decode64(self[key])
         end
       end
       key = OpenSSL::PKey::EC.new curve_name
