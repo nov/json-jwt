@@ -465,7 +465,7 @@ describe JSON::JWT do
       context 'when too many dots' do
         it do
           expect do
-            JSON::JWT.decode 'header.payload.signature.something.wrong'
+            JSON::JWT.decode 'header.payload.signature.too.many.dots'
           end.to raise_error JSON::JWT::InvalidFormat
         end
       end
