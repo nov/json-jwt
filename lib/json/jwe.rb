@@ -252,7 +252,11 @@ module JSON
         end
         jwe = new
         _header_json_, jwe.jwe_encrypted_key, jwe.iv, jwe.cipher_text, jwe.authentication_tag = input.split('.').collect do |segment|
-          Base64.urlsafe_decode64 segment
+          begin
+            Base64.urlsafe_decode64 segment
+          rescue ArgumentError
+            raise DecryptionFailed
+          end
         end
         jwe.auth_data = input.split('.').first
         jwe.header = JSON.parse(_header_json_).with_indifferent_access
