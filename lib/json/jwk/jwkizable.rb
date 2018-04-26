@@ -5,17 +5,17 @@ module JSON
         def to_jwk(ex_params = {})
           params = {
             kty: :RSA,
-            e: UrlSafeBase64.encode64(e.to_s(2)),
-            n: UrlSafeBase64.encode64(n.to_s(2))
+            e: Base64.urlsafe_encode64(e.to_s(2), padding: false),
+            n: Base64.urlsafe_encode64(n.to_s(2), padding: false)
           }.merge ex_params
           if private?
             params.merge!(
-              d: UrlSafeBase64.encode64(d.to_s(2)),
-              p: UrlSafeBase64.encode64(p.to_s(2)),
-              q: UrlSafeBase64.encode64(q.to_s(2)),
-              dp: UrlSafeBase64.encode64(dmp1.to_s(2)),
-              dq: UrlSafeBase64.encode64(dmq1.to_s(2)),
-              qi: UrlSafeBase64.encode64(iqmp.to_s(2)),
+              d: Base64.urlsafe_encode64(d.to_s(2), padding: false),
+              p: Base64.urlsafe_encode64(p.to_s(2), padding: false),
+              q: Base64.urlsafe_encode64(q.to_s(2), padding: false),
+              dp: Base64.urlsafe_encode64(dmp1.to_s(2), padding: false),
+              dq: Base64.urlsafe_encode64(dmq1.to_s(2), padding: false),
+              qi: Base64.urlsafe_encode64(iqmp.to_s(2), padding: false),
             )
           end
           JWK.new params
@@ -27,10 +27,10 @@ module JSON
           params = {
             kty: :EC,
             crv: curve_name,
-            x: UrlSafeBase64.encode64([coordinates[:x]].pack('H*')),
-            y: UrlSafeBase64.encode64([coordinates[:y]].pack('H*'))
+            x: Base64.urlsafe_encode64([coordinates[:x]].pack('H*'), padding: false),
+            y: Base64.urlsafe_encode64([coordinates[:y]].pack('H*'), padding: false)
           }.merge ex_params
-          params[:d] = UrlSafeBase64.encode64([coordinates[:d]].pack('H*')) if private_key?
+          params[:d] = Base64.urlsafe_encode64([coordinates[:d]].pack('H*'), padding: false) if private_key?
           JWK.new params
         end
 

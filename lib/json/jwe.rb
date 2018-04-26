@@ -32,7 +32,7 @@ module JSON
       self.mac_key, self.encryption_key = derive_encryption_and_mac_keys
       cipher.key = encryption_key
       self.iv = cipher.random_iv # NOTE: 'iv' has to be set after 'key' for GCM
-      self.auth_data = UrlSafeBase64.encode64 header.to_json
+      self.auth_data = Base64.urlsafe_encode64 header.to_json, padding: false
       cipher.auth_data = auth_data if gcm?
       self.cipher_text = cipher.update(plain_text) + cipher.final
       self
@@ -64,7 +64,7 @@ module JSON
         cipher_text,
         authentication_tag
       ].collect do |segment|
-        UrlSafeBase64.encode64 segment.to_s
+        Base64.urlsafe_encode64 segment.to_s, padding: false
       end.join('.')
     end
 
@@ -72,21 +72,21 @@ module JSON
       case options[:syntax]
       when :general
         {
-          protected:  UrlSafeBase64.encode64(header.to_json),
+          protected:  Base64.urlsafe_encode64(header.to_json, padding: false),
           recipients: [{
-            encrypted_key: UrlSafeBase64.encode64(jwe_encrypted_key)
+            encrypted_key: Base64.urlsafe_encode64(jwe_encrypted_key, padding: false)
           }],
-          iv:         UrlSafeBase64.encode64(iv),
-          ciphertext: UrlSafeBase64.encode64(cipher_text),
-          tag:        UrlSafeBase64.encode64(authentication_tag)
+          iv:         Base64.urlsafe_encode64(iv, padding: false),
+          ciphertext: Base64.urlsafe_encode64(cipher_text, padding: false),
+          tag:        Base64.urlsafe_encode64(authentication_tag, padding: false)
         }
       else
         {
-          protected:     UrlSafeBase64.encode64(header.to_json),
-          encrypted_key: UrlSafeBase64.encode64(jwe_encrypted_key),
-          iv:            UrlSafeBase64.encode64(iv),
-          ciphertext:    UrlSafeBase64.encode64(cipher_text),
-          tag:           UrlSafeBase64.encode64(authentication_tag)
+          protected:     Base64.urlsafe_encode64(header.to_json, padding: false),
+          encrypted_key: Base64.urlsafe_encode64(jwe_encrypted_key, padding: false),
+          iv:            Base64.urlsafe_encode64(iv, padding: false),
+          ciphertext:    Base64.urlsafe_encode64(cipher_text, padding: false),
+          tag:           Base64.urlsafe_encode64(authentication_tag, padding: false)
         }
       end
     end
@@ -252,7 +252,11 @@ module JSON
         end
         jwe = new
         _header_json_, jwe.jwe_encrypted_key, jwe.iv, jwe.cipher_text, jwe.authentication_tag = input.split('.').collect do |segment|
-          UrlSafeBase64.decode64 segment
+          begin
+            Base64.urlsafe_decode64 segment
+          rescue ArgumentError
+            raise DecryptionFailed
+          end
         end
         jwe.auth_data = input.split('.').first
         jwe.header = JSON.parse(_header_json_).with_indifferent_access

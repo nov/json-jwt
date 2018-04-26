@@ -48,7 +48,7 @@ describe JSON::JWS do
   describe '#sign!' do
     shared_examples_for :generate_expected_signature do
       it do
-        UrlSafeBase64.encode64(signed.signature).should == expected_signature[alg]
+        Base64.urlsafe_encode64(signed.signature, padding: false).should == expected_signature[alg]
       end
     end
     subject { signed }
@@ -279,10 +279,10 @@ describe JSON::JWS do
       context 'when general' do
         it 'should return General JWS JSON Serialization' do
           signed.to_json(syntax: :general).should == {
-            payload: UrlSafeBase64.encode64(claims.to_json),
+            payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
             signatures: [{
-              protected: UrlSafeBase64.encode64(signed.header.to_json),
-              signature: UrlSafeBase64.encode64(signed.signature)
+              protected: Base64.urlsafe_encode64(signed.header.to_json, padding: false),
+              signature: Base64.urlsafe_encode64(signed.signature, padding: false)
             }]
           }.to_json
         end
@@ -290,10 +290,10 @@ describe JSON::JWS do
         context 'when not signed yet' do
           it 'should not fail' do
             jws.to_json(syntax: :general).should == {
-              payload: UrlSafeBase64.encode64(claims.to_json),
+              payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
               signatures: [{
-                protected: UrlSafeBase64.encode64(jws.header.to_json),
-                signature: UrlSafeBase64.encode64('')
+                protected: Base64.urlsafe_encode64(jws.header.to_json, padding: false),
+                signature: Base64.urlsafe_encode64('', padding: false)
               }]
             }.to_json
           end
@@ -303,18 +303,18 @@ describe JSON::JWS do
       context 'when flattened' do
         it 'should return Flattened JWS JSON Serialization' do
           signed.to_json(syntax: :flattened).should == {
-            protected: UrlSafeBase64.encode64(signed.header.to_json),
-            payload: UrlSafeBase64.encode64(claims.to_json),
-            signature: UrlSafeBase64.encode64(signed.signature)
+            protected: Base64.urlsafe_encode64(signed.header.to_json, padding: false),
+            payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
+            signature: Base64.urlsafe_encode64(signed.signature, padding: false)
           }.to_json
         end
 
         context 'when not signed yet' do
           it 'should not fail' do
             jws.to_json(syntax: :flattened).should == {
-              protected: UrlSafeBase64.encode64(jws.header.to_json),
-              payload: UrlSafeBase64.encode64(claims.to_json),
-              signature: UrlSafeBase64.encode64('')
+              protected: Base64.urlsafe_encode64(jws.header.to_json, padding: false),
+              payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
+              signature: Base64.urlsafe_encode64('', padding: false)
             }.to_json
           end
         end

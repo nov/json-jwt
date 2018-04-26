@@ -96,7 +96,7 @@ module JSON
         header.to_json,
         self.to_json
       ].collect do |segment|
-        UrlSafeBase64.encode64 segment
+        Base64.urlsafe_encode64 segment, padding: false
       end.join('.')
     end
 
@@ -180,7 +180,7 @@ module JSON
           raise InvalidFormat.new("Invalid JWS Format. JWS should include #{NUM_OF_SEGMENTS} segments.")
         end
         header, claims, signature = input.split('.', JWS::NUM_OF_SEGMENTS).collect do |segment|
-          UrlSafeBase64.decode64 segment.to_s
+          Base64.urlsafe_decode64 segment.to_s
         end
         header, claims = [header, claims].collect do |json|
           JSON.parse(json).with_indifferent_access

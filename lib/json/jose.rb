@@ -51,7 +51,7 @@ module JSON
         else
           decode_compact_serialized input, key_or_secret, algorithms, encryption_methods
         end
-      rescue JSON::ParserError
+      rescue JSON::ParserError, ArgumentError
         raise JWT::InvalidFormat.new("Invalid JSON Format")
       end
     end

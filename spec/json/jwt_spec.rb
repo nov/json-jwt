@@ -202,7 +202,7 @@ describe JSON::JWT do
               header, payload, signature = jws.to_s.split('.')
               malformed_header = {alg: :none}.to_json
               [
-                UrlSafeBase64.encode64(malformed_header),
+                Base64.urlsafe_encode64(malformed_header, padding: false),
                 payload,
                 ''
               ].join('.')
@@ -226,7 +226,7 @@ describe JSON::JWT do
               header, payload, signature = jws.to_s.split('.')
               malformed_header = {alg: :none}.to_json
               [
-                UrlSafeBase64.encode64(malformed_header),
+                Base64.urlsafe_encode64(malformed_header, padding: false),
                 payload,
                 ''
               ].join('.')
@@ -246,12 +246,12 @@ describe JSON::JWT do
               malformed_signature = OpenSSL::HMAC.digest(
                 OpenSSL::Digest.new('SHA256'),
                 public_key.to_s,
-                [UrlSafeBase64.encode64(malformed_header), payload].join('.')
+                [Base64.urlsafe_encode64(malformed_header, padding: false), payload].join('.')
               )
               [
-                UrlSafeBase64.encode64(malformed_header),
+                Base64.urlsafe_encode64(malformed_header, padding: false),
                 payload,
-                UrlSafeBase64.encode64(malformed_signature)
+                Base64.urlsafe_encode64(malformed_signature, padding: false)
               ].join('.')
             end
 
@@ -276,14 +276,14 @@ describe JSON::JWT do
                 digest = OpenSSL::Digest.new('SHA256')
                 malformed_signature = private_key.sign_pss(
                   digest,
-                  [UrlSafeBase64.encode64(malformed_header), payload].join('.'),
+                  [Base64.urlsafe_encode64(malformed_header, padding: false), payload].join('.'),
                   salt_length: :digest,
                   mgf1_hash: digest
                 )
                 [
-                  UrlSafeBase64.encode64(malformed_header),
+                  Base64.urlsafe_encode64(malformed_header, padding: false),
                   payload,
-                  UrlSafeBase64.encode64(malformed_signature)
+                  Base64.urlsafe_encode64(malformed_signature, padding: false)
                 ].join('.')
               end
 
@@ -310,12 +310,12 @@ describe JSON::JWT do
                 malformed_header = {alg: :RS512}.to_json
                 malformed_signature = private_key.sign(
                   OpenSSL::Digest.new('SHA512'),
-                  [UrlSafeBase64.encode64(malformed_header), payload].join('.')
+                  [Base64.urlsafe_encode64(malformed_header, padding: false), payload].join('.')
                 )
                 [
-                  UrlSafeBase64.encode64(malformed_header),
+                  Base64.urlsafe_encode64(malformed_header, padding: false),
                   payload,
-                  UrlSafeBase64.encode64(malformed_signature)
+                  Base64.urlsafe_encode64(malformed_signature, padding: false)
                 ].join('.')
               end
 
@@ -377,10 +377,10 @@ describe JSON::JWT do
         context 'when general' do
           let(:serialized) do
             {
-              payload: UrlSafeBase64.encode64(claims.to_json),
+              payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
               signatures: [{
-                protected: UrlSafeBase64.encode64(signed.header.to_json),
-                signature: UrlSafeBase64.encode64(signed.signature)
+                protected: Base64.urlsafe_encode64(signed.header.to_json, padding: false),
+                signature: Base64.urlsafe_encode64(signed.signature, padding: false)
               }]
             }
           end
@@ -390,9 +390,9 @@ describe JSON::JWT do
         context 'when flattened' do
           let(:serialized) do
             {
-              protected: UrlSafeBase64.encode64(signed.header.to_json),
-              payload: UrlSafeBase64.encode64(claims.to_json),
-              signature: UrlSafeBase64.encode64(signed.signature)
+              protected: Base64.urlsafe_encode64(signed.header.to_json, padding: false),
+              payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
+              signature: Base64.urlsafe_encode64(signed.signature, padding: false)
             }
           end
           it_behaves_like :json_serialization_parser
@@ -465,7 +465,7 @@ describe JSON::JWT do
       context 'when too many dots' do
         it do
           expect do
-            JSON::JWT.decode 'header.payload.signature.something.wrong'
+            JSON::JWT.decode 'header.payload.signature.too.many.dots'
           end.to raise_error JSON::JWT::InvalidFormat
         end
       end
