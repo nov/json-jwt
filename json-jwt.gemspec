@@ -13,7 +13,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.add_runtime_dependency 'activesupport'
   gem.add_runtime_dependency 'bindata'
-  gem.add_runtime_dependency 'securecompare'
   gem.add_runtime_dependency 'aes_key_wrap'
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'simplecov'
