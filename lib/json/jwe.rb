@@ -48,6 +48,8 @@ module JSON
       cipher.key = encryption_key
       cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
       if gcm?
+        # https://github.com/ruby/openssl/issues/63
+        raise DecryptionFailed.new('Invalid authentication tag') if authentication_tag.length < 16
         cipher.auth_tag = authentication_tag
         cipher.auth_data = auth_data
       end

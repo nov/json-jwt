@@ -169,6 +169,24 @@ describe JSON::JWE do
       end
     end
 
+    shared_examples_for :verify_gcm_authentication_tag do
+      let(:jwe_string) do
+        _jwe_ = JSON::JWE.new plain_text
+        _jwe_.alg, _jwe_.enc = alg, enc
+        _jwe_.encrypt! key
+        header, key, iv, cipher_text, auth_tag = _jwe_.to_s.split('.')
+        truncated_auth_tag = Base64.urlsafe_decode64(auth_tag).slice(0..-2)
+        truncated_auth_tag = Base64.urlsafe_encode64(truncated_auth_tag, padding: false)
+        [header, key, iv, cipher_text, truncated_auth_tag].join('.')
+      end
+
+      it do
+        expect do
+          jwe.decrypt! key
+        end.to raise_error JSON::JWE::DecryptionFailed
+      end
+    end
+
     shared_examples_for :unexpected_algorithm_for_decryption do
       it do
         expect do
@@ -193,6 +211,7 @@ describe JSON::JWE do
         let(:enc) { :A128GCM }
         if gcm_supported?
           it_behaves_like :decryptable
+          it_behaves_like :verify_gcm_authentication_tag
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -202,6 +221,7 @@ describe JSON::JWE do
         let(:enc) { :A256GCM }
         if gcm_supported?
           it_behaves_like :decryptable
+          it_behaves_like :verify_gcm_authentication_tag
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -226,6 +246,7 @@ describe JSON::JWE do
         let(:enc) { :A128GCM }
         if gcm_supported?
           it_behaves_like :decryptable
+          it_behaves_like :verify_gcm_authentication_tag
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -235,6 +256,7 @@ describe JSON::JWE do
         let(:enc) { :A256GCM }
         if gcm_supported?
           it_behaves_like :decryptable
+          it_behaves_like :verify_gcm_authentication_tag
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -262,6 +284,7 @@ describe JSON::JWE do
         let(:key_size) { 16 }
         if gcm_supported?
           it_behaves_like :decryptable
+          it_behaves_like :verify_gcm_authentication_tag
         else
           it_behaves_like :gcm_decryption_unsupported
         end
@@ -272,6 +295,7 @@ describe JSON::JWE do
         let(:key_size) { 32 }
         if gcm_supported?
           it_behaves_like :decryptable
+          it_behaves_like :verify_gcm_authentication_tag
         else
           it_behaves_like :gcm_decryption_unsupported
         end
