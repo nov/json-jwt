@@ -77,6 +77,33 @@ describe JSON::JWT do
           its(:alg) { should == :ES512 }
         end
       end
+
+      context 'when key is JWK with kty=okt' do
+        let(:key) { JSON::JWK.new shared_secret }
+        its(:alg) { should == :HS256 }
+      end
+
+      context 'when key is JWK with kty=RSA' do
+        let(:key) { JSON::JWK.new private_key }
+        its(:alg) { should == :RS256 }
+      end
+
+      context 'when key is JWK with kty=EC' do
+        context 'when prime256v1' do
+          let(:key) { JSON::JWK.new private_key(:ecdsa) }
+          its(:alg) { should == :ES256 }
+        end
+
+        context 'when secp384r1' do
+          let(:key) { JSON::JWK.new private_key(:ecdsa, digest_length: 384) }
+          its(:alg) { should == :ES384 }
+        end
+
+        context 'when secp521r1' do
+          let(:key) { JSON::JWK.new private_key(:ecdsa, digest_length: 512) }
+          its(:alg) { should == :ES512 }
+        end
+      end
     end
 
     context 'when non-JWK key is given' do

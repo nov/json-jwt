@@ -70,6 +70,7 @@ module JSON
     end
 
     def autodetected_algorithm_from(private_key_or_secret)
+      private_key_or_secret = with_jwk_support private_key_or_secret
       case private_key_or_secret
       when String
         :HS256
