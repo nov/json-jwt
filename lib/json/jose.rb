@@ -32,6 +32,18 @@ module JSON
       end
     end
 
+    def secure_compare(a, b)
+      if ActiveSupport::SecurityUtils.respond_to?(:fixed_length_secure_compare)
+        begin
+          ActiveSupport::SecurityUtils.fixed_length_secure_compare(a, b)
+        rescue ArgumentError
+          false
+        end
+      else
+        ActiveSupport::SecurityUtils.secure_compare(a, b)
+      end
+    end
+
     module ClassMethods
       def register_header_keys(*keys)
         keys.each do |header_key|
@@ -52,18 +64,6 @@ module JSON
         end
       rescue JSON::ParserError, ArgumentError
         raise JWT::InvalidFormat.new("Invalid JSON Format")
-      end
-
-      def secure_compare(a, b)
-        if ActiveSupport::SecurityUtils.respond_to?(:fixed_length_secure_compare)
-          begin
-            ActiveSupport::SecurityUtils.fixed_length_secure_compare(a, b)
-          rescue ArgumentError
-            false
-          end
-        else
-          ActiveSupport::SecurityUtils.secure_compare(a, b)
-        end
       end
     end
   end
