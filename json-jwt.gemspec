@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.require_paths = ['lib']
+  gem.required_ruby_version = '>= 2.3'
   gem.add_runtime_dependency 'activesupport'
   gem.add_runtime_dependency 'bindata'
   gem.add_runtime_dependency 'aes_key_wrap'
