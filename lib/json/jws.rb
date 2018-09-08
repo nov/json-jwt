@@ -117,7 +117,7 @@ module JSON
         private_key = private_key_or_secret
         verify_ecdsa_group! private_key
         asn1_to_raw(
-          private_key.dsa_sign_asn1(digest.digest signature_base_string),
+          private_key.sign(digest, signature_base_string),
           private_key
         )
       else
@@ -139,10 +139,7 @@ module JSON
       when ecdsa?
         public_key = public_key_or_secret
         verify_ecdsa_group! public_key
-        public_key.dsa_verify_asn1(
-          digest.digest(signature_base_string),
-          raw_to_asn1(signature, public_key)
-        )
+        public_key.verify digest, raw_to_asn1(signature, public_key), signature_base_string
       else
         raise UnexpectedAlgorithm.new('Unknown Signature Algorithm')
       end
