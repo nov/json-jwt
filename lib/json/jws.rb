@@ -117,7 +117,8 @@ module JSON
         private_key = private_key_or_secret
         verify_ecdsa_group! private_key
         asn1_to_raw(
-          private_key.sign(digest, signature_base_string),
+          private_key.dsa_sign_asn1(digest.digest signature_base_string),
+          # private_key.sign(digest, signature_base_string), # NOTE: this causes `undefined method `private?'` error in ruby 2.3
           private_key
         )
       else
