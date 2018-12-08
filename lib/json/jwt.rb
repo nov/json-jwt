@@ -6,6 +6,7 @@ require 'json/jose'
 
 module JSON
   class JWT < ActiveSupport::HashWithIndifferentAccess
+    attr_accessor :blank_payload
     attr_accessor :signature
 
     class Exception < StandardError; end
@@ -19,8 +20,10 @@ module JSON
       @content_type = 'application/jwt'
       self.typ = :JWT
       self.alg = :none
-      [:exp, :nbf, :iat].each do |key|
-        claims[key] = claims[key].to_i if claims[key]
+      unless claims.nil?
+        [:exp, :nbf, :iat].each do |key|
+          claims[key] = claims[key].to_i if claims[key]
+        end
       end
       update claims
     end
@@ -66,6 +69,22 @@ module JSON
           payload:   Base64.urlsafe_encode64(self.to_json, padding: false),
           signature: Base64.urlsafe_encode64(signature.to_s, padding: false)
         }
+      else
+        super
+      end
+    end
+
+    def to_json *args
+      if @blank_payload && args.empty?
+        ''
+      else
+        super
+      end
+    end
+
+    def update claims
+      if claims.nil?
+        @blank_payload = true
       else
         super
       end

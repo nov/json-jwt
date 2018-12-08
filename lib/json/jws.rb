@@ -35,6 +35,7 @@ module JSON
       if hash_or_jwt.is_a? JSON::JWT
         self.header.update hash_or_jwt.header
         self.signature = hash_or_jwt.signature
+        self.blank_payload = hash_or_jwt.blank_payload
       end
       self
     end
@@ -181,8 +182,11 @@ module JSON
         header, claims, signature = input.split('.', JWS::NUM_OF_SEGMENTS).collect do |segment|
           Base64.urlsafe_decode64 segment.to_s
         end
-        header, claims = [header, claims].collect do |json|
-          JSON.parse(json).with_indifferent_access
+        header = JSON.parse(header).with_indifferent_access
+        if claims == ''
+          claims = nil
+        else
+          claims = JSON.parse(claims).with_indifferent_access
         end
         jws = new claims
         jws.header = header
