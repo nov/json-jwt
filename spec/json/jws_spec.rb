@@ -17,7 +17,7 @@ describe JSON::JWS do
   let(:signed) { jws.sign! private_key_or_secret }
   let(:signed_blank) { jws_blank.sign! private_key_or_secret }
   let(:decoded) { JSON::JWT.decode signed.to_s, public_key_or_secret }
-  let(:decoded_blank) { JSON::JWT.decode signed_blank.to_s, public_key_or_secret }
+  let(:decoded_blank) { JSON::JWT.decode signed_blank.to_s, public_key_or_secret, nil, nil, true }
   let(:claims) do
     {
       iss: 'joe',
@@ -60,6 +60,27 @@ describe JSON::JWS do
   describe '#content_type' do
     it do
       jws.content_type.should == 'application/jose'
+    end
+  end
+
+  describe 'decode' do
+    let(:alg) { :RS256 }
+    let(:private_key_or_secret) { private_key }
+    let(:public_key_or_secret) { public_key }
+
+    describe 'blank payload not allowed' do
+      it 'should raise format error' do
+        expect do
+          JSON::JWT.decode signed_blank.to_s, public_key_or_secret
+        end.to raise_error JSON::JWT::InvalidFormat
+      end
+    end
+    describe 'blank payload allowed' do
+      it 'should not raise an error' do
+        expect do
+          JSON::JWT.decode signed_blank.to_s, public_key_or_secret, nil, nil, true
+        end.to_not raise_error
+      end
     end
   end
 

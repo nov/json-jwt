@@ -248,7 +248,7 @@ module JSON
     end
 
     class << self
-      def decode_compact_serialized(input, private_key_or_secret, algorithms = nil, encryption_methods = nil)
+      def decode_compact_serialized(input, private_key_or_secret, algorithms = nil, encryption_methods = nil, _allow_blank_payload = false)
         unless input.count('.') + 1 == NUM_OF_SEGMENTS
           raise InvalidFormat.new("Invalid JWE Format. JWE should include #{NUM_OF_SEGMENTS} segments.")
         end
@@ -268,7 +268,7 @@ module JSON
         jwe
       end
 
-      def decode_json_serialized(input, private_key_or_secret, algorithms = nil, encryption_methods = nil)
+      def decode_json_serialized(input, private_key_or_secret, algorithms = nil, encryption_methods = nil, _allow_blank_payload = false)
         input = input.with_indifferent_access
         jwe_encrypted_key = if input[:recipients].present?
           input[:recipients].first[:encrypted_key]

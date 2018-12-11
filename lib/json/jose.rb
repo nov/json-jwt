@@ -56,11 +56,11 @@ module JSON
         end
       end
 
-      def decode(input, key_or_secret = nil, algorithms = nil, encryption_methods = nil)
+      def decode(input, key_or_secret = nil, algorithms = nil, encryption_methods = nil, allow_blank_payload = false)
         if input.is_a? Hash
-          decode_json_serialized input, key_or_secret, algorithms, encryption_methods
+          decode_json_serialized input, key_or_secret, algorithms, encryption_methods, allow_blank_payload
         else
-          decode_compact_serialized input, key_or_secret, algorithms, encryption_methods
+          decode_compact_serialized input, key_or_secret, algorithms, encryption_methods, allow_blank_payload
         end
       rescue JSON::ParserError, ArgumentError
         raise JWT::InvalidFormat.new("Invalid JSON Format")
