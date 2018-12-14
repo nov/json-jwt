@@ -6,6 +6,7 @@ require 'json/jose'
 
 module JSON
   class JWT < ActiveSupport::HashWithIndifferentAccess
+    attr_accessor :blank_payload
     attr_accessor :signature
 
     class Exception < StandardError; end
@@ -19,8 +20,10 @@ module JSON
       @content_type = 'application/jwt'
       self.typ = :JWT
       self.alg = :none
-      [:exp, :nbf, :iat].each do |key|
-        claims[key] = claims[key].to_i if claims[key]
+      unless claims.nil?
+        [:exp, :nbf, :iat].each do |key|
+          claims[key] = claims[key].to_i if claims[key]
+        end
       end
       update claims
     end
@@ -71,6 +74,22 @@ module JSON
       end
     end
 
+    def to_json *args
+      if @blank_payload && args.empty?
+        ''
+      else
+        super
+      end
+    end
+
+    def update claims
+      if claims.nil?
+        @blank_payload = true
+      else
+        super
+      end
+    end
+
     def pretty_generate
       [
         JSON.pretty_generate(header),
@@ -79,10 +98,10 @@ module JSON
     end
 
     class << self
-      def decode_compact_serialized(jwt_string, key_or_secret, algorithms = nil, encryption_methods = nil)
+      def decode_compact_serialized(jwt_string, key_or_secret, algorithms = nil, encryption_methods = nil, allow_blank_payload = false)
         case jwt_string.count('.') + 1
         when JWS::NUM_OF_SEGMENTS
-          JWS.decode_compact_serialized jwt_string, key_or_secret, algorithms
+          JWS.decode_compact_serialized jwt_string, key_or_secret, algorithms, allow_blank_payload
         when JWE::NUM_OF_SEGMENTS
           JWE.decode_compact_serialized jwt_string, key_or_secret, algorithms, encryption_methods
         else
@@ -90,10 +109,10 @@ module JSON
         end
       end
 
-      def decode_json_serialized(input, key_or_secret, algorithms = nil, encryption_methods = nil)
+      def decode_json_serialized(input, key_or_secret, algorithms = nil, encryption_methods = nil, allow_blank_payload = false)
         input = input.with_indifferent_access
         if (input[:signatures] || input[:signature]).present?
-          JWS.decode_json_serialized input, key_or_secret, algorithms
+          JWS.decode_json_serialized input, key_or_secret, algorithms, allow_blank_payload
         elsif input[:ciphertext].present?
           JWE.decode_json_serialized input, key_or_secret, algorithms, encryption_methods
         else
