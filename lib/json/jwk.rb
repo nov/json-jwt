@@ -53,15 +53,15 @@ module JSON
     private
 
     def rsa?
-      self[:kty].try(:to_sym) == :RSA
+      self[:kty]&.to_sym == :RSA
     end
 
     def ec?
-      self[:kty].try(:to_sym) == :EC
+      self[:kty]&.to_sym == :EC
     end
 
     def oct?
-      self[:kty].try(:to_sym) == :oct
+      self[:kty]&.to_sym == :oct
     end
 
     def calculate_default_kid
@@ -120,7 +120,7 @@ module JSON
     end
 
     def to_ec_key
-      curve_name = case self[:crv].try(:to_sym)
+      curve_name = case self[:crv]&.to_sym
       when :'P-256'
         'prime256v1'
       when :'P-384'

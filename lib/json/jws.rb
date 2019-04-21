@@ -19,10 +19,10 @@ module JSON
     end
 
     def verify!(public_key_or_secret, algorithms = nil)
-      if alg.try(:to_sym) == :none
+      if alg&.to_sym == :none
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
-      elsif algorithms.blank? || Array(algorithms).include?(alg.try(:to_sym))
+      elsif algorithms.blank? || Array(algorithms).include?(alg&.to_sym)
         public_key_or_secret && valid?(public_key_or_secret) or
         raise VerificationFailed
       else
@@ -47,15 +47,15 @@ module JSON
     end
 
     def hmac?
-      [:HS256, :HS384, :HS512].include? algorithm.try(:to_sym)
+      [:HS256, :HS384, :HS512].include? algorithm&.to_sym
     end
 
     def rsa?
-      [:RS256, :RS384, :RS512].include? algorithm.try(:to_sym)
+      [:RS256, :RS384, :RS512].include? algorithm&.to_sym
     end
 
     def rsa_pss?
-      if [:PS256, :PS384, :PS512].include? algorithm.try(:to_sym)
+      if [:PS256, :PS384, :PS512].include? algorithm&.to_sym
         if OpenSSL::VERSION < '2.1.0'
           raise "#{alg} isn't supported. OpenSSL gem v2.1.0+ is required to use #{alg}."
         else
@@ -67,7 +67,7 @@ module JSON
     end
 
     def ecdsa?
-      [:ES256, :ES384, :ES512].include? algorithm.try(:to_sym)
+      [:ES256, :ES384, :ES512].include? algorithm&.to_sym
     end
 
     def autodetected_algorithm_from(private_key_or_secret)

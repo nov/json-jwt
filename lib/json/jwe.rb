@@ -98,15 +98,15 @@ module JSON
     # common
 
     def gcm?
-      [:A128GCM, :A256GCM].include? encryption_method.try(:to_sym)
+      [:A128GCM, :A256GCM].include? encryption_method&.to_sym
     end
 
     def cbc?
-      [:'A128CBC-HS256', :'A256CBC-HS512'].include? encryption_method.try(:to_sym)
+      [:'A128CBC-HS256', :'A256CBC-HS512'].include? encryption_method&.to_sym
     end
 
     def dir?
-      :dir == algorithm.try(:to_sym)
+      :dir == algorithm&.to_sym
     end
 
     def cipher
@@ -115,7 +115,7 @@ module JSON
     end
 
     def cipher_name
-      case encryption_method.try(:to_sym)
+      case encryption_method&.to_sym
       when :A128GCM
         'aes-128-gcm'
       when :A256GCM
@@ -130,7 +130,7 @@ module JSON
     end
 
     def sha_size
-      case encryption_method.try(:to_sym)
+      case encryption_method&.to_sym
       when :'A128CBC-HS256'
         256
       when :'A256CBC-HS512'
@@ -158,7 +158,7 @@ module JSON
     # encryption
 
     def jwe_encrypted_key
-      @jwe_encrypted_key ||= case algorithm.try(:to_sym)
+      @jwe_encrypted_key ||= case algorithm&.to_sym
       when :RSA1_5
         public_key_or_secret.public_encrypt content_encryption_key
       when :'RSA-OAEP'
@@ -210,7 +210,7 @@ module JSON
 
     def decrypt_content_encryption_key
       fake_content_encryption_key = generate_content_encryption_key # NOTE: do this always not to make timing difference
-      case algorithm.try(:to_sym)
+      case algorithm&.to_sym
       when :RSA1_5
         private_key_or_secret.private_decrypt jwe_encrypted_key
       when :'RSA-OAEP'
