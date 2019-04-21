@@ -11,32 +11,6 @@ describe JSON::JWE do
   end
 
   describe 'encrypt!' do
-    shared_examples_for :gcm_encryption_unsupported do
-      if gcm_supported?
-        skip 'GSM supported'
-      else
-        context 'when enc=A128GCM' do
-          before { jwe.enc = :A128GCM }
-
-          it do
-            expect do
-              jwe.encrypt! key
-            end.to raise_error JSON::JWE::UnexpectedAlgorithm
-          end
-        end
-
-        context 'when enc=A256GCM' do
-          before { jwe.enc = :A256GCM }
-
-          it do
-            expect do
-              jwe.encrypt! key
-            end.to raise_error JSON::JWE::UnexpectedAlgorithm
-          end
-        end
-      end
-    end
-
     shared_examples_for :unexpected_algorithm_for_encryption do
       it do
         expect do
@@ -56,18 +30,6 @@ describe JSON::JWE do
     context 'when plaintext given' do
       let(:plain_text) { 'Hello World' }
       let(:jwe) { JSON::JWE.new plain_text }
-
-      context 'when alg=RSA1_5' do
-        let(:key) { public_key }
-        before { jwe.alg = :'RSA1_5' }
-        it_behaves_like :gcm_encryption_unsupported
-      end
-
-      context 'when alg=RSA-OAEP' do
-        let(:key) { public_key }
-        before { jwe.alg = :'RSA-OAEP' }
-        it_behaves_like :gcm_encryption_unsupported
-      end
 
       context 'when alg=dir' do
         it :TODO
@@ -105,24 +67,6 @@ describe JSON::JWE do
         end
       end
     end
-
-    context 'when jwt given' do
-      let(:plain_text) { jwt.to_s }
-      let(:jwt) { JSON::JWT.new(foo: :bar) }
-      let(:jwe) { JSON::JWE.new jwt }
-
-      context 'when alg=RSA-OAEP' do
-        let(:key) { public_key }
-        before { jwe.alg = :'RSA1_5' }
-        it_behaves_like :gcm_encryption_unsupported
-      end
-
-      context 'when alg=RSA-OAEP' do
-        let(:key) { public_key }
-        before { jwe.alg = :'RSA-OAEP' }
-        it_behaves_like :gcm_encryption_unsupported
-      end
-    end
   end
 
   describe 'decrypt!' do
@@ -143,14 +87,6 @@ describe JSON::JWE do
       it do
         jwe.decrypt! key
         jwe.plain_text.should == plain_text
-      end
-    end
-
-    shared_examples_for :gcm_decryption_unsupported do
-      it do
-        expect do
-          jwe.decrypt! key
-        end.to raise_error JSON::JWE::UnexpectedAlgorithm
       end
     end
 
@@ -209,22 +145,14 @@ describe JSON::JWE do
 
       context 'when enc=A128GCM' do
         let(:enc) { :A128GCM }
-        if gcm_supported?
-          it_behaves_like :decryptable
-          it_behaves_like :verify_gcm_authentication_tag
-        else
-          it_behaves_like :gcm_decryption_unsupported
-        end
+        it_behaves_like :decryptable
+        it_behaves_like :verify_gcm_authentication_tag
       end
 
       context 'when enc=A256GCM' do
         let(:enc) { :A256GCM }
-        if gcm_supported?
-          it_behaves_like :decryptable
-          it_behaves_like :verify_gcm_authentication_tag
-        else
-          it_behaves_like :gcm_decryption_unsupported
-        end
+        it_behaves_like :decryptable
+        it_behaves_like :verify_gcm_authentication_tag
       end
 
       context 'when enc=A128CBC-HS256' do
@@ -244,22 +172,14 @@ describe JSON::JWE do
 
       context 'when enc=A128GCM' do
         let(:enc) { :A128GCM }
-        if gcm_supported?
-          it_behaves_like :decryptable
-          it_behaves_like :verify_gcm_authentication_tag
-        else
-          it_behaves_like :gcm_decryption_unsupported
-        end
+        it_behaves_like :decryptable
+        it_behaves_like :verify_gcm_authentication_tag
       end
 
       context 'when enc=A256GCM' do
         let(:enc) { :A256GCM }
-        if gcm_supported?
-          it_behaves_like :decryptable
-          it_behaves_like :verify_gcm_authentication_tag
-        else
-          it_behaves_like :gcm_decryption_unsupported
-        end
+        it_behaves_like :decryptable
+        it_behaves_like :verify_gcm_authentication_tag
       end
 
       context 'when enc=A128CBC-HS256' do
@@ -282,23 +202,15 @@ describe JSON::JWE do
       context 'when enc=A128GCM' do
         let(:enc) { :A128GCM }
         let(:key_size) { 16 }
-        if gcm_supported?
-          it_behaves_like :decryptable
-          it_behaves_like :verify_gcm_authentication_tag
-        else
-          it_behaves_like :gcm_decryption_unsupported
-        end
+        it_behaves_like :decryptable
+        it_behaves_like :verify_gcm_authentication_tag
       end
 
       context 'when enc=A256GCM' do
         let(:enc) { :A256GCM }
         let(:key_size) { 32 }
-        if gcm_supported?
-          it_behaves_like :decryptable
-          it_behaves_like :verify_gcm_authentication_tag
-        else
-          it_behaves_like :gcm_decryption_unsupported
-        end
+        it_behaves_like :decryptable
+        it_behaves_like :verify_gcm_authentication_tag
       end
 
       context 'when enc=A128CBC-HS256' do

@@ -56,7 +56,7 @@ describe 'interop' do
               let(:key) { public_key }
               before { jwe.alg = :'RSA1_5' }
 
-              it_behaves_like :gcm_encryption if gcm_supported?
+              it_behaves_like :gcm_encryption
               it_behaves_like :cbc_encryption
             end
 
@@ -64,7 +64,7 @@ describe 'interop' do
               let(:key) { public_key }
               before { jwe.alg = :'RSA-OAEP' }
 
-              it_behaves_like :gcm_encryption if gcm_supported?
+              it_behaves_like :gcm_encryption
               it_behaves_like :cbc_encryption
             end
           end
@@ -78,7 +78,7 @@ describe 'interop' do
               let(:key) { public_key }
               before { jwe.alg = :'RSA1_5' }
 
-              it_behaves_like :gcm_encryption if gcm_supported?
+              it_behaves_like :gcm_encryption
               it_behaves_like :cbc_encryption
             end
 
@@ -86,7 +86,7 @@ describe 'interop' do
               let(:key) { public_key }
               before { jwe.alg = :'RSA-OAEP' }
 
-              it_behaves_like :gcm_encryption if gcm_supported?
+              it_behaves_like :gcm_encryption
               it_behaves_like :cbc_encryption
             end
           end
