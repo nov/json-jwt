@@ -7,8 +7,9 @@ Gem::Specification.new do |gem|
   gem.summary     = %q{JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON Web Key) in Ruby}
   gem.description = %q{JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON Web Key) in Ruby}
   gem.license     = 'MIT'
-  gem.files         = `git ls-files`.split("\n")
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  gem.files         = `git ls-files`.split("\n").reject do |f|
+    f.match(%r{^(test|spec|features)/})
+  end
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.require_paths = ['lib']
   gem.required_ruby_version = '>= 2.3'
