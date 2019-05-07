@@ -4,7 +4,7 @@ describe 'interop' do
   describe 'with jsrsasign' do
     context 'JWS' do
       let(:public_key) do
-        pem = <<-PEM.strip_heredoc
+        pem = <<~PEM
           -----BEGIN PUBLIC KEY-----
           MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoBUyo8CQAFPeYPvv78ylh5MwFZjT
           CLQeb042TjiMJxG+9DLFmRSMlBQ9T/RsLLc+PmpB1+7yPAR+oR5gZn3kJQ==
@@ -13,7 +13,7 @@ describe 'interop' do
         OpenSSL::PKey::EC.new pem
       end
       let(:private_key) do
-        pem = <<-PEM.strip_heredoc
+        pem = <<~PEM
           -----BEGIN PRIVATE KEY-----
           MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgEbVzfPnZPxfAyxqE
           ZV05laAoJAl+/6Xt2O4mOB611sOhRANCAASgFTKjwJAAU95g++/vzKWHkzAVmNMI
