@@ -9,7 +9,7 @@ module JSON
       register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
       alias_method :algorithm, :alg
 
-      attr_accessor :header
+      attr_writer :header
       def header
         @header ||= {}
       end
