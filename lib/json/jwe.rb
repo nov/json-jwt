@@ -14,9 +14,10 @@ module JSON
 
     attr_accessor(
       :public_key_or_secret, :private_key_or_secret,
-      :plain_text, :cipher_text, :authentication_tag, :iv, :auth_data,
-      :content_encryption_key, :jwe_encrypted_key, :encryption_key, :mac_key
+      :plain_text, :cipher_text, :iv, :auth_data,
+      :content_encryption_key, :encryption_key, :mac_key
     )
+    attr_writer :jwe_encrypted_key, :authentication_tag
 
     register_header_keys :enc, :epk, :zip, :apu, :apv
     alias_method :encryption_method, :enc

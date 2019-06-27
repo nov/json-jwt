@@ -6,7 +6,7 @@ module JSON
 
     NUM_OF_SEGMENTS = 3
 
-    attr_accessor :signature_base_string
+    attr_writer :signature_base_string
 
     def initialize(jwt)
       update jwt
