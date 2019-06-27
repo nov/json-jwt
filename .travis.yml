@@ -8,4 +8,4 @@ rvm:
   - 2.5.1
 
 jdk:
-  - oraclejdk8
+  - oraclejdk11
