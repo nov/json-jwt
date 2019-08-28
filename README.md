@@ -45,7 +45,7 @@ jws = JSON::JWT.new(claim).sign(private_key, :RS256)
 jws.to_s
 
 # Decode & Verify
-input = "jwt_header.jwt_claims.jwt_signature"
+input = "#{jwt_header}.#{jwt_claims}.#{jwt_signature}"
 JSON::JWT.decode(input, public_key)
 ```
 
