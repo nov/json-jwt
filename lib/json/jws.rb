@@ -22,7 +22,7 @@ module JSON
       if alg&.to_sym == :none
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
-      elsif algorithms.blank? || Array(algorithms).include?(alg&.to_sym)
+      elsif algorithms.nil? || Array(algorithms).include?(alg&.to_sym)
         public_key_or_secret && valid?(public_key_or_secret) or
         raise VerificationFailed
       else
@@ -197,7 +197,7 @@ module JSON
       end
 
       def decode_json_serialized(input, public_key_or_secret, algorithms = nil, allow_blank_payload = false)
-        header, payload, signature = if input[:signatures].present?
+        header, payload, signature = if input[:signatures]
           [
             input[:signatures].first[:protected],
             input[:payload],

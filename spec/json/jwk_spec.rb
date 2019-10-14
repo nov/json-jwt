@@ -17,13 +17,13 @@ describe JSON::JWK do
       it { should be_instance_of JSON::JWK }
       describe 'kid' do
         subject { jwk[:kid] }
-        it { should be_blank }
+        it { should be_nil }
       end
     end
 
     context 'when no imput' do
       it do
-        JSON::JWK.new.should be_blank
+        JSON::JWK.new.should be_empty
       end
     end
 

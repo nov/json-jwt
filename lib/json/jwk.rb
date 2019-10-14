@@ -13,7 +13,7 @@ module JSON
       else
         super().merge!(params).merge!(ex_params)
       end
-      calculate_default_kid if self[:kid].blank?
+      calculate_default_kid if self[:kid].nil?
     end
 
     def content_type

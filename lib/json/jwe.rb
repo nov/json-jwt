@@ -40,8 +40,8 @@ module JSON
     end
 
     def decrypt!(private_key_or_secret, algorithms = nil, encryption_methods = nil)
-      raise UnexpectedAlgorithm.new('Unexpected alg header') unless algorithms.blank? || Array(algorithms).include?(alg)
-      raise UnexpectedAlgorithm.new('Unexpected enc header') unless encryption_methods.blank? || Array(encryption_methods).include?(enc)
+      raise UnexpectedAlgorithm.new('Unexpected alg header') unless algorithms.nil? || Array(algorithms).include?(alg)
+      raise UnexpectedAlgorithm.new('Unexpected enc header') unless encryption_methods.nil? || Array(encryption_methods).include?(enc)
       self.private_key_or_secret = with_jwk_support private_key_or_secret
       cipher.decrypt
       self.content_encryption_key = decrypt_content_encryption_key
@@ -270,7 +270,7 @@ module JSON
       end
 
       def decode_json_serialized(input, private_key_or_secret, algorithms = nil, encryption_methods = nil, _allow_blank_payload = false)
-        jwe_encrypted_key = if input[:recipients].present?
+        jwe_encrypted_key = if input[:recipients]
           input[:recipients].first[:encrypted_key]
         else
           input[:encrypted_key]

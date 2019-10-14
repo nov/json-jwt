@@ -110,9 +110,9 @@ module JSON
       end
 
       def decode_json_serialized(input, key_or_secret, algorithms = nil, encryption_methods = nil, allow_blank_payload = false)
-        if (input[:signatures] || input[:signature]).present?
+        if (input[:signatures] || input[:signature])
           JWS.decode_json_serialized input, key_or_secret, algorithms, allow_blank_payload
-        elsif input[:ciphertext].present?
+        elsif input[:ciphertext]
           JWE.decode_json_serialized input, key_or_secret, algorithms, encryption_methods
         else
           raise InvalidFormat.new("Unexpected JOSE JSON Serialization Format.")
