@@ -354,45 +354,45 @@ describe JSON::JWS do
     context 'when syntax option given' do
       context 'when general' do
         it 'should return General JWS JSON Serialization' do
-          signed.to_json(syntax: :general).should == {
+          signed.as_json(syntax: :general).should == {
             payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
             signatures: [{
               protected: Base64.urlsafe_encode64(signed.header.to_json, padding: false),
               signature: Base64.urlsafe_encode64(signed.signature, padding: false)
             }]
-          }.to_json
+          }
         end
         context 'with blank payload' do
           it 'should return General JWS JSON Serialization' do
-            signed_blank.to_json(syntax: :general).should == {
+            signed_blank.as_json(syntax: :general).should == {
               payload: '',
               signatures: [{
                 protected: Base64.urlsafe_encode64(signed_blank.header.to_json, padding: false),
                 signature: Base64.urlsafe_encode64(signed_blank.signature, padding: false)
               }]
-            }.to_json
+            }
           end
         end
 
         context 'when not signed yet' do
           it 'should not fail' do
-            jws.to_json(syntax: :general).should == {
+            jws.as_json(syntax: :general).should == {
               payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
               signatures: [{
                 protected: Base64.urlsafe_encode64(jws.header.to_json, padding: false),
                 signature: Base64.urlsafe_encode64('', padding: false)
               }]
-            }.to_json
+            }
           end
           context 'with blank payload' do
             it 'should not fail' do
-              jws_blank.to_json(syntax: :general).should == {
+              jws_blank.as_json(syntax: :general).should == {
                 payload: '',
                 signatures: [{
                   protected: Base64.urlsafe_encode64(jws_blank.header.to_json, padding: false),
                   signature: Base64.urlsafe_encode64('', padding: false)
                 }]
-              }.to_json
+              }
             end
           end
         end
@@ -400,37 +400,37 @@ describe JSON::JWS do
 
       context 'when flattened' do
         it 'should return Flattened JWS JSON Serialization' do
-          signed.to_json(syntax: :flattened).should == {
+          signed.as_json(syntax: :flattened).should == {
             protected: Base64.urlsafe_encode64(signed.header.to_json, padding: false),
             payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
             signature: Base64.urlsafe_encode64(signed.signature, padding: false)
-          }.to_json
+          }
         end
         context 'with blank payload' do
           it 'should return Flattened JWS JSON Serialization' do
-            signed_blank.to_json(syntax: :flattened).should == {
+            signed_blank.as_json(syntax: :flattened).should == {
               protected: Base64.urlsafe_encode64(signed_blank.header.to_json, padding: false),
               payload: '',
               signature: Base64.urlsafe_encode64(signed_blank.signature, padding: false)
-            }.to_json
+            }
           end
         end
 
         context 'when not signed yet' do
           it 'should not fail' do
-            jws.to_json(syntax: :flattened).should == {
+            jws.as_json(syntax: :flattened).should == {
               protected: Base64.urlsafe_encode64(jws.header.to_json, padding: false),
               payload: Base64.urlsafe_encode64(claims.to_json, padding: false),
               signature: Base64.urlsafe_encode64('', padding: false)
-            }.to_json
+            }
           end
           context 'with blank payload' do
             it 'should not fail' do
-              jws_blank.to_json(syntax: :flattened).should == {
+              jws_blank.as_json(syntax: :flattened).should == {
                 protected: Base64.urlsafe_encode64(jws_blank.header.to_json, padding: false),
                 payload: '',
                 signature: Base64.urlsafe_encode64('', padding: false)
-              }.to_json
+              }
             end
           end
         end

@@ -5,7 +5,7 @@ module JSON
 
       def initialize(*jwks)
         jwks = if jwks.first.is_a?(Hash) && (keys = jwks.first[:keys])
-          keys
+          [keys]
         else
           jwks
         end
