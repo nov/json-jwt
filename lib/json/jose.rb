@@ -1,4 +1,4 @@
-require 'active_support/security_utils'
+require 'securecompare'
 
 module JSON
   module JOSE
@@ -6,6 +6,7 @@ module JSON
 
     included do
       extend ClassMethods
+      include SecureCompare
       register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
       alias_method :algorithm, :alg
 
@@ -29,18 +30,6 @@ module JSON
         end&.to_key or raise JWK::Set::KidNotFound
       else
         key
-      end
-    end
-
-    def secure_compare(a, b)
-      if ActiveSupport::SecurityUtils.respond_to?(:fixed_length_secure_compare)
-        begin
-          ActiveSupport::SecurityUtils.fixed_length_secure_compare(a, b)
-        rescue ArgumentError
-          false
-        end
-      else
-        ActiveSupport::SecurityUtils.secure_compare(a, b)
       end
     end
 
