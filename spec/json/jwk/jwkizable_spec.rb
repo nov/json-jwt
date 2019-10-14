@@ -6,14 +6,14 @@ describe JSON::JWK::JWKizable do
 
     shared_examples_for :jwkizable_as_public do
       it { should be_instance_of JSON::JWK }
-      it { should include *public_key_attributes.collect(&:to_s) }
-      it { should_not include *private_key_attributes.collect(&:to_s) }
+      it { should include *public_key_attributes }
+      it { should_not include *private_key_attributes }
     end
 
     shared_examples_for :jwkizable_as_private do
       it { should be_instance_of JSON::JWK }
-      it { should include *public_key_attributes.collect(&:to_s) }
-      it { should include *private_key_attributes.collect(&:to_s) }
+      it { should include *public_key_attributes }
+      it { should include *private_key_attributes }
     end
 
     describe OpenSSL::PKey::RSA do

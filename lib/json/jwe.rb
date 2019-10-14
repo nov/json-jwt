@@ -262,7 +262,7 @@ module JSON
           end
         end
         jwe.auth_data = input.split('.').first
-        jwe.header = JSON.parse(_header_json_).with_indifferent_access
+        jwe.header = JSON.parse(_header_json_, symbolize_names: true)
         unless private_key_or_secret == :skip_decryption
           jwe.decrypt! private_key_or_secret, algorithms, encryption_methods
         end
@@ -270,7 +270,6 @@ module JSON
       end
 
       def decode_json_serialized(input, private_key_or_secret, algorithms = nil, encryption_methods = nil, _allow_blank_payload = false)
-        input = input.with_indifferent_access
         jwe_encrypted_key = if input[:recipients].present?
           input[:recipients].first[:encrypted_key]
         else

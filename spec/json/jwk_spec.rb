@@ -77,14 +77,14 @@ describe JSON::JWK do
 
   context 'when RSA public key given' do
     let(:jwk) { JSON::JWK.new public_key }
-    it { jwk.keys.collect(&:to_sym).should include :kty, :e, :n }
+    it { jwk.keys.should include :kty, :e, :n }
     its(:kty) { jwk[:kty].should == :RSA }
     its(:e) { jwk[:e].should == Base64.urlsafe_encode64(public_key.e.to_s(2), padding: false) }
     its(:n) { jwk[:n].should == Base64.urlsafe_encode64(public_key.n.to_s(2), padding: false) }
 
     context 'when kid/use options given' do
       let(:jwk) { JSON::JWK.new public_key, kid: '12345', use: :sig }
-      it { jwk.keys.collect(&:to_sym).should include :kid, :use }
+      it { jwk.keys.should include :kid, :use }
       its(:kid) { jwk[:kid].should == '12345' }
       its(:use) { jwk[:use].should == :sig }
     end
@@ -128,7 +128,7 @@ describe JSON::JWK do
     [256, 384, 512].each do |digest_length|
       describe "EC#{digest_length}" do
         let(:jwk) { JSON::JWK.new public_key(:ecdsa, digest_length: digest_length) }
-        it { jwk.keys.collect(&:to_sym).should include :kty, :crv, :x, :y }
+        it { jwk.keys.should include :kty, :crv, :x, :y }
         its(:kty) { jwk[:kty].should == :EC }
         its(:x) { jwk[:x].should == expected_coordinates[digest_length][:x] }
         its(:y) { jwk[:y].should == expected_coordinates[digest_length][:y] }

@@ -22,7 +22,7 @@ describe JSON::JWS do
     {
       iss: 'joe',
       exp: 1300819380,
-      :'http://example.com/is_root' => true
+      'http://example.com/is_root': true
     }
   end
   let(:expected_signature) do

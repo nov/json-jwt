@@ -12,8 +12,8 @@ describe JSON::JWT do
     {
       iss: 'joe',
       exp: 1300819380,
-      'http://example.com/is_root' => true
-    }.with_indifferent_access
+      'http://example.com/is_root': true
+    }
   end
   let(:no_signed) do
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
@@ -375,7 +375,7 @@ describe JSON::JWT do
         it 'should skip verification' do
           expect do
             jwt = JSON::JWT.decode jws.to_s, :skip_verification
-            jwt.header.should == {'alg' => 'HS256', 'typ' => 'JWT'}
+            jwt.header.should == {alg: 'HS256', typ: 'JWT'}
           end.not_to raise_error
         end
       end
@@ -440,7 +440,7 @@ describe JSON::JWT do
           expect do
             jwe = JSON::JWT.decode input, :skip_decryption
             jwe.should be_instance_of JSON::JWE
-            jwe.header.should == {'alg' => 'RSA1_5', 'enc' => 'A128CBC-HS256'}
+            jwe.header.should == {alg: 'RSA1_5', enc: 'A128CBC-HS256'}
           end.not_to raise_error
         end
       end

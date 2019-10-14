@@ -1,22 +1,17 @@
 module JSON
-  class JWK < ActiveSupport::HashWithIndifferentAccess
+  class JWK < Hash
     class UnknownAlgorithm < JWT::Exception; end
 
     def initialize(params = {}, ex_params = {})
       case params
       when OpenSSL::PKey::RSA, OpenSSL::PKey::EC
-        super params.to_jwk(ex_params)
+        super().merge!(params.to_jwk_params(ex_params))
       when OpenSSL::PKey::PKey
         raise UnknownAlgorithm.new('Unknown Key Type')
       when String
-        super(
-          k: params,
-          kty: :oct
-        )
-        merge! ex_params
+        super().merge!(k: params, kty: :oct).merge!(ex_params)
       else
-        super params
-        merge! ex_params
+        super().merge!(params).merge!(ex_params)
       end
       calculate_default_kid if self[:kid].blank?
     end
@@ -53,15 +48,15 @@ module JSON
     private
 
     def rsa?
-      self[:kty]&.to_sym == :RSA
+      self[:kty] == :RSA
     end
 
     def ec?
-      self[:kty]&.to_sym == :EC
+      self[:kty] == :EC
     end
 
     def oct?
-      self[:kty]&.to_sym == :oct
+      self[:kty] == :oct
     end
 
     def calculate_default_kid

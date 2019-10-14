@@ -2,7 +2,7 @@ module JSON
   class JWK
     module JWKizable
       module RSA
-        def to_jwk(ex_params = {})
+        def to_jwk_params(ex_params = {})
           params = {
             kty: :RSA,
             e: Base64.urlsafe_encode64(e.to_s(2), padding: false),
@@ -18,12 +18,16 @@ module JSON
               qi: Base64.urlsafe_encode64(iqmp.to_s(2), padding: false),
             )
           end
-          JWK.new params
+          params
+        end
+
+        def to_jwk(ex_params = {})
+          JWK.new to_jwk_params(ex_params)
         end
       end
 
       module EC
-        def to_jwk(ex_params = {})
+        def to_jwk_params(ex_params = {})
           params = {
             kty: :EC,
             crv: curve_name,
@@ -31,7 +35,11 @@ module JSON
             y: Base64.urlsafe_encode64([coordinates[:y]].pack('H*'), padding: false)
           }.merge ex_params
           params[:d] = Base64.urlsafe_encode64([coordinates[:d]].pack('H*'), padding: false) if private_key?
-          JWK.new params
+          params
+        end
+
+        def to_jwk(ex_params = {})
+          JWK.new to_jwk_params(ex_params)
         end
 
         private

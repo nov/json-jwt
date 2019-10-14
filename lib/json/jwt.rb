@@ -5,7 +5,7 @@ require 'active_support/core_ext'
 require 'json/jose'
 
 module JSON
-  class JWT < ActiveSupport::HashWithIndifferentAccess
+  class JWT < Hash
     attr_accessor :blank_payload
     attr_accessor :signature
 
@@ -110,7 +110,6 @@ module JSON
       end
 
       def decode_json_serialized(input, key_or_secret, algorithms = nil, encryption_methods = nil, allow_blank_payload = false)
-        input = input.with_indifferent_access
         if (input[:signatures] || input[:signature]).present?
           JWS.decode_json_serialized input, key_or_secret, algorithms, allow_blank_payload
         elsif input[:ciphertext].present?

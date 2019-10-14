@@ -182,11 +182,11 @@ module JSON
         header, claims, signature = input.split('.', JWS::NUM_OF_SEGMENTS).collect do |segment|
           Base64.urlsafe_decode64 segment.to_s
         end
-        header = JSON.parse(header).with_indifferent_access
+        header = JSON.parse(header, symbolize_names: true)
         if allow_blank_payload && claims == ''
           claims = nil
         else
-          claims = JSON.parse(claims).with_indifferent_access
+          claims = JSON.parse(claims, symbolize_names: true)
         end
         jws = new claims
         jws.header = header
@@ -197,7 +197,6 @@ module JSON
       end
 
       def decode_json_serialized(input, public_key_or_secret, algorithms = nil, allow_blank_payload = false)
-        input = input.with_indifferent_access
         header, payload, signature = if input[:signatures].present?
           [
             input[:signatures].first[:protected],
