@@ -2,21 +2,22 @@ require 'securecompare'
 
 module JSON
   module JOSE
-    extend ActiveSupport::Concern
+    def self.included(base)
+      base.extend ClassMethods
+      base.class_eval do
+        extend ClassMethods
+        include SecureCompare
+        register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
+        alias_method :algorithm, :alg
 
-    included do
-      extend ClassMethods
-      include SecureCompare
-      register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
-      alias_method :algorithm, :alg
+        attr_writer :header
+        def header
+          @header ||= {}
+        end
 
-      attr_writer :header
-      def header
-        @header ||= {}
-      end
-
-      def content_type
-        @content_type ||= 'application/jose'
+        def content_type
+          @content_type ||= 'application/jose'
+        end
       end
     end
 
