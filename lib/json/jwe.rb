@@ -254,7 +254,7 @@ module JSON
           raise InvalidFormat.new("Invalid JWE Format. JWE should include #{NUM_OF_SEGMENTS} segments.")
         end
         jwe = new
-        _header_json_, jwe.jwe_encrypted_key, jwe.iv, jwe.cipher_text, jwe.authentication_tag = input.split('.').collect do |segment|
+        _header_json_, jwe.jwe_encrypted_key, jwe.iv, jwe.cipher_text, jwe.authentication_tag = input.split('.', NUM_OF_SEGMENTS).collect do |segment|
           begin
             Base64.urlsafe_decode64 segment
           rescue ArgumentError

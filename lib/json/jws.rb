@@ -179,7 +179,7 @@ module JSON
         unless input.count('.') + 1 == NUM_OF_SEGMENTS
           raise InvalidFormat.new("Invalid JWS Format. JWS should include #{NUM_OF_SEGMENTS} segments.")
         end
-        header, claims, signature = input.split('.', JWS::NUM_OF_SEGMENTS).collect do |segment|
+        header, claims, signature = input.split('.', NUM_OF_SEGMENTS).collect do |segment|
           Base64.urlsafe_decode64 segment.to_s
         end
         header = JSON.parse(header).with_indifferent_access
@@ -191,7 +191,7 @@ module JSON
         jws = new claims
         jws.header = header
         jws.signature = signature
-        jws.signature_base_string = input.split('.')[0, JWS::NUM_OF_SEGMENTS - 1].join('.')
+        jws.signature_base_string = input.split('.')[0, NUM_OF_SEGMENTS - 1].join('.')
         jws.verify! public_key_or_secret, algorithms unless public_key_or_secret == :skip_verification
         jws
       end
