@@ -95,12 +95,17 @@ describe JSON::JWE do
         _jwe_ = JSON::JWE.new plain_text
         _jwe_.alg, _jwe_.enc = alg, enc
         _jwe_.encrypt! key
-        _jwe_.to_s + 'tampered'
+        hdr, extra, iv, cipher_text, _ = _jwe_.to_s.split '.'
+        [hdr, extra, iv, cipher_text, ''].join '.'
       end
 
       it do
+        # fetching those variables outside of exception block to make sure
+        # we intercept exception in decrypt! and not in other place
+        j = jwe
+        k = key
         expect do
-          jwe.decrypt! key
+          j.decrypt! k
         end.to raise_error JSON::JWE::DecryptionFailed
       end
     end
