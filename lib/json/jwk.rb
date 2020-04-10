@@ -50,8 +50,6 @@ module JSON
       end
     end
 
-    private
-
     def rsa?
       self[:kty]&.to_sym == :RSA
     end
@@ -62,12 +60,6 @@ module JSON
 
     def oct?
       self[:kty]&.to_sym == :oct
-    end
-
-    def calculate_default_kid
-      self[:kid] = thumbprint
-    rescue
-      # ignore
     end
 
     def normalize
@@ -95,6 +87,14 @@ module JSON
       end
     end
 
+    private
+    
+    def calculate_default_kid
+      self[:kid] = thumbprint
+    rescue
+      # ignore
+    end
+    
     def to_rsa_key
       e, n, d, p, q, dp, dq, qi = [:e, :n, :d, :p, :q, :dp, :dq, :qi].collect do |key|
         if self[key]
