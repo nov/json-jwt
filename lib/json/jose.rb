@@ -7,6 +7,8 @@ module JSON
     included do
       extend ClassMethods
       register_header_keys :alg, :jku, :jwk, :x5u, :x5t, :x5c, :kid, :typ, :cty, :crit
+
+      # NOTE: not used anymore in this gem, but keeping in case developers are calling it.
       alias_method :algorithm, :alg
 
       attr_writer :header

@@ -107,7 +107,7 @@ module JSON
     end
 
     def dir?
-      :dir == algorithm&.to_sym
+      :dir == alg&.to_sym
     end
 
     def cipher
@@ -159,7 +159,7 @@ module JSON
     # encryption
 
     def jwe_encrypted_key
-      @jwe_encrypted_key ||= case algorithm&.to_sym
+      @jwe_encrypted_key ||= case alg&.to_sym
       when :RSA1_5
         public_key_or_secret.public_encrypt content_encryption_key
       when :'RSA-OAEP'
@@ -211,7 +211,7 @@ module JSON
 
     def decrypt_content_encryption_key
       fake_content_encryption_key = generate_content_encryption_key # NOTE: do this always not to make timing difference
-      case algorithm&.to_sym
+      case alg&.to_sym
       when :RSA1_5
         private_key_or_secret.private_decrypt jwe_encrypted_key
       when :'RSA-OAEP'
