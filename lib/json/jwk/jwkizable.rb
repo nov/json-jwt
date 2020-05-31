@@ -44,6 +44,8 @@ module JSON
             :'P-384'
           when 'secp521r1'
             :'P-521'
+          when 'secp256k1'
+            :secp256k1
           else
             raise UnknownAlgorithm.new('Unknown EC Curve')
           end

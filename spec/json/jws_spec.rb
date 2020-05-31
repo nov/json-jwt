@@ -133,7 +133,7 @@ describe JSON::JWS do
       end
     end
 
-    [:ES256, :ES384, :ES512].each do |algorithm|
+    [:ES256, :ES384, :ES512, :ES256K].each do |algorithm|
       describe algorithm do
         let(:alg) { algorithm }
 
@@ -283,7 +283,7 @@ describe JSON::JWS do
       end
     end
 
-    [:ES256, :ES384, :ES512].each do |algorithm|
+    [:ES256, :ES384, :ES512, :ES256K].each do |algorithm|
       describe algorithm do
         let(:alg) { algorithm }
         let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }

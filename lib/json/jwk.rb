@@ -88,13 +88,13 @@ module JSON
     end
 
     private
-    
+
     def calculate_default_kid
       self[:kid] = thumbprint
     rescue
       # ignore
     end
-    
+
     def to_rsa_key
       e, n, d, p, q, dp, dq, qi = [:e, :n, :d, :p, :q, :dp, :dq, :qi].collect do |key|
         if self[key]
@@ -127,6 +127,8 @@ module JSON
         'secp384r1'
       when :'P-521'
         'secp521r1'
+      when :secp256k1
+        'secp256k1'
       else
         raise UnknownAlgorithm.new('Unknown EC Curve')
       end
