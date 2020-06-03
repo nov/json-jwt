@@ -36,12 +36,12 @@ describe JSON::JWK::JWKizable do
       let(:private_key_attributes) { [:d] }
 
       describe :public_key do
-        let(:key) { public_key :ecdsa }
+        let(:key) { public_key :ecdsa, curve_name: :prime256v1 }
         it_behaves_like :jwkizable_as_public
       end
 
       describe :private_key do
-        let(:key) { private_key :ecdsa }
+        let(:key) { private_key :ecdsa, curve_name: :prime256v1 }
         it_behaves_like :jwkizable_as_private
       end
     end

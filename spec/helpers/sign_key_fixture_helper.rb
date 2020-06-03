@@ -21,7 +21,7 @@ module SignKeyFixtureHelper
     )
   end
 
-  def private_key(algorithm = :rsa, options = {})
+  def private_key(algorithm = :rsa, digest_length: 256, curve_name: nil)
     case algorithm
     when :rsa
       OpenSSL::PKey::RSA.new(
@@ -33,8 +33,8 @@ module SignKeyFixtureHelper
         pem_file(
           File.join([
             algorithm,
-            options[:digest_length] || 256,
-            options[:curve_name],
+            digest_length,
+            curve_name,
             'private_key',
           ].compact.collect(&:to_s))
         )
@@ -42,7 +42,7 @@ module SignKeyFixtureHelper
     end
   end
 
-  def public_key(algorithm = :rsa, options = {})
+  def public_key(algorithm = :rsa, digest_length: 256, curve_name: nil)
     case algorithm
     when :rsa
       OpenSSL::PKey::RSA.new(
@@ -50,7 +50,14 @@ module SignKeyFixtureHelper
       )
     when :ecdsa
       OpenSSL::PKey::EC.new(
-        pem_file("#{algorithm}/#{options[:digest_length] || 256}/public_key")
+        pem_file(
+          File.join([
+            algorithm,
+            digest_length,
+            curve_name,
+            'public_key',
+          ].compact.collect(&:to_s))
+        )
       )
     end
   end

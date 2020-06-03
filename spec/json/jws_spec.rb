@@ -45,6 +45,15 @@ describe JSON::JWS do
       :RS512 => 'ws2HZ6wvh8GMrFKiIHXDogyx8HFpa4wvrLxfZaMfCoMPf0SZ4V3tiEZRWfrxyvwpsdBj2Mgm5lt3IYAHhlI2hqWvuikDq6tuViloaAIm2xwTU060bF0GL1tQJ-h20wUukJ6fsWet8M9DNg7hcElYQMawHhk4L91YUtY2hKT_uWgPih_pn0Hq5Ve0at4CwAyXXTwCYSEH23PMsUdDfE5tfCyvL2bNQ71Ld_MvQS1NLS7hydzEtfxLK-UkDQVclFmEM3JXrPG7YSRodtKlwJ-ESDx6CaJXXDAgitSF32dslcIkmOXRJqjNmF15i_aVg0ExiU92WTpCrdwzWTt4Aphqlw',
     }
   end
+  let(:curve_name) do
+    case alg
+    when :ES256
+      :prime256v1
+    when :ES256K
+      :secp256k1
+    end
+  end
+
 
   shared_examples_for :jwt_with_alg do
     it { should == jwt }
@@ -150,15 +159,27 @@ describe JSON::JWS do
         end
 
         context 'when OpenSSL::PKey::EC key given' do
-          let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
-          let(:public_key_or_secret)  { public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+          let(:private_key_or_secret) do
+            private_key :ecdsa, curve_name: curve_name, digest_length: algorithm.to_s[2,3].to_i
+          end
+          let(:public_key_or_secret) do
+            public_key :ecdsa, curve_name: curve_name, digest_length: algorithm.to_s[2,3].to_i
+          end
           it_behaves_like :jwt_with_alg
           it_behaves_like :self_verifiable
         end
 
         context 'when JSON::JWK key given' do
-          let(:private_key_or_secret) { JSON::JWK.new(private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
-          let(:public_key_or_secret)  { JSON::JWK.new(public_key  :ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
+          let(:private_key_or_secret) do
+            JSON::JWK.new(
+              private_key :ecdsa, curve_name: curve_name, digest_length: algorithm.to_s[2,3].to_i
+            )
+          end
+          let(:public_key_or_secret) do
+            JSON::JWK.new(
+              public_key :ecdsa, curve_name: curve_name, digest_length: algorithm.to_s[2,3].to_i
+            )
+          end
           it_behaves_like :jwt_with_alg
           it_behaves_like :self_verifiable
         end
@@ -237,7 +258,6 @@ describe JSON::JWS do
 
         describe 'claims' do
           it 'should be parsed successfully' do
-            p decoded_blank.blank_payload
             decoded_blank.blank_payload.should == true
             decoded_blank[:iss].should == nil
             decoded_blank[:exp].should == nil
@@ -245,7 +265,6 @@ describe JSON::JWS do
           end
         end
       end
-
     end
     subject { decoded }
 
@@ -286,15 +305,23 @@ describe JSON::JWS do
     [:ES256, :ES384, :ES512, :ES256K].each do |algorithm|
       describe algorithm do
         let(:alg) { algorithm }
-        let(:private_key_or_secret) { private_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+        let(:private_key_or_secret) do
+          private_key :ecdsa, curve_name: curve_name, digest_length: algorithm.to_s[2,3].to_i
+        end
 
         context 'when OpenSSL::PKey::EC key given' do
-          let(:public_key_or_secret) { public_key :ecdsa, digest_length: algorithm.to_s[2,3].to_i }
+          let(:public_key_or_secret) do
+            public_key :ecdsa, curve_name: curve_name, digest_length: algorithm.to_s[2,3].to_i
+          end
           it_behaves_like :success_signature_verification
         end
 
         context 'when JSON::JWK key given' do
-          let(:public_key_or_secret) { JSON::JWK.new public_key(:ecdsa, digest_length: algorithm.to_s[2,3].to_i) }
+          let(:public_key_or_secret) do
+            JSON::JWK.new(
+              public_key :ecdsa, curve_name: curve_name, digest_length: algorithm.to_s[2,3].to_i
+            )
+          end
           it_behaves_like :success_signature_verification
         end
       end
@@ -346,7 +373,6 @@ describe JSON::JWS do
     end
     context 'with blank payload' do
       it 'should JSONize payload' do
-        puts ("jws_blank: #{jws_blank.to_json.inspect}")
         jws_blank.to_json.should == ''
       end
     end

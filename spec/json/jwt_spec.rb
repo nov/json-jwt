@@ -63,7 +63,7 @@ describe JSON::JWT do
 
       context 'when key is EC key' do
         context 'when prime256v1' do
-          let(:key) { private_key(:ecdsa) }
+          let(:key) { private_key(:ecdsa, curve_name: :prime256v1) }
           its(:alg) { should == :ES256 }
         end
 
@@ -95,7 +95,7 @@ describe JSON::JWT do
 
       context 'when key is JWK with kty=EC' do
         context 'when prime256v1' do
-          let(:key) { JSON::JWK.new private_key(:ecdsa) }
+          let(:key) { JSON::JWK.new private_key(:ecdsa, curve_name: :prime256v1) }
           its(:alg) { should == :ES256 }
         end
 

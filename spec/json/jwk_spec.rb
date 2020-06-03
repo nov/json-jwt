@@ -33,7 +33,7 @@ describe JSON::JWK do
     end
 
     context 'with OpenSSL::PKey::EC' do
-      let(:key) { public_key :ecdsa }
+      let(:key) { public_key :ecdsa, curve_name: :prime256v1 }
       it_behaves_like :jwk_with_kid
     end
 
@@ -107,7 +107,7 @@ describe JSON::JWK do
   end
 
   context 'when EC public key given' do
-    let(:jwk) { JSON::JWK.new public_key(:ecdsa) }
+    let(:jwk) { JSON::JWK.new(public_key :ecdsa, curve_name: :prime256v1) }
     let(:expected_coordinates) do
       {
         256 => {
@@ -127,7 +127,15 @@ describe JSON::JWK do
 
     [256, 384, 512].each do |digest_length|
       describe "EC#{digest_length}" do
-        let(:jwk) { JSON::JWK.new public_key(:ecdsa, digest_length: digest_length) }
+        let(:curve_name) do
+          case digest_length
+          when 256
+            :prime256v1
+          else
+            nil
+          end
+        end
+        let(:jwk) { JSON::JWK.new(public_key :ecdsa, curve_name: curve_name, digest_length: digest_length) }
         it { jwk.keys.collect(&:to_sym).should include :kty, :crv, :x, :y }
         its(:kty) { jwk[:kty].should == :EC }
         its(:x) { jwk[:x].should == expected_coordinates[digest_length][:x] }
