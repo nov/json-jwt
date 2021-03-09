@@ -1,3 +1,5 @@
+cache: bundler
+
 before_install:
   - gem install bundler
   - git submodule update --init --recursive
