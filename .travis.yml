@@ -3,6 +3,7 @@ before_install:
   - git submodule update --init --recursive
 
 rvm:
+  - 2.3.7
   - 2.5.8
   - 2.6.6
   - 2.7.2

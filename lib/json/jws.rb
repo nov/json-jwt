@@ -1,7 +1,9 @@
 module JSON
   class JWS < JWT
     class InvalidFormat < JWT::InvalidFormat; end
+
     class VerificationFailed < JWT::VerificationFailed; end
+
     class UnexpectedAlgorithm < JWT::UnexpectedAlgorithm; end
 
     NUM_OF_SEGMENTS = 3
@@ -24,7 +26,7 @@ module JSON
         signature == '' or raise VerificationFailed
       elsif algorithms.blank? || Array(algorithms).include?(alg&.to_sym)
         public_key_or_secret && valid?(public_key_or_secret) or
-        raise VerificationFailed
+          raise VerificationFailed
       else
         raise UnexpectedAlgorithm.new('Unexpected alg header')
       end
@@ -107,14 +109,22 @@ module JSON
         private_key.sign digest, signature_base_string
       when rsa_pss?
         private_key = private_key_or_secret
+        raise UnexpectedAlgorithm.new('Unknown Signature Algorithm') unless private_key.respond_to? :sign_pss
         private_key.sign_pss digest, signature_base_string, salt_length: :digest, mgf1_hash: digest
       when ecdsa?
         private_key = private_key_or_secret
         verify_ecdsa_group! private_key
-        asn1_to_raw(
-          private_key.sign(digest, signature_base_string),
-          private_key
-        )
+        if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.5.0')
+          asn1_to_raw(
+            private_key.dsa_sign_asn1(digest.digest signature_base_string),
+            private_key
+          )
+        else
+          asn1_to_raw(
+            private_key.sign(digest, signature_base_string),
+            private_key
+          )
+        end
       else
         raise UnexpectedAlgorithm.new('Unknown Signature Algorithm')
       end
@@ -134,7 +144,14 @@ module JSON
       when ecdsa?
         public_key = public_key_or_secret
         verify_ecdsa_group! public_key
-        public_key.verify digest, raw_to_asn1(signature, public_key), signature_base_string
+        if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.5.0')
+          public_key.dsa_verify_asn1(
+            digest.digest(signature_base_string),
+            raw_to_asn1(signature, public_key)
+          )
+        else
+          public_key.verify digest, raw_to_asn1(signature, public_key), signature_base_string
+        end
       else
         raise UnexpectedAlgorithm.new('Unknown Signature Algorithm')
       end
@@ -144,18 +161,18 @@ module JSON
 
     def verify_ecdsa_group!(key)
       group_name = case digest.digest_length * 8
-      when 256
-        case key.group.curve_name
-        when 'secp256k1'
-          :secp256k1
-        else
-          :prime256v1
-        end
-      when 384
-        :secp384r1
-      when 512
-        :secp521r1
-      end
+                   when 256
+                     case key.group.curve_name
+                     when 'secp256k1'
+                       :secp256k1
+                     else
+                       :prime256v1
+                     end
+                   when 384
+                     :secp384r1
+                   when 512
+                     :secp521r1
+                   end
       key.group = OpenSSL::PKey::EC::Group.new group_name.to_s
       key.check_key
     end
@@ -197,18 +214,18 @@ module JSON
       def decode_json_serialized(input, public_key_or_secret, algorithms = nil, allow_blank_payload = false)
         input = input.with_indifferent_access
         header, payload, signature = if input[:signatures].present?
-          [
-            input[:signatures].first[:protected],
-            input[:payload],
-            input[:signatures].first[:signature]
-          ].collect do |segment|
-            segment
-          end
-        else
-          [:protected, :payload, :signature].collect do |key|
-            input[key]
-          end
-        end
+                                       [
+                                         input[:signatures].first[:protected],
+                                         input[:payload],
+                                         input[:signatures].first[:signature]
+                                       ].collect do |segment|
+                                         segment
+                                       end
+                                     else
+                                       [:protected, :payload, :signature].collect do |key|
+                                         input[key]
+                                       end
+                                     end
         compact_serialized = [header, payload, signature].join('.')
         decode_compact_serialized compact_serialized, public_key_or_secret, algorithms, allow_blank_payload
       end
