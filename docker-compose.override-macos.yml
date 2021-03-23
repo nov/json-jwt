@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  app:
+    volumes:
+      - "app_mount:/app"
+    ports:
+      # Ports required for debugging
+      - "1234:1234"
+      - "26166:26168"
+
+volumes:
+  app_mount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+      device: ":/System/Volumes/Data/${PWD}"

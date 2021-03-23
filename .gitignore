@@ -21,3 +21,6 @@ Gemfile.lock
 
 ## PROJECT::SPECIFIC
 .class
+
+docker-compose.override.yml
+.env

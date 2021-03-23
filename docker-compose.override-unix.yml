@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+  app:
+    volumes:
+      - ".:/app"
+    ports:
+      # Ports required for debugging
+      - "1234:1234"
+      - "26166:26168"
