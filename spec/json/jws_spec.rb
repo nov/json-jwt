@@ -186,6 +186,17 @@ describe JSON::JWS do
       end
     end
 
+    context 'when JSON::JWK::Set has only one key' do
+      let(:alg) { :HS256 }
+      let(:jwks) do
+        jwk = JSON::JWK.new shared_secret
+        JSON::JWK::Set.new jwk
+      end
+      let(:signed) { jws.sign!(jwks) }
+
+      it { should == jws.sign!('secret') }
+    end
+
     context 'when JSON::JWK::Set key given' do
       let(:alg) { :HS256 }
       let(:kid) { 'kid' }
@@ -198,6 +209,16 @@ describe JSON::JWS do
       context 'when jwk is found by given kid' do
         before { jws.kid = kid }
         it { should == jws.sign!('secret') }
+      end
+
+      context 'when kid is unknown' do
+        before { jws.kid = 'unknown_kid' }
+
+        it do
+          expect do
+            subject
+          end.to raise_error JSON::JWK::Set::KidNotFound
+        end
       end
 
       context 'otherwise' do

@@ -26,11 +26,23 @@ module JSON
       when JSON::JWK
         key.to_key
       when JSON::JWK::Set
-        key.detect do |jwk|
-          jwk[:kid] && jwk[:kid] == kid
-        end&.to_key or raise JWK::Set::KidNotFound
+        find_key(key)
       else
         key
+      end
+    end
+
+    def find_key(key)
+      if kid
+        found_key = key.detect { |jwk| jwk[:kid] && jwk[:kid] == kid }
+
+        return found_key.to_key if found_key
+
+        raise JWK::Set::KidNotFound
+      elsif key.length > 1
+        raise JWK::Set::KidNotFound
+      elsif key.length == 1
+        key[0].to_key
       end
     end
 
