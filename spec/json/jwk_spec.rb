@@ -145,7 +145,7 @@ describe JSON::JWK do
 
     describe 'unknown curve' do
       it do
-        key = OpenSSL::PKey::EC.new('secp112r2').generate_key
+        key = OpenSSL::PKey::EC.generate('secp112r2')
         expect do
           JSON::JWK.new key
         end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown EC Curve'
@@ -193,7 +193,7 @@ describe JSON::JWK do
 
   describe 'unknown key type' do
     it do
-      key = OpenSSL::PKey::DSA.generate 256
+      key = OpenSSL::PKey::DSA.generate 2048
       expect do
         JSON::JWK.new key
       end.to raise_error JSON::JWK::UnknownAlgorithm, 'Unknown Key Type'
