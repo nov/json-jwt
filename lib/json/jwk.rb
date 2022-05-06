@@ -101,22 +101,29 @@ module JSON
           OpenSSL::BN.new Base64.urlsafe_decode64(self[key]), 2
         end
       end
-      key = OpenSSL::PKey::RSA.new
-      if key.respond_to? :set_key
-        key.set_key n, e, d
-        key.set_factors p, q if p && q
-        key.set_crt_params dp, dq, qi if dp && dq && qi
-      else
-        key.e = e
-        key.n = n
-        key.d = d if d
-        key.p = p if p
-        key.q = q if q
-        key.dmp1 = dp if dp
-        key.dmq1 = dq if dq
-        key.iqmp = qi if qi
+
+      # Public key
+      data_sequence = OpenSSL::ASN1::Sequence([
+        OpenSSL::ASN1::Integer(n),
+        OpenSSL::ASN1::Integer(e),
+      ])
+
+      if d && p && q && dp && dq && qi
+        data_sequence = OpenSSL::ASN1::Sequence([
+          OpenSSL::ASN1::Integer(0),
+          OpenSSL::ASN1::Integer(n),
+          OpenSSL::ASN1::Integer(e),
+          OpenSSL::ASN1::Integer(d),
+          OpenSSL::ASN1::Integer(p),
+          OpenSSL::ASN1::Integer(q),
+          OpenSSL::ASN1::Integer(dp),
+          OpenSSL::ASN1::Integer(dq),
+          OpenSSL::ASN1::Integer(qi),
+        ])
       end
-      key
+
+      asn1 = OpenSSL::ASN1::Sequence(data_sequence)
+      OpenSSL::PKey::RSA.new(asn1.to_der)
     end
 
     def to_ec_key
@@ -137,13 +144,32 @@ module JSON
           Base64.urlsafe_decode64(self[key])
         end
       end
-      key = OpenSSL::PKey::EC.new curve_name
-      key.private_key = OpenSSL::BN.new(d, 2) if d
-      key.public_key = OpenSSL::PKey::EC::Point.new(
+
+      point = OpenSSL::PKey::EC::Point.new(
         OpenSSL::PKey::EC::Group.new(curve_name),
         OpenSSL::BN.new(['04' + x.unpack('H*').first + y.unpack('H*').first].pack('H*'), 2)
       )
-      key
+
+      # Public key
+      data_sequence = OpenSSL::ASN1::Sequence([
+        OpenSSL::ASN1::Sequence([
+          OpenSSL::ASN1::ObjectId("id-ecPublicKey"),
+          OpenSSL::ASN1::ObjectId(curve_name)
+        ]),
+        OpenSSL::ASN1::BitString(point.to_octet_string(:uncompressed))
+      ])
+
+      if d
+        # Private key
+        data_sequence = OpenSSL::ASN1::Sequence([
+          OpenSSL::ASN1::Integer(1),
+          OpenSSL::ASN1::OctetString(OpenSSL::BN.new(d, 2).to_s(2)),
+          OpenSSL::ASN1::ObjectId(curve_name, 0, :EXPLICIT),
+          OpenSSL::ASN1::BitString(point.to_octet_string(:uncompressed), 1, :EXPLICIT)
+        ])
+      end
+
+      OpenSSL::PKey::EC.new(data_sequence.to_der)
     end
   end
 end
