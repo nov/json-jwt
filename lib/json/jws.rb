@@ -156,8 +156,8 @@ module JSON
       when 512
         :secp521r1
       end
-      key.group = OpenSSL::PKey::EC::Group.new group_name.to_s
-      key.check_key
+      newkey = OpenSSL::PKey::EC.generate(group_name.to_s)
+      newkey.check_key
     end
 
     def raw_to_asn1(signature, public_key)
