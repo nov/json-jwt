@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe JSON::JWT do
+  it do
+    fail 'see what happens on spec fails'
+  end
+
   let(:jwt) { JSON::JWT.new claims }
   let(:jws) do
     jwt.alg = :HS256
