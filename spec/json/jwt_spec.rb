@@ -19,6 +19,10 @@ describe JSON::JWT do
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.'
   end
 
+  its(:version) do
+    JSON::JWT::VERSION.should_not be_blank
+  end
+
   context 'when not signed nor encrypted' do
     it do
       jwt.to_s.should == no_signed

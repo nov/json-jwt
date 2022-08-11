@@ -1,11 +1,16 @@
 require 'openssl'
 require 'base64'
+require 'httpclient'
 require 'active_support'
 require 'active_support/core_ext'
 require 'json/jose'
 
 module JSON
   class JWT < ActiveSupport::HashWithIndifferentAccess
+    VERSION = ::File.read(
+      ::File.join(::File.dirname(__FILE__), '../../VERSION')
+    ).chomp
+
     attr_accessor :blank_payload
     attr_accessor :signature
 
@@ -132,3 +137,5 @@ require 'json/jwe'
 require 'json/jwk'
 require 'json/jwk/jwkizable'
 require 'json/jwk/set'
+require 'json/jwk/set/fetcher'
+require 'json/jwk/set/fetcher/debugger/request_filter'

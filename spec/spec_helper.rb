@@ -16,3 +16,4 @@ end
 
 require 'helpers/sign_key_fixture_helper'
 require 'helpers/nimbus_spec_helper'
+require 'helpers/webmock_helper'
