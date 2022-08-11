@@ -19,6 +19,12 @@ module JSON
         'application/jwk-set+json'
       end
 
+      def [](kid)
+        detect do |jwk|
+          jwk[:kid] && jwk[:kid] == kid
+        end
+      end
+
       def as_json(options = {})
         # NOTE: Array.new wrapper is requied to avoid CircularReferenceError
         {keys: Array.new(self)}

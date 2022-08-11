@@ -60,12 +60,13 @@ module JSON
         end
         self.cache = Cache.new
 
-        def self.fetch(jwks_uri, kid:)
+        def self.fetch(jwks_uri, kid:, auto_detect: true)
           cache_key = [
             'json:jwk:set',
             OpenSSL::Digest::MD5.hexdigest(jwks_uri),
             kid
           ].collect(&:to_s).join(':')
+
           jwks = Set.new(
             JSON.parse(
               cache.fetch(cache_key) do
@@ -73,9 +74,12 @@ module JSON
               end
             )
           )
-          jwks.detect do |jwk|
-            jwk[:kid] && jwk[:kid] == kid
-          end or raise JWK::Set::KidNotFound
+
+          if auto_detect
+            jwks[kid] or raise KidNotFound
+          else
+            jwks
+          end
         end
       end
     end

@@ -1,6 +1,18 @@
 require 'spec_helper'
 
 describe JSON::JWK::Set::Fetcher do
+  describe JSON::JWK::Set::Fetcher::Cache do
+    let(:something) { SecureRandom.hex(32) }
+
+    it 'just execute givne block' do
+      expect(
+        subject.fetch('cache_key') do
+          something
+        end
+      ).to eq something
+    end
+  end
+
   describe 'debugging feature' do
     after { JSON::JWK::Set::Fetcher.debugging = false }
 
@@ -43,12 +55,14 @@ describe JSON::JWK::Set::Fetcher do
     end
   end
 
-  describe 'fetching featulre' do
-    JWKS_URI = 'https://idp.example.com/jwks'
+  describe 'fetching feature' do
     class CustomCache
+      JWKS_URI = 'https://idp.example.com/jwks'
+
       def fetch(kid)
+        base_key = "json:jwk:set:#{OpenSSL::Digest::MD5.hexdigest JWKS_URI}"
         case kid
-        when "json:jwk:set:#{OpenSSL::Digest::MD5.hexdigest JWKS_URI}:known"
+        when "#{base_key}:AIDOPK1", "#{base_key}:unknown"
           File.read(File.join(File.dirname(__FILE__), '../../../mock_response/jwks.json'))
         else
           yield
@@ -56,7 +70,7 @@ describe JSON::JWK::Set::Fetcher do
       end
     end
 
-    let(:jwks_uri) { JWKS_URI }
+    let(:jwks_uri) { CustomCache::JWKS_URI }
 
     describe '.cache' do
       subject { JSON::JWK::Set::Fetcher.cache }
@@ -84,8 +98,9 @@ describe JSON::JWK::Set::Fetcher do
         JSON::JWK::Set::Fetcher.cache = JSON::JWK::Set::Fetcher::Cache.new
       end
 
-      context 'when unknown' do
-        let(:kid) { 'unknown' }
+      context 'when not cached' do
+        let(:kid) { 'not_cached' }
+
         it "should request to jwks_uri" do
           expect do
             subject
@@ -93,12 +108,37 @@ describe JSON::JWK::Set::Fetcher do
         end
       end
 
-      context 'when known' do
-        let(:kid) { 'known' }
-        it "should not request to jwks_uri" do
-          expect do
-            subject
-          end.not_to request_to jwks_uri
+      context 'when cached' do
+        context 'when unknown' do
+          let(:kid) { 'unknown' }
+
+          it "should not request to jwks_uri" do
+            expect do
+              subject
+            end.to raise_error JSON::JWK::Set::KidNotFound
+          end
+        end
+
+        context 'when known' do
+          let(:kid) { 'AIDOPK1' }
+
+          it "should not request to jwks_uri" do
+            expect do
+              subject
+            end.not_to request_to jwks_uri
+          end
+
+          it do
+            should be_instance_of JSON::JWK
+          end
+
+          context 'when auto_detect disabled' do
+            subject { JSON::JWK::Set::Fetcher.fetch jwks_uri, kid: kid, auto_detect: false }
+
+            it do
+              should be_instance_of JSON::JWK::Set
+            end
+          end
         end
       end
     end

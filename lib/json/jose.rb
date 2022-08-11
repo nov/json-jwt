@@ -26,9 +26,7 @@ module JSON
       when JSON::JWK
         key.to_key
       when JSON::JWK::Set
-        key.detect do |jwk|
-          jwk[:kid] && jwk[:kid] == kid
-        end&.to_key or raise JWK::Set::KidNotFound
+        key[kid]&.to_key or raise JWK::Set::KidNotFound
       else
         key
       end
