@@ -62,7 +62,7 @@ describe JSON::JWK::Set::Fetcher do
       def fetch(kid)
         base_key = "json:jwk:set:#{OpenSSL::Digest::MD5.hexdigest JWKS_URI}"
         case kid
-        when "#{base_key}:AIDOPK1", "#{base_key}:unknown"
+        when "#{base_key}:known"
           File.read(File.join(File.dirname(__FILE__), '../../../mock_response/jwks.json'))
         else
           yield
@@ -106,21 +106,23 @@ describe JSON::JWK::Set::Fetcher do
             subject
           end.to request_to jwks_uri
         end
-      end
 
-      context 'when cached' do
         context 'when unknown' do
           let(:kid) { 'unknown' }
 
           it "should not request to jwks_uri" do
             expect do
-              subject
+              mock_json :get, jwks_uri, 'jwks' do
+                subject
+              end
             end.to raise_error JSON::JWK::Set::KidNotFound
           end
         end
+      end
 
+      context 'when cached' do
         context 'when known' do
-          let(:kid) { 'AIDOPK1' }
+          let(:kid) { 'known' }
 
           it "should not request to jwks_uri" do
             expect do
