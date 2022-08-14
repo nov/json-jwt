@@ -197,7 +197,7 @@ describe JSON::JWK::Set::Fetcher do
             context 'as keyward args' do
               subject { JSON::JWK::Set::Fetcher.fetch jwks_uri, options.merge(kid: kid, auto_detect: true) }
 
-              if Gem::Version.create(RUBY_VERSION) >= Gem::Version.create(3.0)
+              if Gem.ruby_version >= Gem::Version.create(3.0)
                 it do
                   expect do
                     subject
