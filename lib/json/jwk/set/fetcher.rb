@@ -3,7 +3,7 @@ module JSON
     class Set
       module Fetcher
         class Cache
-          def fetch(cache_key)
+          def fetch(cache_key, options = {})
             yield
           end
         end
@@ -60,7 +60,7 @@ module JSON
         end
         self.cache = Cache.new
 
-        def self.fetch(jwks_uri, kid:, auto_detect: true)
+        def self.fetch(jwks_uri, kid:, auto_detect: true, **options)
           cache_key = [
             'json:jwk:set',
             OpenSSL::Digest::MD5.hexdigest(jwks_uri),
@@ -69,7 +69,7 @@ module JSON
 
           jwks = Set.new(
             JSON.parse(
-              cache.fetch(cache_key) do
+              cache.fetch(cache_key, options) do
                 http_client.get_content(jwks_uri)
               end
             )

@@ -59,9 +59,9 @@ describe JSON::JWK::Set::Fetcher do
     class CustomCache
       JWKS_URI = 'https://idp.example.com/jwks'
 
-      def fetch(kid)
+      def fetch(cache_key, options = {})
         base_key = "json:jwk:set:#{OpenSSL::Digest::MD5.hexdigest JWKS_URI}"
-        case kid
+        case cache_key
         when "#{base_key}:known"
           File.read(File.join(File.dirname(__FILE__), '../../../mock_response/jwks.json'))
         else
@@ -139,6 +139,73 @@ describe JSON::JWK::Set::Fetcher do
 
             it do
               should be_instance_of JSON::JWK::Set
+            end
+          end
+        end
+      end
+
+      describe 'cache options' do
+        let(:kid) { 'known' }
+
+        shared_context :receive_options_as_hash do
+          it do
+            expect_any_instance_of(CustomCache).to receive(:fetch).with(
+              "json:jwk:set:#{OpenSSL::Digest::MD5.hexdigest CustomCache::JWKS_URI}:#{kid}",
+              options
+            ).and_return(
+              File.read(File.join(File.dirname(__FILE__), '../../../mock_response/jwks.json'))
+            )
+            subject
+          end
+        end
+        shared_context :receive_options_as_blank_hash do
+          let(:options) { {} }
+          it_behaves_like :receive_options_as_hash
+        end
+
+        context 'when cache options not given' do
+          context 'with auto_detect' do
+            subject { JSON::JWK::Set::Fetcher.fetch jwks_uri, kid: kid }
+            it_behaves_like :receive_options_as_blank_hash
+          end
+        end
+
+        context 'when cache options given' do
+          let(:options) do
+            {
+              force: true,
+              expires_in: 10.minutes
+            }
+          end
+
+          context 'with auto_detect' do
+            subject { JSON::JWK::Set::Fetcher.fetch jwks_uri, kid: kid, auto_detect: true, **options }
+            it_behaves_like :receive_options_as_hash
+          end
+
+          context 'without auto_detect' do
+            subject { JSON::JWK::Set::Fetcher.fetch jwks_uri, kid: kid, **options }
+            it_behaves_like :receive_options_as_hash
+          end
+
+          context 'when kid & auto_detect are included in the given options' do
+            context 'as hash' do
+              subject { JSON::JWK::Set::Fetcher.fetch jwks_uri, **options.merge(kid: kid, auto_detect: true) }
+              it_behaves_like :receive_options_as_hash
+            end
+
+            context 'as keyward args' do
+              subject { JSON::JWK::Set::Fetcher.fetch jwks_uri, options.merge(kid: kid, auto_detect: true) }
+
+              if Gem::Version.create(RUBY_VERSION) >= Gem::Version.create(3.0)
+                it do
+                  expect do
+                    subject
+                  end.to raise_error ArgumentError
+                end
+              else
+                it_behaves_like :receive_options_as_hash
+              end
             end
           end
         end
