@@ -49,6 +49,17 @@ input = "jwt_header.jwt_claims.jwt_signature"
 JSON::JWT.decode(input, public_key)
 ```
 
+If you need to get a JWK from `jwks_uri` of OpenID Connect IdP, you can use `JSON::JWK::Set::Fetcher` to fetch (& optionally cache) it.
+
+```ruby
+# JWK Set Fetching & Caching
+# NOTE: Optionally by setting cache instance, JWKs are cached by kid.
+JSON::JWK::Set::Fetcher.cache = Rails.cache
+
+JSON::JWK::Set::Fetcher.fetch(jwks_uri, kid: kid)
+# => returns JSON::JWK instance or raise JSON::JWK::Set::KidNotFound
+```
+
 For more details, read [Documentation Wiki](https://github.com/nov/json-jwt/wiki).
 
 ## Note on Patches/Pull Requests
