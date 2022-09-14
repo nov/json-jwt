@@ -2,8 +2,6 @@
 
 JSON Web Token and its family (JSON Web Signature, JSON Web Encryption and JSON Web Key) in Ruby
 
-[![Build Status](https://secure.travis-ci.org/nov/json-jwt.png)](http://travis-ci.org/nov/json-jwt)
-
 ## Installation
 
 ```
