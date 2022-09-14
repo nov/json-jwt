@@ -1,4 +1,4 @@
-name: Test Ruby
+name: Spec
 
 on:
   push:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  spec:
     strategy:
       matrix:
         os: ['ubuntu-20.04']
@@ -26,5 +26,5 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
-    - name: Run tests
-      run: bundle exec rake
+    - name: Run Specs
+      run: bundle exec rake spec
