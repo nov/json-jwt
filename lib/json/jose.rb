@@ -1,4 +1,4 @@
-require 'active_support/security_utils'
+#require 'active_support/security_utils'
 
 module JSON
   module JOSE
