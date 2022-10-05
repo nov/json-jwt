@@ -123,8 +123,27 @@ describe JSON::JWE do
         it_behaves_like :signature_verification_failure
       end
 
-      describe "with corrupted signature" do
-        let(:signature) { Base64.urlsafe_encode64(Base64.urlsafe_decode64(super()).reverse) }
+      describe "with good pkcs7 padding and bad signature" do
+        let(:iv) do
+          good_padding_byte = 16 - (plain_text.bytesize % 16)
+          bad_padding_byte = 1
+          iv_bytes = Base64.urlsafe_decode64(super()).bytes
+          iv_bytes[-1] = iv_bytes[-1] ^ good_padding_byte ^ bad_padding_byte
+          Base64.urlsafe_encode64(iv_bytes.pack("C*"), padding: false)
+        end
+
+        it_behaves_like :signature_verification_failure
+      end
+
+      describe "with bad pkcs7 padding and bad signature" do
+        let(:iv) do
+          good_padding_byte = 16 - (plain_text.bytesize % 16)
+          bad_padding_byte = good_padding_byte - 1
+          iv_bytes = Base64.urlsafe_decode64(super()).bytes
+          iv_bytes[-1] = iv_bytes[-1] ^ good_padding_byte ^ bad_padding_byte
+          Base64.urlsafe_encode64(iv_bytes.pack("C*"), padding: false)
+        end
+
         it_behaves_like :signature_verification_failure
       end
     end
