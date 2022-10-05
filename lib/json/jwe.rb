@@ -54,7 +54,15 @@ module JSON
         cipher.auth_tag = authentication_tag
         cipher.auth_data = auth_data
       end
-      self.plain_text = cipher.update(cipher_text) + cipher.final
+
+      begin
+        self.plain_text = cipher.update(cipher_text) + cipher.final
+      rescue OpenSSL::OpenSSLError
+        # Ensure that the same error is raised for invalid PKCS7 padding
+        # as for invalid signatures. This prevents padding-oracle attacks.
+        raise DecryptionFailed
+      end
+
       verify_cbc_authentication_tag! if cbc?
       self
     end
@@ -244,7 +252,7 @@ module JSON
         sha_digest, mac_key, secured_input
       )[0, sha_size / 2 / 8]
       unless secure_compare(authentication_tag, expected_authentication_tag)
-        raise DecryptionFailed.new('Invalid authentication tag')
+        raise DecryptionFailed
       end
     end
 
