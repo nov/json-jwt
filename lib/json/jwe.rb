@@ -43,9 +43,12 @@ module JSON
       raise UnexpectedAlgorithm.new('Unexpected alg header') unless algorithms.blank? || Array(algorithms).include?(alg)
       raise UnexpectedAlgorithm.new('Unexpected enc header') unless encryption_methods.blank? || Array(encryption_methods).include?(enc)
       self.private_key_or_secret = with_jwk_support private_key_or_secret
-      cipher.decrypt
       self.content_encryption_key = decrypt_content_encryption_key
       self.mac_key, self.encryption_key = derive_encryption_and_mac_keys
+
+      verify_cbc_authentication_tag! if cbc?
+
+      cipher.decrypt
       cipher.key = encryption_key
       cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
       if gcm?
@@ -63,7 +66,6 @@ module JSON
         raise DecryptionFailed
       end
 
-      verify_cbc_authentication_tag! if cbc?
       self
     end
 
