@@ -91,22 +91,41 @@ describe JSON::JWE do
     end
 
     shared_examples_for :verify_cbc_authentication_tag do
-      let(:jwe_string) do
+      let(:jwe_parts) do
         _jwe_ = JSON::JWE.new plain_text
         _jwe_.alg, _jwe_.enc = alg, enc
         _jwe_.encrypt! key
-        hdr, extra, iv, cipher_text, _ = _jwe_.to_s.split '.'
-        [hdr, extra, iv, cipher_text, ''].join '.'
+        _jwe_.to_s.split '.'
       end
 
-      it do
-        # fetching those variables outside of exception block to make sure
-        # we intercept exception in decrypt! and not in other place
-        j = jwe
-        k = key
-        expect do
-          j.decrypt! k
-        end.to raise_error JSON::JWE::DecryptionFailed
+      let(:hdr)         { jwe_parts[0] }
+      let(:extra)       { jwe_parts[1] }
+      let(:iv)          { jwe_parts[2] }
+      let(:cipher_text) { jwe_parts[3] }
+      let(:signature)   { jwe_parts[4] }
+
+      let(:jwe_string) { [hdr, extra, iv, cipher_text, signature].join '.' }
+
+      shared_examples_for :signature_verification_failure do
+        it do
+          # fetching those variables outside of exception block to make sure
+          # we intercept exception in decrypt! and not in other place
+          j = jwe
+          k = key
+          expect do
+            j.decrypt! k
+          end.to raise_error JSON::JWE::DecryptionFailed
+        end
+      end
+
+      describe "with missing signature" do
+        let(:signature) { "" }
+        it_behaves_like :signature_verification_failure
+      end
+
+      describe "with corrupted signature" do
+        let(:signature) { Base64.urlsafe_encode64(Base64.urlsafe_decode64(super()).reverse) }
+        it_behaves_like :signature_verification_failure
       end
     end
 
