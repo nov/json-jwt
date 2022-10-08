@@ -39,7 +39,7 @@ module JSON
           Faraday.new(headers: {user_agent: "JSON::JWK::Set::Fetcher #{VERSION}"}) do |faraday|
             faraday.response :raise_error
             faraday.response :follow_redirects
-            faraday.response :logger, WebFinger.logger if debugging?
+            faraday.response :logger, JSON::JWK::Set::Fetcher.logger if debugging?
             faraday.adapter Faraday.default_adapter
             http_config.try(:call, faraday)
           end
