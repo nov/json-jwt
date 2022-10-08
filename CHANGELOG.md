@@ -9,5 +9,3 @@
 ### Changed
 
 * Switch from httpclient to faraday v2 https://github.com/nov/json-jwt/pull/110
-
-**Full Changelog**: https://github.com/nov/json-jwt/compare/v1.15.3...v1.16.0
