@@ -43,9 +43,12 @@ module JSON
       raise UnexpectedAlgorithm.new('Unexpected alg header') unless algorithms.blank? || Array(algorithms).include?(alg)
       raise UnexpectedAlgorithm.new('Unexpected enc header') unless encryption_methods.blank? || Array(encryption_methods).include?(enc)
       self.private_key_or_secret = with_jwk_support private_key_or_secret
-      cipher.decrypt
       self.content_encryption_key = decrypt_content_encryption_key
       self.mac_key, self.encryption_key = derive_encryption_and_mac_keys
+
+      verify_cbc_authentication_tag! if cbc?
+
+      cipher.decrypt
       cipher.key = encryption_key
       cipher.iv = iv # NOTE: 'iv' has to be set after 'key' for GCM
       if gcm?
@@ -54,8 +57,15 @@ module JSON
         cipher.auth_tag = authentication_tag
         cipher.auth_data = auth_data
       end
-      self.plain_text = cipher.update(cipher_text) + cipher.final
-      verify_cbc_authentication_tag! if cbc?
+
+      begin
+        self.plain_text = cipher.update(cipher_text) + cipher.final
+      rescue OpenSSL::OpenSSLError
+        # Ensure that the same error is raised for invalid PKCS7 padding
+        # as for invalid signatures. This prevents padding-oracle attacks.
+        raise DecryptionFailed
+      end
+
       self
     end
 
@@ -244,7 +254,7 @@ module JSON
         sha_digest, mac_key, secured_input
       )[0, sha_size / 2 / 8]
       unless secure_compare(authentication_tag, expected_authentication_tag)
-        raise DecryptionFailed.new('Invalid authentication tag')
+        raise DecryptionFailed
       end
     end
 
