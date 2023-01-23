@@ -68,6 +68,10 @@ describe JSON::JWK::Set::Fetcher do
           yield
         end
       end
+
+      def delete(cache_key)
+        # ignore
+      end
     end
 
     let(:jwks_uri) { CustomCache::JWKS_URI }
@@ -109,8 +113,16 @@ describe JSON::JWK::Set::Fetcher do
 
         context 'when unknown' do
           let(:kid) { 'unknown' }
+          let(:cache_key) do
+            [
+              'json:jwk:set',
+              OpenSSL::Digest::MD5.hexdigest(jwks_uri),
+              kid
+            ].collect(&:to_s).join(':')
+          end
 
-          it "should not request to jwks_uri" do
+          it do
+            expect(JSON::JWK::Set::Fetcher.cache).to receive(:delete).with(cache_key)
             expect do
               mock_json :get, jwks_uri, 'jwks' do
                 subject

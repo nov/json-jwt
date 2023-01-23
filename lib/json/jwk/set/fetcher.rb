@@ -6,6 +6,8 @@ module JSON
           def fetch(cache_key, options = {})
             yield
           end
+
+          def delete(cache_key, options = {}); end
         end
 
         def self.logger
@@ -72,7 +74,12 @@ module JSON
           )
 
           if auto_detect
-            jwks[kid] or raise KidNotFound
+            if jwks[kid]
+              jwks[kid]
+            else
+              cache.delete(cache_key)
+              raise KidNotFound
+            end
           else
             jwks
           end
