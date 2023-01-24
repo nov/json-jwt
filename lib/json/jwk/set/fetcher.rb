@@ -72,14 +72,10 @@ module JSON
               end
             )
           )
+          cache.delete(cache_key, options) if jwks[kid].blank?
 
           if auto_detect
-            if jwks[kid]
-              jwks[kid]
-            else
-              cache.delete(cache_key)
-              raise KidNotFound
-            end
+            jwks[kid] or raise KidNotFound
           else
             jwks
           end

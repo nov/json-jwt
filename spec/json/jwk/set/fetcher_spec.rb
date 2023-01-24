@@ -122,7 +122,7 @@ describe JSON::JWK::Set::Fetcher do
           end
 
           it do
-            expect(JSON::JWK::Set::Fetcher.cache).to receive(:delete).with(cache_key)
+            expect(JSON::JWK::Set::Fetcher.cache).to receive(:delete).with(cache_key, {})
             expect do
               mock_json :get, jwks_uri, 'jwks' do
                 subject
