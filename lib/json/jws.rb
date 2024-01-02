@@ -124,7 +124,8 @@ module JSON
       public_key_or_secret = with_jwk_support public_key_or_secret
       case
       when hmac?
-        secure_compare sign(signature_base_string, public_key_or_secret), signature
+        secret = public_key_or_secret
+        secure_compare sign(signature_base_string, secret), signature
       when rsa?
         public_key = public_key_or_secret
         public_key.verify digest, signature, signature_base_string
