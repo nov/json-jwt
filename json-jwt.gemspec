@@ -14,6 +14,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.required_ruby_version = '>= 2.4'
   gem.add_runtime_dependency 'activesupport', '>= 4.2'
+  gem.add_runtime_dependency 'base64'
   gem.add_runtime_dependency 'bindata'
   gem.add_runtime_dependency 'aes_key_wrap'
   gem.add_runtime_dependency 'faraday', '~> 2.0'
