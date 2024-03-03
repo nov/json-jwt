@@ -109,7 +109,11 @@ module JSON
         when JWS::NUM_OF_SEGMENTS
           JWS.decode_compact_serialized jwt_string, key_or_secret, algorithms, allow_blank_payload
         when JWE::NUM_OF_SEGMENTS
-          JWE.decode_compact_serialized jwt_string, key_or_secret, algorithms, encryption_methods
+          if allow_blank_payload
+            raise InvalidFormat.new("JWE w/ blank payload is not supported.")
+          else
+            JWE.decode_compact_serialized jwt_string, key_or_secret, algorithms, encryption_methods
+          end
         else
           raise InvalidFormat.new("Invalid JWT Format. JWT should include #{JWS::NUM_OF_SEGMENTS} or #{JWE::NUM_OF_SEGMENTS} segments.")
         end
