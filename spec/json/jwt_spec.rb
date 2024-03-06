@@ -504,6 +504,14 @@ describe JSON::JWT do
         end
       end
     end
+
+    context 'when JWS & JWE can be mixed-up (CVE-2023-51774)' do
+      it do
+        expect do
+          JSON::JWT.decode 'header.encrypted_key.iv.cipher_text.authentication_tag', 'secret', nil, nil, true
+        end.to raise_error JSON::JWT::InvalidFormat
+      end
+    end
   end
 
   describe '.pretty_generate' do
