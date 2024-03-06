@@ -504,6 +504,14 @@ describe JSON::JWT do
         end
       end
     end
+
+    context 'when JWE format (5 segments) and allow_blank_payload is true' do
+      it do
+        expect do
+          JSON::JWT.decode 'one.two.three.four.five', 'secret', nil, nil, true
+        end.to raise_error JSON::JWT::InvalidFormat
+      end
+    end
   end
 
   describe '.pretty_generate' do
