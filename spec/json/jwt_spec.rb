@@ -23,6 +23,15 @@ describe JSON::JWT do
     JSON::JWT::VERSION.should_not be_blank
   end
 
+  describe '#initialize' do
+    it "doesn't try to modify a frozen hash" do
+      claims = { iss: 'joe', exp: '1300819380' }.freeze
+      jwt = JSON::JWT.new(claims)
+      expect(jwt[:exp]).to eql 1300819380
+      expect(claims[:exp]).to eql '1300819380'
+    end
+  end
+
   context 'when not signed nor encrypted' do
     it do
       jwt.to_s.should == no_signed

@@ -26,12 +26,12 @@ module JSON
       @content_type = 'application/jwt'
       self.typ = :JWT
       self.alg = :none
+      update claims
       unless claims.nil?
         [:exp, :nbf, :iat].each do |key|
-          claims[key] = claims[key].to_i if claims[key]
+          self[key] = self[key].to_i if self[key]
         end
       end
-      update claims
     end
 
     def sign(private_key_or_secret, algorithm = :autodetect)
