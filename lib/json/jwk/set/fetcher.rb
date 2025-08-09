@@ -2,7 +2,7 @@ module JSON
   class JWK
     class Set
       module Fetcher
-        class MalformedJWKSet < JWT::Exception; end
+        class UnexpectedFormat < JWT::Exception; end
 
         class Cache
           def fetch(cache_key, options = {})
@@ -73,7 +73,10 @@ module JSON
             end
           )
 
-          raise MalformedJWKSet, "Malformed JWK Set: #{parsed_jwks.inspect}" unless parsed_jwks.is_a?(Hash) && parsed_jwks['keys'].is_a?(Array)
+          unless parsed_jwks.is_a?(Hash) && parsed_jwks['keys'].is_a?(Array)
+            cache.delete(cache_key, options)
+            raise UnexpectedFormat
+          end
 
           jwks = Set.new(parsed_jwks)
           cache.delete(cache_key, options) if jwks[kid].blank?
