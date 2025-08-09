@@ -4,7 +4,7 @@ describe JSON::JWK::Set::Fetcher do
   describe JSON::JWK::Set::Fetcher::Cache do
     let(:something) { SecureRandom.hex(32) }
 
-    it 'just execute givne block' do
+    it 'just execute given block' do
       expect(
         subject.fetch('cache_key') do
           something
@@ -109,6 +109,17 @@ describe JSON::JWK::Set::Fetcher do
           expect do
             subject
           end.to request_to jwks_uri
+        end
+
+        context "when the JWKS uri returns a structure that's not a valid JWK Set" do
+          it "raises a JSON::JWK::Set::Fetcher::MalformedJWKSet error" do
+            stub_request(:get, jwks_uri).to_return(
+              status: 200,
+              body: '"hello there"' # Note that this is valid JSON, but not a valid JWK Set
+            )
+
+            expect { subject }.to raise_error(JSON::JWK::Set::Fetcher::MalformedJWKSet)
+          end
         end
 
         context 'when unknown' do
