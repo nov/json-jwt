@@ -69,7 +69,7 @@ describe JSON::JWK::Set::Fetcher do
         end
       end
 
-      def delete(cache_key)
+      def delete(cache_key, options = nil)
         # ignore
       end
     end
@@ -112,13 +112,13 @@ describe JSON::JWK::Set::Fetcher do
         end
 
         context "when the JWKS uri returns a structure that's not a valid JWK Set" do
-          it "raises a JSON::JWK::Set::Fetcher::MalformedJWKSet error" do
+          it "raises a JSON::JWK::Set::Fetcher::UnexpectedFormat error" do
             stub_request(:get, jwks_uri).to_return(
               status: 200,
               body: '"hello there"' # Note that this is valid JSON, but not a valid JWK Set
             )
 
-            expect { subject }.to raise_error(JSON::JWK::Set::Fetcher::MalformedJWKSet)
+            expect { subject }.to raise_error(JSON::JWK::Set::Fetcher::UnexpectedFormat)
           end
         end
 
