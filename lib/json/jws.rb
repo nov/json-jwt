@@ -20,6 +20,7 @@ module JSON
 
     def verify!(public_key_or_secret, algorithms = nil)
       if alg&.to_sym == :none
+        raise UnexpectedAlgorithm unless algorithms.blank? || Array(algorithms).include?(:none)
         raise UnexpectedAlgorithm if public_key_or_secret
         signature == '' or raise VerificationFailed
       elsif algorithms.blank? || Array(algorithms).include?(alg&.to_sym)
