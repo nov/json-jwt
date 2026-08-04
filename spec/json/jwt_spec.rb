@@ -520,6 +520,14 @@ describe JSON::JWT do
           JSON::JWT.decode 'header.encrypted_key.iv.cipher_text.authentication_tag', 'secret', nil, nil, true
         end.to raise_error JSON::JWT::InvalidFormat
       end
+
+      context 'when json-serialized JWS is given' do
+        it do
+          expect do
+            JSON::JWT.decode({ciphertext: 'cipher_text'}, 'secret', nil, nil, true)
+          end.to raise_error JSON::JWT::InvalidFormat
+        end
+      end
     end
   end
 

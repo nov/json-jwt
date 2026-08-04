@@ -109,11 +109,7 @@ module JSON
         when JWS::NUM_OF_SEGMENTS
           JWS.decode_compact_serialized jwt_string, key_or_secret, algorithms, allow_blank_payload
         when JWE::NUM_OF_SEGMENTS
-          if allow_blank_payload
-            raise InvalidFormat.new("JWE w/ blank payload is not supported.")
-          else
-            JWE.decode_compact_serialized jwt_string, key_or_secret, algorithms, encryption_methods
-          end
+          JWE.decode_compact_serialized jwt_string, key_or_secret, algorithms, encryption_methods, allow_blank_payload
         else
           raise InvalidFormat.new("Invalid JWT Format. JWT should include #{JWS::NUM_OF_SEGMENTS} or #{JWE::NUM_OF_SEGMENTS} segments.")
         end
@@ -124,7 +120,7 @@ module JSON
         if (input[:signatures] || input[:signature]).present?
           JWS.decode_json_serialized input, key_or_secret, algorithms, allow_blank_payload
         elsif input[:ciphertext].present?
-          JWE.decode_json_serialized input, key_or_secret, algorithms, encryption_methods
+          JWE.decode_json_serialized input, key_or_secret, algorithms, encryption_methods, allow_blank_payload
         else
           raise InvalidFormat.new("Unexpected JOSE JSON Serialization Format.")
         end
